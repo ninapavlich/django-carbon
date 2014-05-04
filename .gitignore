@@ -1,0 +1,12 @@
+.env
+*.pyc
+*.pyo
+*.swp
+*.egg-info
+docs/_build
+*.DS_Store
+venv/
+.sass-cache/
+node_modules/
+src/
+django-carbon-example
