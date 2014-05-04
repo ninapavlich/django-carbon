@@ -16,8 +16,6 @@ urlpatterns = patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     
 
-    #(r'^admin/utils/travel/update$', 'mikeandnina.kernel.api.google_flights.update' ),
-
     (r'^admin/', include(admin.site.urls)),
 
 
