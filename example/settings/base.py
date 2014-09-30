@@ -4,6 +4,7 @@ from django.conf.global_settings import *   # pylint: disable=W0614,W0401
 import os
 import sys
 import example as project_module
+import inspect
 
 #==============================================================================
 # Generic Django project settings
@@ -39,7 +40,6 @@ PAGE_LANGUAGES = (
 # Auth / security
 #==============================================================================
 
-#AUTH_USER_MODEL = 'account.User'
 
 AUTHENTICATION_BACKENDS += ()
 
@@ -57,7 +57,9 @@ INSTALLED_APPS = (
     #'storages',
     #'haystack',
     #'imagekit',
-    #'registration',    
+    #'registration', 
+    'django-carbon.blog',
+    'django-carbon.gallery',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -180,6 +182,11 @@ NEWSLETTER_CONFIRM_EMAIL = False
 #     ('Name', 'email'),
 # )
 
+#==============================================================================
+# DJANGO-CARBON SETTINGS
+#==============================================================================
+TAG_MODEL = 'django-carbon.blog.Tag'
+#AUTH_USER_MODEL = 'django.contrib.auth.models.User'
 
 
 #==============================================================================
