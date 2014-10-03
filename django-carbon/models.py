@@ -48,7 +48,6 @@ class Addressible(models.Model):
         'slug': "Auto-generated page text id for this page.",
         'parent': "Hierarchical parent of this item. Used to define path.",
         'path': "The URL path to this page, defined page text id.",
-        'path_override': "Override to the default page url path defined in 'path' using the format: /my/custom/path",
         'temporary_redirect': "Temporarily redirect to a different path",
         'permanent_redirect': "Permanently redirect to a different path",
         'page_meta_description': "A short description of the page, used for SEO and not displayed to the user.",
@@ -83,30 +82,11 @@ class Addressible(models.Model):
 
     path = models.CharField(_('path'), max_length=255, unique=True,
         help_text=help['path'])
-    path_override = models.CharField(_('path override'), max_length=255,
-        blank=True, help_text=help['path_override'])
 
     temporary_redirect = models.CharField(_('Temporary Redirect'), max_length=255,
         blank=True, help_text=help['temporary_redirect'])
     permanent_redirect = models.CharField(_('Permanent Redirect'), max_length=255,
         blank=True, help_text=help['permanent_redirect'])
-
-    #SOCIAL
-    sharable = models.BooleanField(default=False, 
-        help_text=help['sharable'])
-    tiny_url = models.CharField(_('tiny url'), max_length=255, unique=True,
-        help_text=help['tiny_url'])
-
-    #SEO
-    page_meta_description = models.CharField(_('Meta Description'), 
-        max_length=2000, blank=True, help_text=help['page_meta_description'])
-    page_meta_keywords = models.CharField(_('Meta Page Keywords'), 
-        max_length=2000, blank=True, help_text=help['page_meta_keywords'])
-
-    allow_robots = models.BooleanField(default=False, 
-        help_text=help['allow_robots'])
-    changefreq = models.CharField(_('Meta Page Keywords'), 
-        max_length=2000, blank=True, help_text=help['changefreq'])
 
 
     class Meta:
@@ -117,9 +97,7 @@ class Addressible(models.Model):
         return ("title__icontains",)
 
     def build_path(self):
-        if self.path_override:
-            return self.path_override
-        elif self.parent:
+        if self.parent:
             return "%s%s/" % (self.parent.path, self.slug)
         else:
             return "/%s/" % self.slug
@@ -127,21 +105,6 @@ class Addressible(models.Model):
     def get_absolute_url(self):
         return self.path
 
-    def get_sharing_url(self, service):
-        #TODO
-        return self.get_absolute_url()
-
-    #Sitemap Properties
-    def lastmod(self):
-        if hasattr(self, 'modified'):
-            return getattr(self, 'modified')
-        return None
-
-    def location(self, obj):
-        return obj.get_absolute_url()
-
-    def changefreq(self, obj):
-        return self.changefreq
 
     def get_children(self):
         return self.__class__.objects.filter(parent=self)
@@ -192,30 +155,27 @@ class Publishable(models.Model):
 class Accessible(models.Model):
 
     help = {
-        'access_restriction': "Restrict access to the item",
         'password':"Password to use if access_restriction is set to Password",
-        'publish_date': "Object state will be set to 'Published' on this date. (Note: Requires Cron)",
-        'expire_date': "Object state will be set to 'Expired' on this date. (Note: Requires Cron)",
-        'require_registered_user' : "Require logged in user"   
+        'publish_date': "Object state will be set to 'Published' on this date.",
+        'expire_date': "Object state will be set to 'Expired' on this date.",
+        'require_registered_user' : "Require logged in user" 
     }
 
-    OPEN = 1
-    REGISTERED_USERS = 2
-    PASSWORD = 3
-    USER_WHITELIST = 4
-    USER_BLACKLIST = 5
-    CUSTOM = 6
-    ACCESS_CHOICES = (
-        (OPEN, _("Open")),
-        (REGISTERED_USERS, _("Registered Users")),
-        (PASSWORD, _("Password")),
-        (USER_WHITELIST, _("User Whitelist")),
-        (USER_BLACKLIST, _("User Blacklist")),
-        (CUSTOM, _("Custom")),
-    )
+    # OPEN = 1
+    # REGISTERED_USERS = 2
+    # PASSWORD = 3
+    # USER_WHITELIST = 4
+    # USER_BLACKLIST = 5
+    # CUSTOM = 6
+    # ACCESS_CHOICES = (
+    #     (OPEN, _("Open")),
+    #     (REGISTERED_USERS, _("Registered Users")),
+    #     (PASSWORD, _("Password")),
+    #     (USER_WHITELIST, _("User Whitelist")),
+    #     (USER_BLACKLIST, _("User Blacklist")),
+    #     (CUSTOM, _("Custom")),
+    # )
 
-    access_restriction = models.IntegerField(choices=ACCESS_CHOICES, 
-        default=OPEN, help_text=help['access_restriction'])
 
     require_registered_user = models.BooleanField( _("Required Registered Users"), 
         default = False, help_text=help['require_registered_user'])
@@ -224,7 +184,16 @@ class Accessible(models.Model):
         null=True, blank=True, help_text=help['password'])
 
     user_whitelist = models.ManyToManyField(settings.AUTH_USER_MODEL, 
-        blank=True, null=True, related_name='%(app_label)s_%(class)s_user')
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_user')
+
+    user_blacklist = models.ManyToManyField(settings.AUTH_USER_MODEL, 
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_user')
+
+    groups_whitelist = models.ManyToManyField('auth.Group', 
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_groups')
+
+    groups_blacklist = models.ManyToManyField('auth.Group', 
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_groups')
 
     publish_date = models.DateTimeField(_('Publish on Date'), auto_now=True, 
         blank=True, null=True, help_text=help['publish_date'])
@@ -269,6 +238,121 @@ class Accessible(models.Model):
         #OVERRIDE IN SUBCLASS
         return True
 
+# -- Level 5
+class SEO(models.Model):
+   
+    help = {
+        'page_meta_description': "A short description of the page, used for SEO and not displayed to the user.",
+        'page_meta_keywords': "A short list of keywords of the page, used for SEO and not displayed to the user.",
+        'allow_robots': "Allow search engines to index this object.",
+        'changefreq': "How frequently does page content update",
+        'sharable': "Is URL a sharable URL",
+        'tiny_url': "Tiny URL used for social sharing",
+        'social_share_image': "Standards for the social share image vary, but an image at least 300x200px should work well.",
+        'facebook_author_id': "Numeric Facebook ID",
+        'twitter_author_id': "Twitter handle, including \"@\" e.g. @cgpartners",
+        'google_author_id': "Google author id, e.g. the AUTHOR_ID in https://plus.google.com/AUTHOR_ID/posts",
+    }
+
+    model_settings = {}
+
+    YEARLY = 'yearly'
+    MONTHLY = 'monthly'
+    WEEKLY = 'weekly'
+    DAILY = 'daily'
+    CHANGE_FREQ_CHOICES = (
+        (YEARLY, _("Yearly")),
+        (MONTHLY, _("Monthly")),
+        (WEEKLY, _("Weekly")),
+        (DAILY, _("Deaily")),
+    )
+
+
+    # -- Choice Data
+    MUSIC_SONG = 'music.song'
+    MUSIC_ALBUM = 'music.album'
+    MUSIC_PLAYLIST = 'music.playlist'
+    MUSIC_PLAYLIST = 'music.radio_station'
+    VIDEO_MOVIE = 'video.movie'
+    VIDEO_EPISODE = 'video.episode'
+    VIDEO_TV_SHOW = 'video.tv_show'
+    VIDEO_OTHER = 'video.other'
+    ARTICLE = 'article'
+    BOOK = 'book'
+    PROFILE = 'profile'
+    WEBSITE = 'website'  
+    
+
+    TYPE_CHOICES = (
+        (ARTICLE, "Article"),
+        (BOOK, "Book"),
+        (PROFILE, "Profile"),
+        (WEBSITE, "Website"),
+        (VIDEO_MOVIE, "Video - Movie"),
+        (VIDEO_EPISODE, "Video - Episode"),
+        (VIDEO_TV_SHOW, "Video - TV Show"),
+        (VIDEO_OTHER, "Video - Other"),
+        (MUSIC_SONG, "Music - Song"),
+        (MUSIC_ALBUM, "Music - Album"),
+        (MUSIC_PLAYLIST, "Music - Playlist"),
+        (MUSIC_PLAYLIST, "Music - Radio Station"),
+    )
+
+    
+    #SOCIAL
+    sharable = models.BooleanField(default=False, 
+        help_text=help['sharable'])
+    tiny_url = models.CharField(_('tiny url'), max_length=255, unique=True,
+        help_text=help['tiny_url'])
+
+    #SEO
+    page_meta_description = models.CharField(_('Meta Description'), 
+        max_length=2000, blank=True, help_text=help['page_meta_description'])
+    page_meta_keywords = models.CharField(_('Meta Page Keywords'), 
+        max_length=2000, blank=True, help_text=help['page_meta_keywords'])
+
+    social_share_type = models.CharField("Social type", max_length=255, 
+        null=True, blank=True, choices=TYPE_CHOICES, default=ARTICLE )
+    
+    social_share_image = models.ForeignKey(get_image_model(model_name), 
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_social_images',
+        help_text=help['social_share_image'])
+
+    facebook_author_id = models.CharField("Facebook Author ID", max_length=255, 
+        null=True, blank=True, help_text=help['facebook_author_id'])
+    twitter_author_id = models.CharField("Twitter Admin ID", max_length=255, 
+        null=True, blank=True, help_text=help['twitter_author_id'])
+    google_author_id = models.CharField("Google Admin ID", max_length=255, 
+        null=True, blank=True, help_text=help['google_author_id'])
+
+
+
+    allow_robots = models.BooleanField(default=False, 
+        help_text=help['allow_robots'])
+    changefreq = models.CharField(_('Meta Page Keywords'), 
+        max_length=2000, blank=True, help_text=help['changefreq'])
+
+
+    class Meta:
+        abstract = True
+
+    def get_sharing_url(self, service):
+        #TODO
+        return self.get_absolute_url()
+
+    #Sitemap Properties
+    def lastmod(self):
+        if hasattr(self, 'modified'):
+            return getattr(self, 'modified')
+        return None
+
+    def location(self, obj):
+        return obj.get_absolute_url()
+
+    def changefreq(self, obj):
+        return self.changefreq
+       
+
 # # -- Level 5
 # class Listable(models.Model):
 
@@ -310,35 +394,35 @@ class Accessible(models.Model):
 
 #         super(Listable, self).save(*args, **kwargs)
 
-# -- Level 6
-class Categorizable(models.Model):
+# # -- Level 6
+# class Categorizable(models.Model):
 
-    help = {
-        'categories': "Categories associated with this item",
-        'tags': "Tags associated with this item",
-        'related': "Other items related to this item",        
-    }
+#     help = {
+#         'categories': "Categories associated with this item",
+#         'tags': "Tags associated with this item",
+#         'related': "Other items related to this item",        
+#     }
 
 
-    categories = models.ManyToManyField(settings.TAG_MODEL, blank=True, 
-        null=True, related_name='%(app_label)s_%(class)s_categories', help_text=help['categories'])
+#     categories = models.ManyToManyField(settings.TAG_MODEL, blank=True, 
+#         null=True, related_name='%(app_label)s_%(class)s_categories', help_text=help['categories'])
 
-    tags = models.ManyToManyField(settings.TAG_MODEL, blank=True, 
-        null=True, related_name='%(app_label)s_%(class)s_tags', help_text=help['tags'])
+#     tags = models.ManyToManyField(settings.TAG_MODEL, blank=True, 
+#         null=True, related_name='%(app_label)s_%(class)s_tags', help_text=help['tags'])
 
-    related = models.ManyToManyField('self', blank=True, 
-        null=True, related_name='%(app_label)s_%(class)s_related', help_text=help['related'])
+#     related = models.ManyToManyField('self', blank=True, 
+#         null=True, related_name='%(app_label)s_%(class)s_related', help_text=help['related'])
 
-    # Related item
-    content_type = models.ForeignKey(ContentType,
-             verbose_name=_('content type'),
-            related_name="content_type_set_for_%(app_label)s_%(class)s")
-    object_pk = models.TextField(_('object ID'))
-    content_object = generic.GenericForeignKey(ct_field="content_type", 
-        fk_field="object_pk")
+#     # Related item
+#     content_type = models.ForeignKey(ContentType,
+#              verbose_name=_('content type'),
+#             related_name="content_type_set_for_%(app_label)s_%(class)s")
+#     object_pk = models.TextField(_('object ID'))
+#     content_object = generic.GenericForeignKey(ct_field="content_type", 
+#         fk_field="object_pk")
 
-    class Meta:
-        abstract = True
+#     class Meta:
+#         abstract = True
 
 # -- Level 7
 class Content(models.Model):
@@ -348,7 +432,6 @@ class Content(models.Model):
         'authors': "",
         'editors': "",
         'pub_date': "",
-        'display_pub_date':"",
         'allow_comments':""
 
     }
@@ -363,9 +446,7 @@ class Content(models.Model):
 
     pub_date = models.DateField('Publication Date', blank=True, null=True,
         help_text=help['pub_date'])
-    display_pub_date = models.BooleanField( _("Display Publication Date"), 
-        default = True, help_text=help['display_pub_date'])
-
+   
     allow_comments = models.BooleanField(default=False, 
         help_text=help['allow_comments'])
 
@@ -373,7 +454,7 @@ class Content(models.Model):
         abstract = True
 
 # -- Level 8
-class UserInput(models.Model):
+class Moderatable(models.Model):
 
     help = {
         'moderation_status': "",
