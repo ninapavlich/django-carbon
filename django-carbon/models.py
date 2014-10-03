@@ -49,13 +49,7 @@ class Addressible(models.Model):
         'parent': "Hierarchical parent of this item. Used to define path.",
         'path': "The URL path to this page, defined page text id.",
         'temporary_redirect': "Temporarily redirect to a different path",
-        'permanent_redirect': "Permanently redirect to a different path",
-        'page_meta_description': "A short description of the page, used for SEO and not displayed to the user.",
-        'page_meta_keywords': "A short list of keywords of the page, used for SEO and not displayed to the user.",
-        'allow_robots': "Allow search engines to index this object.",
-        'changefreq': "How frequently does page content update",
-        'sharable': "Is URL a sharable URL",
-        'tiny_url': "Tiny URL used for social sharing"
+        'permanent_redirect': "Permanently redirect to a different path"
     }
 
     model_settings = {}
