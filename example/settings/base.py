@@ -19,6 +19,12 @@ ALLOWED_HOSTS = (
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+# -- Server settings
+if os.environ.get( 'ENVIRONMENT', 'local' ) != 'local':
+    IS_ON_SERVER = True
+else:
+    IS_ON_SERVER = False
+
 GRAPPELLI_ADMIN_TITLE = "Django Carbon Example"
 
 SITE_ID = 1
@@ -51,15 +57,21 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = (
     'grappelli.dashboard',
     'grappelli',
-    'south',
+    
     'localflavor',
 
     #'storages',
     #'haystack',
-    #'imagekit',
+    'imagekit',
     #'registration', 
-    'django-carbon.blog',
-    'django-carbon.gallery',
+
+    'carbon.atoms',
+
+    'carbon.compounds.account',
+    'carbon.compounds.media',
+    'carbon.compounds.page',
+    'carbon.compounds.blog',
+    'carbon.compounds.gallery',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,10 +121,9 @@ MEDIA_URL = '/uploads/'
 STATIC_ROOT = os.path.join(VAR_ROOT, 'static')
 MEDIA_ROOT = os.path.join(VAR_ROOT, 'uploads')
 
-STATICFILES_DIRS = (
-    os.path.join(PROJECT_DIR, 'static'),
-)
 
+
+    
 
 
 #==============================================================================
@@ -139,16 +150,56 @@ MIDDLEWARE_CLASSES += (
 
 
 #==============================================================================
-# Third party app settings
+# AWS
 #==============================================================================
 AWS_ACCESS_KEY_ID       = ''
 AWS_SECRET_ACCESS_KEY   = ''
 AWS_STORAGE_BUCKET_NAME = ''
+AWS_STORAGE_BUCKET_NAME_MEDIA = ''
+AWS_STATIC_FOLDER = 'static'
+AWS_MEDIA_FOLDER = 'media'
+AWS_S3_CUSTOM_DOMAIN    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME)
+AWS_S3_CUSTOM_DOMAIN_MEDIA    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME_MEDIA)
+
+AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE = ''
+AWS_S3_CUSTOM_DOMAIN_MEDIA_SECURE    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE)
+
+
 AWS_QUERYSTRING_AUTH = False
 AWS_HEADERS = {
     'Expires': 'Thu, 15 Apr 2010 20:00:00 GMT',
     'Cache-Control': 'max-age=86400',
 }
+
+#==============================================================================
+# Static Files
+#==============================================================================
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_DIR, 'static'),
+)
+
+if IS_ON_SERVER:
+    
+    VAR_ROOT = '/srv/http/carbon_media'
+    STATIC_ROOT = os.path.join(VAR_ROOT, 'static')
+
+    STATICFILES_STORAGE = 'example.s3utils.StaticRootS3BotoStorage'
+    STATIC_URL = "//s3.amazonaws.com/%s/static/" % AWS_STORAGE_BUCKET_NAME
+
+    AWS_S3_SECURE_URLS = True
+    AWS_IS_GZIPPED = True
+
+    GZIP_CONTENT_TYPES = (
+        'text/css',
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript',
+    )
+
+else:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')  
+
 
 #==============================================================================
 # Auth / security
@@ -185,8 +236,9 @@ NEWSLETTER_CONFIRM_EMAIL = False
 #==============================================================================
 # DJANGO-CARBON SETTINGS
 #==============================================================================
-TAG_MODEL = 'django-carbon.blog.Tag'
-#AUTH_USER_MODEL = 'django.contrib.auth.models.User'
+#TAG_MODEL = 'django-carbon.blog.Tag'
+AUTH_USER_MODEL = 'account.User'
+
 
 
 #==============================================================================
@@ -209,7 +261,7 @@ FACEBOOK_SECRET_CLIENT_ID = ''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'django-carbon-example',
+        'NAME': os.path.join(VAR_ROOT, 'django-carbon-example'),
     }
 }
 
@@ -233,3 +285,14 @@ HAYSTACK_CONNECTIONS = {
 }
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
+
+#==============================================================================
+# CARBON SETTINGS
+#==============================================================================
+MEDIA_STORAGE = 'example.s3utils.MediaS3BotoStorage'
+SECURE_MEDIA_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'
+
+IMAGE_THUMBNAIL_WIDTH = 150
+IMAGE_THUMBNAIL_HEIGHT = 150
+IMAGE_THUMBNAIL_QUALITY = 80
+IMAGE_MODEL = 'media.Image'

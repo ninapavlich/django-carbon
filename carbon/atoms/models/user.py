@@ -1,0 +1,83 @@
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
+
+from .abstract import *
+from .access import *
+
+
+class PersonAtom(models.Model):
+
+    help = {
+        'first_name': "",
+        'last_name':"",
+    }
+
+    first_name = models.CharField(_('First name'), max_length=30, blank=True)
+    middle_name = models.CharField(_('Middle name'), max_length=30, blank=True)
+    last_name = models.CharField(_('Last name'), max_length=30, blank=True)
+    date_of_birth = models.DateField(_('Date of Birth'), blank=True, null=True)
+
+    
+    class Meta:
+        abstract = True
+
+class StreetAddressAtom(models.Model):
+
+    street_1 = models.CharField(_('Street 1'), max_length=30, blank=True)
+    street_2 = models.CharField(_('Street_2'), max_length=30, blank=True)
+    city = models.CharField(_('City'), max_length=30, blank=True)
+    state = models.CharField(_('State'), max_length=30, blank=True)
+    zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True)   
+
+    latitude = models.CharField(_('Latitude'), max_length=30, blank=True)   
+    longitude = models.CharField(_('Longitude'), max_length=30, blank=True)    
+    
+    class Meta:
+        abstract = True     
+
+
+
+
+class StreetAddressMolecule(VersionableAtom, StreetAddressAtom):
+    class Meta:
+        abstract = True
+
+class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMixin):
+    help = {
+        'email':"",
+    }
+
+    email = models.EmailField(_('email address'), unique=True, blank=True)
+
+    is_staff = models.BooleanField(_('staff status'), default=False,
+        help_text=_('Designates whether the user can log into this admin '
+                    'site.'))
+    is_active = models.BooleanField(_('active'), default=True,
+        help_text=_('Designates whether this user should be treated as '
+                    'active. Unselect this instead of deleting accounts.'))
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+
+    USERNAME_FIELD = 'email'
+
+    def get_short_name(self):
+        if self.first_name:
+            return self.first_name
+        return self.email
+
+    def get_full_name(self):
+        if self.first_name and self.last_name:
+            return u"%s %s" % (self.first_name, self.last_name)
+        elif self.first_name:
+            return u"%s (%s)" % (self.first_name, self.email)
+        elif self.last_name:
+            return u"%s (%s)" % (self.first_name, self.email)
+        else:
+            return self.email
+
+    class Meta:
+        abstract = True
+
