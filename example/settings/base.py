@@ -63,7 +63,7 @@ INSTALLED_APPS = (
     #'storages',
     #'haystack',
     'imagekit',
-    #'registration', 
+    #'robots',
 
     'carbon.atoms',
 
