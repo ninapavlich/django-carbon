@@ -100,6 +100,7 @@ PROJECT_DIR = os.path.dirname(os.path.realpath(project_module.__file__))
 PYTHON_BIN = os.path.dirname(sys.executable)
 ve_path = os.path.dirname(os.path.dirname(os.path.dirname(PROJECT_DIR)))
 
+
 if os.path.exists(os.path.join(PYTHON_BIN, 'activate_this.py')):
     VAR_ROOT = os.path.join(os.path.dirname(PYTHON_BIN), 'var')
 elif ve_path and os.path.exists(os.path.join(ve_path, 'bin',
@@ -114,16 +115,6 @@ if not os.path.exists(VAR_ROOT):
 # Project URLS and media settings
 #==============================================================================
 ROOT_URLCONF = 'example.urls'
-
-STATIC_URL = '/static/'
-MEDIA_URL = '/uploads/'
-
-STATIC_ROOT = os.path.join(VAR_ROOT, 'static')
-MEDIA_ROOT = os.path.join(VAR_ROOT, 'uploads')
-
-
-
-    
 
 
 #==============================================================================
@@ -144,9 +135,20 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 MIDDLEWARE_CLASSES += (
+    
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     "example.kernel.middleware.Django403Middleware",
     'example.kernel.middleware.DoNotTrackMiddleware',
 )
+
+# 'django.contrib.auth.middleware.AuthenticationMiddleware',
+# 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 
 
 #==============================================================================
@@ -175,7 +177,11 @@ AWS_HEADERS = {
 # Static Files
 #==============================================================================
 STATICFILES_DIRS = (
-    os.path.join(PROJECT_DIR, 'static'),
+    os.path.join(PROJECT_DIR, 'media'),
+)
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
 )
 
 if IS_ON_SERVER:
@@ -289,6 +295,8 @@ HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 #==============================================================================
 # CARBON SETTINGS
 #==============================================================================
+MEDIA_ROOT = os.path.join(VAR_ROOT, 'uploads')
+MEDIA_URL = '/uploads/'
 MEDIA_STORAGE = 'example.s3utils.MediaS3BotoStorage'
 SECURE_MEDIA_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'
 
