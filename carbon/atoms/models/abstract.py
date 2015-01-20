@@ -231,8 +231,7 @@ class AddressibleAtom(models.Model):
     
 
     def save(self, *args, **kwargs):
-        print "Save %s"%(self.title)
-
+        
         try: 
             model = type(self)
             model._meta.get_field_by_name('parent')

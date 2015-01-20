@@ -8,7 +8,7 @@ from carbon.atoms.models.content import ContentMolecule, CategoryMolecule, Order
 class Template(VersionableAtom ):
 
     help = {
-        'content': "Allow item to be shared on social networks",
+        'content': "",
         'title':"",
     }
 
@@ -17,7 +17,14 @@ class Template(VersionableAtom ):
     content = models.TextField(_('content'), help_text=help['content'])
 
 
+    def __unicode__(self):
+        return self.title
+
+
 class Page(HierarchicalAtom, ContentMolecule):
+
+    template = models.ForeignKey('page.Template')
+
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")

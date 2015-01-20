@@ -288,7 +288,7 @@ class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom):
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
 
-class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom):
+class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
     #Basically just a tag but with hierarchy
     item_class = None
 
