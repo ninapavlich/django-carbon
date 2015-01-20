@@ -63,6 +63,10 @@ class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMix
 
     USERNAME_FIELD = 'email'
 
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("email__icontains", "first_name__icontains", "middle_name__icontains", "last_name__icontains")
+
     def get_short_name(self):
         if self.first_name:
             return self.first_name
@@ -77,6 +81,9 @@ class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMix
             return u"%s (%s)" % (self.first_name, self.email)
         else:
             return self.email
+
+    def __unicode__(self):
+        return self.get_full_name()
 
     class Meta:
         abstract = True

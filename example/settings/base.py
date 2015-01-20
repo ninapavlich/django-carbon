@@ -55,7 +55,7 @@ SECRET_KEY = ':sdlk23j)SDS(&3g2a]dc08d923*^@)djJDD'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = (
-    'grappelli.dashboard',
+    # 'grappelli.dashboard',
     'grappelli',
     
     'localflavor',
@@ -70,8 +70,8 @@ INSTALLED_APPS = (
     'carbon.compounds.account',
     'carbon.compounds.media',
     'carbon.compounds.page',
-    'carbon.compounds.blog',
-    'carbon.compounds.gallery',
+    'carbon.compounds.portfolio',
+    'carbon.compounds.clientset',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',

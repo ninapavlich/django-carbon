@@ -5,8 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
 from .abstract import *
-from .access import AccessibleAtom
-
 
 
 class PublishableAtom(models.Model):
@@ -28,8 +26,7 @@ class PublishableAtom(models.Model):
         (UNPUBLISHED, _("Unpublished")),
     )
 
-    publication_date = models.DateTimeField(_('Publication Date'), auto_now=True, 
-        blank=True, null=True)
+    publication_date = models.DateTimeField(_('Publication Date'), blank=True, null=True)
     published_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True, related_name='%(app_label)s_%(class)s_published_by', 
         on_delete=models.SET_NULL)
@@ -43,7 +40,7 @@ class PublishableAtom(models.Model):
     def save(self, *args, **kwargs):
 
         has_been_published = False
-        if self.pk is not None and self.publication_status == Publishable.PUBLISHED:
+        if self.pk is not None and self.publication_status == PublishableAtom.PUBLISHED:
             original = type(self).objects.get(pk=self.pk)
             if original.publication_status != self.publication_status:
                 has_been_published = True
@@ -52,7 +49,7 @@ class PublishableAtom(models.Model):
         if has_been_published and not self.publication_date:
             self.publication_date = now()
 
-        super(Publishable, self).save(*args, **kwargs)
+        super(PublishableAtom, self).save(*args, **kwargs)
 
     class Meta:
         abstract = True
@@ -103,7 +100,8 @@ class SEOAtom(models.Model):
     sitemap_priority = models.CharField("Sitemap Priority", max_length=255, 
         null=True, blank=True, default='0.5', help_text=help['sitemap_priority'])
 
-    
+    class Meta:
+        abstract = True
 
     #Sitemap Properties
     def lastmod(self):
@@ -163,8 +161,8 @@ class SocialSharingAtom(models.Model):
     #SOCIAL
     sharable = models.BooleanField(default=False, 
         help_text=help['sharable'])
-    tiny_url = models.CharField(_('tiny url'), max_length=255, unique=True,
-        help_text=help['tiny_url'])
+    tiny_url = models.CharField(_('tiny url'), max_length=255, 
+        help_text=help['tiny_url'], null=True, blank=True)
 
     social_share_type = models.CharField("Social type", max_length=255, 
         null=True, blank=True, choices=TYPE_CHOICES, default=ARTICLE )
@@ -194,7 +192,7 @@ class SocialSharingAtom(models.Model):
 
 class ContentAtom(models.Model):
     help = {
-        'content': "Allow item to be shared on social networks",
+        'content': "",
         'image':"",
         'authors': "",
         'editors': "",
@@ -202,7 +200,7 @@ class ContentAtom(models.Model):
 
     }
 
-    content = models.TextField(_('content'), help_text=help['content'])
+    content = models.TextField(_('content'), help_text=help['content'], null=True, blank=True)
 
     authors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, 
         null=True, related_name='%(app_label)s_%(class)s_authors', help_text=help['authors'])
@@ -223,6 +221,16 @@ class HasImageAtom(models.Model):
     image = models.ForeignKey(settings.IMAGE_MODEL, 
         blank=True, null=True, related_name='%(app_label)s_%(class)s_images',
         help_text=help['image'], on_delete=models.SET_NULL)
+
+    def image_preview(self):
+        if self.image:
+            try:
+                return "<img src='%s' alt='%s' />"%(self.image.thumbnail.url, self.image.alt)
+            except:
+                return "Error displaying image"
+        else:
+            return "-- No image --"
+
     class Meta:
         abstract = True        
 
@@ -263,19 +271,68 @@ class ModerationAtom(models.Model):
         abstract = True
 
 
-class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, AccessibleAtom):
+class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom):
+
+    item_class = None
+
+    class Meta:
+        abstract = True      
+
+    @classmethod
+    def get_items(cls):
+        if not cls.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+            cls.item_class.objects.filter(tag=self).order_by('order')
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("admin_note__icontains","title__icontains")
+
+class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom):
+    #Basically just a tag but with hierarchy
+    item_class = None
+
     class Meta:
         abstract = True
 
-class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, AccessibleAtom):
+    @classmethod
+    def get_items(cls):
+        if not cls.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+            cls.item_class.objects.filter(category=self).order_by('order')
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("admin_note__icontains","title__icontains")
+
+
+class OrderedItemMolecule(VersionableAtom,):
+
+    help = {
+        'order': "",
+    }
+
+    #When implementing, specify item and tag FKs:
+    #tag = models.ForeignKey('app.Model')
+    #item = models.ForeignKey('app.Model')
+    order = models.IntegerField(default=0, help_text=help['order'])
+
+    class Meta:
+        abstract = True  
+
+
+class ContentMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom, HasImageAtom):
     class Meta:
         abstract = True
 
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("admin_note__icontains","title__icontains")
 
-class ContentMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, AccessibleAtom, SEOAtom, SocialSharingAtom, ContentAtom, HasImageAtom):
+class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, ContentAtom, ModerationAtom):
     class Meta:
         abstract = True
 
-class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, AccessibleAtom, ContentAtom, ModerationAtom):
-    class Meta:
-        abstract = True
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("admin_note__icontains","title__icontains")

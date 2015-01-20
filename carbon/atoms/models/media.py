@@ -216,7 +216,7 @@ class SecureImageMolecule( VersionableAtom, AddressibleAtom, RichContentAtom ):
     
     
 
-class MediaMolecule( VersionableAtom, AddressibleAtom, RichContentAtom, HasImageAtom ):
+class MediaMolecule( ImageMolecule ):
 
     class Meta:
         abstract = True
@@ -226,7 +226,7 @@ class MediaMolecule( VersionableAtom, AddressibleAtom, RichContentAtom, HasImage
     except:
         file = models.FileField(upload_to=title_file_name, blank=True, null=True)
 
-class SecureMediaMolecule( VersionableAtom, AddressibleAtom, RichContentAtom, HasImageAtom ):
+class SecureMediaMolecule( SecureImageMolecule ):
 
     class Meta:
         abstract = True

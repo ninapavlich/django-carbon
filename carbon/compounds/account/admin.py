@@ -31,8 +31,7 @@ class UserAdmin(ContribUserAdmin):
         (_('CMS Permissions'), {
             'fields': (
                 ('is_active', 'is_staff',),
-                ('is_mentor'),
-                ('is_site_staff', 'is_board_member'),
+                
                 'is_superuser',
                 ('groups')
             )
