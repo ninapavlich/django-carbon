@@ -271,18 +271,10 @@ class ModerationAtom(models.Model):
         abstract = True
 
 
-class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom):
-
-    item_class = None
+class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
 
     class Meta:
         abstract = True      
-
-    @classmethod
-    def get_items(cls):
-        if not cls.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
-            cls.item_class.objects.filter(tag=self).order_by('order')
 
     @staticmethod
     def autocomplete_search_fields():
@@ -295,11 +287,14 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
     class Meta:
         abstract = True
 
-    @classmethod
-    def get_items(cls):
-        if not cls.item_class:
+    def get_items(self):
+        if not self.item_class:
             raise NotImplementedError('Class should specify an item_class value')
-            cls.item_class.objects.filter(category=self).order_by('order')
+            self.item_class.objects.filter(category=self).order_by('order')
+
+    def get_item_objects(self):
+        items = self.get_items()
+        return [item.item for item in items]
 
     @staticmethod
     def autocomplete_search_fields():

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom
-from carbon.atoms.models.content import ContentMolecule, CategoryMolecule, OrderedItemMolecule
+from carbon.atoms.models.content import ContentMolecule, TagMolecule
 
 class Template(VersionableAtom ):
 
@@ -24,6 +24,7 @@ class Template(VersionableAtom ):
 class Page(HierarchicalAtom, ContentMolecule):
 
     template = models.ForeignKey('page.Template')
+    tags = models.ManyToManyField('page.PageTag')
 
     @staticmethod
     def autocomplete_search_fields():
@@ -31,14 +32,8 @@ class Page(HierarchicalAtom, ContentMolecule):
 
 
 
-class PageCategoryItem(OrderedItemMolecule):
-    category = models.ForeignKey('page.PageCategory')
-    item = models.ForeignKey('page.Page')
-
-
-class PageCategory(CategoryMolecule):
-    item_class = PageCategoryItem
+class PageTag(TagMolecule):  
 
     class Meta:
-        verbose_name_plural = 'Page Categories'
+        verbose_name_plural = 'Page Tags'
 
