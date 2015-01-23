@@ -90,6 +90,41 @@ class PageTagAdmin(BaseTagAdmin):
     pass
 
 
+class MenuItemInline(admin.TabularInline):
+    model = MenuItem
+    autocomplete_lookup_fields = {
+        'generic': [['content_type', 'object_id']],
+        'fk': [],
+    }
+
+    fields = ('order','title', 'content_type', 'object_id', 'path', 'target')
+    sortable_field_name = 'order'
+    extra = 0
+
+
+class MenuAdmin(BaseVersionableAdmin):
+
+    prepopulated_fields = {"slug": ("title",)}
+    core_fields = (
+        'title',
+        'slug',
+    )
+
+    fieldsets = (
+        ("Main", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': BaseVersionableAdmin.meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+    inlines = [MenuItemInline]
+
+
+
 admin.site.register(Template, TemplateAdmin)
 admin.site.register(Page, PageAdmin)
 admin.site.register(PageTag, PageTagAdmin)
+admin.site.register(Menu, MenuAdmin)
