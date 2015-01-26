@@ -5,18 +5,33 @@ from django.db.models.signals import pre_delete
 
 from carbon.atoms.models.media import *
 
+from imagekit import ImageSpec
+from imagekit.models import ImageSpecField
+from imagekit.models import ProcessedImageField
+from imagekit.admin import AdminThumbnail
+from imagekit.processors import ResizeToFill, ResizeToFit
 
 class Image(ImageMolecule):
-    pass
+
+    variants = ('thumbnail','width_1200')
+
+    width_1200 = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+
 
 class Media(MediaMolecule):
-	pass
-
-class SecureImage(SecureImageMolecule):
     pass
 
+class SecureImage(SecureImageMolecule):
+
+    variants = ('thumbnail','width_1200')
+
+    width_1200 = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+
+
 class SecureMedia(SecureMediaMolecule):
-	pass
+    pass
 
 
 @receiver(pre_delete, sender=Image, dispatch_uid='image_delete_signal')

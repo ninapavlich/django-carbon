@@ -118,6 +118,28 @@ class RichContentAtom(models.Model):
             return self.alt
         return self.title
 
+    
+    @property
+    def image_url(self):
+        try:
+            return self.image.url
+        except:
+            return None
+
+    @property
+    def image_width(self):
+        try:
+            return self.image.width
+        except:
+            return None
+
+    @property
+    def image_height(self):
+        try:
+            return self.image.height
+        except:
+            return None
+
     def get_variant_url(self, variant_name):
         try:
             field = getattr(self, variant_name)
