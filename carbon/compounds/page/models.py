@@ -1,9 +1,9 @@
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
-
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.template import Template as DjangoTemplate
+from django.utils.translation import ugettext_lazy as _
 
 from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom
 from carbon.atoms.models.content import ContentMolecule, TagMolecule
@@ -15,10 +15,30 @@ class Template(VersionableAtom ):
         'title':"",
     }
 
+    parent = models.ForeignKey('self', blank=True, null=True,
+        related_name="children", on_delete=models.SET_NULL)
+
     title = models.CharField(_('Page Title'), max_length=255, 
         help_text=help['title'])
     content = models.TextField(_('content'), help_text=help['content'])
 
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("title__icontains",)
+
+    @property
+    def extended_content(self):
+
+        if self.parent:
+            return '{% extends parent %}'+self.content
+        return self.content
+
+    def render(self, context):
+        if self.parent:
+            context['parent'] = DjangoTemplate(self.parent.content)
+        
+        return DjangoTemplate(self.extended_content).render(context)
 
     def __unicode__(self):
         return self.title

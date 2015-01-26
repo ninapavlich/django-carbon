@@ -8,7 +8,13 @@ from .models import *
 
 class TemplateAdmin(BaseVersionableAdmin):
 
+    autocomplete_lookup_fields = {
+        'fk': ('parent', ),
+    }
+    raw_id_fields = ( 'parent', )
+
     core_fields = (
+        'parent',
         'title',
         'content',
     )
