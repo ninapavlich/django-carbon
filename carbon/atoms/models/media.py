@@ -4,6 +4,7 @@ import time
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.utils.deconstruct import deconstructible
 from django.utils.module_loading import import_by_path
 from django.utils.translation import ugettext_lazy as _
@@ -19,20 +20,28 @@ from .content import HasImageAtom
 
 #HELPER FUNCTIONS
 
+# bucket = conn.create_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+#             k = boto.s3.key.Key(bucket)
+#             k.key = settings.MEDIA_DIRECTORY + self.private_file
+#             k.set_acl('private')
+
 def title_file_name( instance, filename ):
     """Generate File Name"""
 
     subfolder = (instance.__class__.__name__).lower()
 
-    filename, extension = os.path.splitext( filename )    
+    file, extension = os.path.splitext( filename )    
     if instance.clean_filename_on_upload:
-        short_title = slugify(filename[:50])    
-        filename        = "%s-%s%s" % ( short_title, str( time.time() )[0:10], extension )
-    
-        filename        = filename.lower()
+        filename     = "%s%s"%(slugify(file[:245]), extension)
+        filename     = filename.lower()
 
-    return '/'.join( [ subfolder, filename ] )
+    full_path = '/'.join( [ subfolder, filename ] )
 
+    if instance.allow_overwrite==True:
+        if instance.file.storage.exists(full_path):
+            instance.file.storage.delete(full_path)
+        
+    return full_path
 
 def clean_path(path):
     file, extension = os.path.splitext( path )
@@ -81,7 +90,10 @@ class RichContentAtom(models.Model):
         'credit': "Item credit",
         'caption': "Item caption",
         'alt':"Alt text",
-        'clean_filename_on_upload':"Clean the filename on upload"
+        'clean_filename_on_upload':"Clean the filename on upload",
+        'allow_overwrite':"Allow file to write over an existing file if the name \
+            is the same. If not, we'll automatically add a numerical suffix to \
+            ensure file doesn't override existing files."
     }
     
     credit = models.CharField(_("Credit"), max_length=255, blank=True,
@@ -93,6 +105,9 @@ class RichContentAtom(models.Model):
     clean_filename_on_upload = models.BooleanField( 
         _("Clean filename on upload"), default = True, 
         help_text=help['clean_filename_on_upload'] )
+    allow_overwrite = models.BooleanField( 
+        _("Allow Overwrite"), default = False, 
+        help_text=help['allow_overwrite'] )
 
     
 
@@ -237,9 +252,10 @@ class SecureImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     
     
 
-class MediaMolecule( ImageMolecule ):
+class MediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     class Meta:
+        verbose_name_plural = 'media'
         abstract = True
 
     try:
@@ -247,13 +263,21 @@ class MediaMolecule( ImageMolecule ):
     except:
         file = models.FileField(upload_to=title_file_name, blank=True, null=True)
 
-class SecureMediaMolecule( SecureImageMolecule ):
+    image = models.ForeignKey(settings.IMAGE_MODEL, blank=True, null=True, on_delete=models.SET_NULL)
+
+class SecureMediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     class Meta:
+        verbose_name_plural = 'secure media'
         abstract = True
 
     try:
         file = models.FileField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureMedia'))
     except:
-        file = models.FileField(upload_to=title_file_name, blank=True, null=True)        
+        file = models.FileField(upload_to=title_file_name, blank=True, null=True)       
 
+    image = models.ForeignKey(settings.IMAGE_MODEL, blank=True, null=True, on_delete=models.SET_NULL) 
+
+
+
+ 

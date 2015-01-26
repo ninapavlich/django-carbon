@@ -299,6 +299,8 @@ HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 #==============================================================================
 MEDIA_ROOT = os.path.join(VAR_ROOT, 'uploads')
 MEDIA_URL = '/uploads/'
+MEDIA_MODEL = 'media.Media'
+SECURE_MEDIA_MODEL = 'media.SecureMedia'
 MEDIA_STORAGE = 'example.s3utils.MediaS3BotoStorage'
 SECURE_MEDIA_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'
 
@@ -307,5 +309,6 @@ IMAGE_THUMBNAIL_WIDTH = 150
 IMAGE_THUMBNAIL_HEIGHT = 150
 IMAGE_THUMBNAIL_QUALITY = 80
 IMAGE_MODEL = 'media.Image'
+SECURE_IMAGE_MODEL = 'media.SecureImage'
 IMAGE_STORAGE = 'example.s3utils.MediaS3BotoStorage'
 SECURE_IMAGE_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'

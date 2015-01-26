@@ -22,8 +22,8 @@ class BaseImageAdmin(BaseVersionableAdmin):
     core_fields = (
         'title',
         ('image','preview'),
-        ('clean_filename_on_upload','use_png'),
-        ('alt'),
+        ('clean_filename_on_upload','allow_overwrite'),
+        ('alt','use_png'),
         'credit',
         'caption',
 
@@ -45,12 +45,17 @@ class BaseImageAdmin(BaseVersionableAdmin):
 
 class BaseMediaAdmin(BaseVersionableAdmin):
 
+    autocomplete_lookup_fields = {
+        'fk': ('image', ),
+    }
+    raw_id_fields = ( 'image', )
+
     readonly_fields = BaseVersionableAdmin.readonly_fields
     
     core_fields = (
         'title',
-        'file',
-        ('clean_filename_on_upload',),
+        ('file','image'),
+        ('clean_filename_on_upload','allow_overwrite'),
         'credit',
         'caption',
 
