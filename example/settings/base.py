@@ -117,7 +117,7 @@ if not os.path.exists(VAR_ROOT):
 # Project URLS and media settings
 #==============================================================================
 ROOT_URLCONF = 'example.urls'
-
+APPEND_SLASH = True
 
 #==============================================================================
 # Templates
@@ -207,6 +207,10 @@ if IS_ON_SERVER:
 else:
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')  
+
+
+CACHE_MIDDLEWARE_SECONDS = 60 * 60 * 2 #only cache views for a few hours
+CACHE_DURATION = 60 * 60 * 24 * 30    
 
 
 #==============================================================================

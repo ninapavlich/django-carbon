@@ -27,8 +27,6 @@ class AccessibleAtom(models.Model):
 
     help = {
         'password':"Password to use if access_restriction is set to Password",
-        'publish_on_date': "Object state will be set to 'Published' on this date.",
-        'expire_on_date': "Object state will be set to 'Expired' on this date.",
         'require_registered_user' : "Require logged in user" 
     }
 
@@ -67,10 +65,7 @@ class AccessibleAtom(models.Model):
     groups_blacklist = models.ManyToManyField('auth.Group', 
         blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_groups')
 
-    publish_on_date = models.DateTimeField(_('Publish on Date'), auto_now=True, 
-        blank=True, null=True, help_text=help['publish_on_date'])
-    expire_on_date = models.DateTimeField(_('Expire on Date'), auto_now=True, 
-        blank=True, null=True, help_text=help['expire_on_date'])
+    
 
     class Meta:
         abstract = True
@@ -81,29 +76,29 @@ class AccessibleAtom(models.Model):
             if not request.user or not request.user.is_authenticated():
                 return False
 
+        if len(self.object.groups_whitelist.all()) > 0:
+            #make sure user is allowed
+            #TODO
+            return False
 
-        # elif self.access_restriction == PASSWORD:
-        #     #Check if there is a password stored in the cookies
-        #     #If not, prompt for password
-        #     pass
+        if len(self.object.groups_blacklist.all()) > 0:
+            #make sure user is allowed 
+            #TODO
+            return False       
 
-        user_whitelist = self.user_whitelist.all()
-        if len(user_whitelist) > 0:
+        if len(self.user_whitelist.all()) > 0:
             if not request.user or not request.user.is_authenticated() \
             or not request.user in user_whitelist:
                 return False
 
-        elif self.access_restriction == PASSWORD.CUSTOM:
-            custom = self.custom_access_allowed(request)
-            if custom == False:
+        if len(self.user_blacklist.all()) > 0:
+            if not request.user or not request.user.is_authenticated() \
+            or request.user in user_blacklist:
                 return False
+
+        #TODO -- password
+
         
-        if self.publish_on_date and now() < self.publish_on_date:
-            return False
-
-        if self.expire_on_date and now() > self.expire_on_date:
-            return False
-
         return True
 
     def custom_access_allowed(self, request):

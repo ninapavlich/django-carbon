@@ -10,7 +10,9 @@ from .abstract import *
 class PublishableAtom(models.Model):
 
     help = {
-        'publication_status': "Current publication status"
+        'publication_status': "Current publication status",
+        'publish_on_date': "Object state will be set to 'Published' on this date.",
+        'expire_on_date': "Object state will be set to 'Expired' on this date.",
     }
 
     DRAFT = 10
@@ -35,7 +37,24 @@ class PublishableAtom(models.Model):
         default=DRAFT, help_text=help['publication_status'])
     
 
-    
+    publish_on_date = models.DateTimeField(_('Publish on Date'), 
+        blank=True, null=True, help_text=help['publish_on_date'])
+    expire_on_date = models.DateTimeField(_('Expire on Date'), 
+        blank=True, null=True, help_text=help['expire_on_date'])
+
+    def is_published(self):
+
+        if self.publication_status == PublishableAtom.PUBLISHED:
+
+            if self.publish_on_date and now() < self.publish_on_date:
+                return False
+
+            if self.expire_on_date and now() > self.expire_on_date:
+                return False
+
+            return True
+
+        return False
 
     def save(self, *args, **kwargs):
 
@@ -266,6 +285,15 @@ class ModerationAtom(models.Model):
     
     cleaned_content = models.TextField(_('Cleaned Content'), blank=True,
         help_text=help['content_cleaned'])
+
+
+    def is_published(self):
+
+        if self.moderation_status == ModerationAtom.PUBLISHED:
+
+            return True
+            
+        return False
 
     class Meta:
         abstract = True

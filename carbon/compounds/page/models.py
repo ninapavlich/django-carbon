@@ -26,8 +26,8 @@ class Template(VersionableAtom ):
 
 class Page(HierarchicalAtom, ContentMolecule):
 
-    template = models.ForeignKey('page.Template')
-    tags = models.ManyToManyField('page.PageTag')
+    template = models.ForeignKey('page.Template', null=True, blank=True)
+    tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
     @staticmethod
     def autocomplete_search_fields():

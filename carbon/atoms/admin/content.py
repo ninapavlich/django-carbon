@@ -84,6 +84,7 @@ class BaseContentAdmin(admin.ModelAdmin):
     publication_fields = (
         ('publication_status'),
         ('publication_date', 'published_by'),
+        ('publish_on_date', 'expire_on_date'),
         ('authors'),
         ('editors'),
         'facebook_author_id',

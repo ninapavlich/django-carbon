@@ -10,7 +10,17 @@ admin.autodiscover()
 
 sitemaps = {}
 
-urlpatterns = patterns('',
+urlpatterns = patterns('')
+
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += patterns('',
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+        (r'', include('example.urls_favicons')),
+    )
+
+urlpatterns +=  patterns('',
     
     (r'^grappelli/', include('grappelli.urls')),
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -18,11 +28,21 @@ urlpatterns = patterns('',
 
     #(r'^robots\.txt$', include('robots.urls')),
 
+    # -- Pages
+    url(r'^', include('carbon.compounds.page.urls')),
+
     # - Static URLS
-    (r'', include('example.urls_favicons')),
     (r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 )
 
+if settings.DEBUG and settings.STATIC_ROOT:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
 if settings.DEBUG and settings.MEDIA_ROOT:
-    urlpatterns += static(settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
+
+
+
