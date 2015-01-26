@@ -154,16 +154,16 @@ MIDDLEWARE_CLASSES += (
 #==============================================================================
 # AWS
 #==============================================================================
-AWS_ACCESS_KEY_ID       = ''
-AWS_SECRET_ACCESS_KEY   = ''
-AWS_STORAGE_BUCKET_NAME = ''
-AWS_STORAGE_BUCKET_NAME_MEDIA = ''
+AWS_ACCESS_KEY_ID       = 'AKIAJP7UIPZYLOQ2TBYQ'
+AWS_SECRET_ACCESS_KEY   = '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'
+AWS_STORAGE_BUCKET_NAME = 'django-carbon'
+AWS_STORAGE_BUCKET_NAME_MEDIA = 'django-carbon'
 AWS_STATIC_FOLDER = 'static'
 AWS_MEDIA_FOLDER = 'media'
 AWS_S3_CUSTOM_DOMAIN    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME)
 AWS_S3_CUSTOM_DOMAIN_MEDIA    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME_MEDIA)
 
-AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE = ''
+AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE = 'django-carbon-secure'
 AWS_S3_CUSTOM_DOMAIN_MEDIA_SECURE    = '%s.s3.amazonaws.com'%(AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE)
 
 
@@ -300,7 +300,10 @@ MEDIA_URL = '/uploads/'
 MEDIA_STORAGE = 'example.s3utils.MediaS3BotoStorage'
 SECURE_MEDIA_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'
 
+
 IMAGE_THUMBNAIL_WIDTH = 150
 IMAGE_THUMBNAIL_HEIGHT = 150
 IMAGE_THUMBNAIL_QUALITY = 80
 IMAGE_MODEL = 'media.Image'
+IMAGE_STORAGE = 'example.s3utils.MediaS3BotoStorage'
+SECURE_IMAGE_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'

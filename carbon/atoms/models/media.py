@@ -1,3 +1,6 @@
+import os
+import time
+
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -17,24 +20,39 @@ from .content import HasImageAtom
 def title_file_name( instance, filename ):
     """Generate File Name"""
 
-    subfolder = (self.__class__.__name__).lower()
+    subfolder = (instance.__class__.__name__).lower()
 
-    file, extension = os.path.splitext( filename )    
+    filename, extension = os.path.splitext( filename )    
     if instance.clean_filename_on_upload:
-        short_title = slugify(file[:50])    
+        short_title = slugify(filename[:50])    
         filename        = "%s-%s%s" % ( short_title, str( time.time() )[0:10], extension )
     
-    filename        = filename.lower()
+        filename        = filename.lower()
+
     return '/'.join( [ subfolder, filename ] )
 
 
 def clean_path(path):
-    split = path.split('/')
+    file, extension = os.path.splitext( path )
+
+    split = file.split('/')
     file_name = split[-1]
     file_name = file_name.replace("_", "-")
     words = file_name.split("-")
-    combined = ' '.join(words[:-1]).title()
+    
+    #Don't include auto-generated number from above, if included in filename
+    last_word = words[-1]
+    is_auto_number = last_word.isdigit() and len(last_word)==10
+    if is_auto_number:
+        words = words[0:-1]
+
+    combined = ' '.join(words).title()
+    
     return combined
+
+
+
+ 
 
 
 def get_storage(type):
@@ -117,12 +135,12 @@ class RichContentAtom(models.Model):
 
     def save(self, *args, **kwargs):
 
+        
         #Use filename for title if not specified.
         if self.file and not self.title:
-            file, extension = os.path.splitext( self.file.url )
-            self.title = clean_path(file)
+            self.title = clean_path(self.file.url)
 
-        super(RichContent, self).save(*args, **kwargs)
+        super(RichContentAtom, self).save(*args, **kwargs)
 
     def __unicode__(self):
         if self.title:
@@ -142,7 +160,7 @@ class RichContentAtom(models.Model):
 
 
 
-class ImageMolecule( VersionableAtom, AddressibleAtom, RichContentAtom ):
+class ImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     try:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'))
@@ -178,7 +196,7 @@ class ImageMolecule( VersionableAtom, AddressibleAtom, RichContentAtom ):
 
     variants = ('thumbnail',)
 
-class SecureImageMolecule( VersionableAtom, AddressibleAtom, RichContentAtom ):
+class SecureImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     try:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'))

@@ -34,12 +34,6 @@ class BaseVersionableAdmin(admin.ModelAdmin):
         obj.modified_by = request.user
 
 
-        if obj.pk is not None and obj.publication_status == PublishableAtom.PUBLISHED:
-            original = type(obj).objects.get(pk=obj.pk)
-            if original.publication_status != obj.publication_status:
-                if not obj.published_by:
-                    obj.published_by = request.user
-
         super(BaseVersionableAdmin, self). save_model(request, obj, form, change)
 
 
@@ -150,6 +144,16 @@ class BaseContentAdmin(admin.ModelAdmin):
         })
     )
 
+    def save_model(self, request, obj, form, change):
+       
+
+        if obj.pk is not None and obj.publication_status == PublishableAtom.PUBLISHED:
+            original = type(obj).objects.get(pk=obj.pk)
+            if original.publication_status != obj.publication_status:
+                if not obj.published_by:
+                    obj.published_by = request.user
+
+        super(BaseContentAdmin, self). save_model(request, obj, form, change)
 
 
 class HierarchicalContentAdmin(BaseContentAdmin):

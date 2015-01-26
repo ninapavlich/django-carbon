@@ -106,7 +106,7 @@ class AddressibleAtom(models.Model):
     
 
     title = models.CharField(_('Title'), max_length=255, 
-        help_text=help['title'])
+        help_text=help['title'], blank=True, null=True)
 
     slug = models.CharField(_('Slug'), max_length=255, blank=True, 
         unique=True, db_index=True, help_text=help['slug'])
@@ -231,6 +231,10 @@ class AddressibleAtom(models.Model):
     
 
     def save(self, *args, **kwargs):
+
+        if not self.title:
+            print 'save title!'
+            self.title = 'Untitled %s'%(self.__class__.__name__)
         
         try: 
             model = type(self)
