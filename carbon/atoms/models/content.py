@@ -3,6 +3,11 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.template import Template as DjangoTemplate
+from django.template import loader
+
+from carbon.utils.slugify import unique_slugify
+from carbon.utils.template import get_page_templates, get_page_templates_raw
 
 from .abstract import *
 
@@ -359,3 +364,71 @@ class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, Conte
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
+
+class TemplateMolecule(VersionableAtom):
+
+    help = {
+        'custom_template': "",
+        'template':"",
+        'title':"",
+        'slug':""
+    }
+
+    title = models.CharField(_('Page Title'), max_length=255, 
+        help_text=help['title'])
+    slug = models.CharField(_('Slug'), max_length=255, blank=True, 
+        unique=True, db_index=True, help_text=help['slug'])
+
+    custom_template = models.TextField(_('custom template'), 
+        help_text=help['custom_template'], null=True, blank=True)
+    template = models.CharField(_('Template'), max_length=255, 
+        choices=get_page_templates(), null=True, blank=True,
+        help_text=help['template'])
+
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("title__icontains",)
+
+    def render(self, context):
+
+        file_templates = get_page_templates_raw()
+
+        
+        #Add DB Templates
+        all_templates = self.__class__.objects.all()
+        for template in all_templates:
+            if template.custom_template:
+                key = 'template_%s'%template.slug
+                context[key] = DjangoTemplate(template.custom_template)
+        
+        if self.custom_template:
+            return DjangoTemplate(self.custom_template).render(context)
+        else:
+            template = loader.get_template(self.template)
+            return template.render(context)
+
+    def generate_slug(self):
+        unique_slugify(self, self.title, 'slug', None, '_')
+        return self.slug
+
+    def __unicode__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+
+        if not self.title:
+            self.title = 'Untitled %s'%(self.__class__.__name__)
+
+        if not self.slug:
+            self.slug = self.generate_slug()
+
+        #Clear html template if custom content is defined
+        if self.custom_template != None and self.custom_template != '':
+            self.template = None
+
+        super(TemplateMolecule, self).save(*args, **kwargs)
+
+
+    class Meta:
+        abstract = True

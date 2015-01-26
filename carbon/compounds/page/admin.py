@@ -6,31 +6,9 @@ from .models import *
 
 
 
-class TemplateAdmin(BaseVersionableAdmin):
+class TemplateAdmin(BaseTemplateAdmin):
 
-    autocomplete_lookup_fields = {
-        'fk': ('parent', ),
-    }
-    raw_id_fields = ( 'parent', )
-
-    core_fields = (
-        'parent',
-        'title',
-        'content',
-    )
-    meta_fields = BaseVersionableAdmin.meta_fields
-    fieldsets = (
-        ("Main Body", {
-            'fields': core_fields,
-            'classes': ( 'grp-collapse grp-open', )
-        }),
-        
-        ("Meta", {
-            'fields': meta_fields,
-            'classes': ( 'grp-collapse grp-closed', )
-        })
-    )
-
+    pass
 
 
 class PageAdmin(HierarchicalContentAdmin):

@@ -219,3 +219,26 @@ class HierarchicalContentAdmin(BaseContentAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
+
+class BaseTemplateAdmin(BaseVersionableAdmin):
+
+    prepopulated_fields = {"slug": ("title",)}
+
+    core_fields = (
+        ('title','slug'),
+        'template',
+        'custom_template',
+
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )    

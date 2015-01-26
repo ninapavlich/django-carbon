@@ -233,7 +233,6 @@ class AddressibleAtom(models.Model):
     def save(self, *args, **kwargs):
 
         if not self.title:
-            print 'save title!'
             self.title = 'Untitled %s'%(self.__class__.__name__)
         
         try: 
