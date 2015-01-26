@@ -28,6 +28,9 @@ class BaseVersionableAdmin(admin.ModelAdmin):
         })
     )
 
+    list_filter = (
+            "created_by", "modified_by", )
+
     def save_model(self, request, obj, form, change):
         if not getattr(obj, "created_by"):
             obj.created_by = request.user

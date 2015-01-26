@@ -10,6 +10,7 @@ http://www.wellfireinteractive.com/blog/easier-12-factor-django/
 def get(key, default=None):
     """Retrieves env vars and makes Python boolean replacements"""
     val = os.environ.get(key, default)
+    
     if val == 'True':
         val = True
     elif val == 'False':
@@ -25,10 +26,12 @@ def read(env_file=".env"):
     try:
         with open(env_file) as f:
             content = f.read()
+
     except IOError:
         content = ''
 
     for line in content.splitlines():
+
         m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
         if m1:
             key, val = m1.group(1), m1.group(2)

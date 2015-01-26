@@ -5,8 +5,10 @@ from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.deconstruct import deconstructible
+from django.utils.module_loading import import_by_path
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
@@ -64,6 +66,7 @@ def get_storage(type):
         storage = import_by_path(settings.SECURE_IMAGE_STORAGE)()
     elif type=='BaseSecureMedia':
         storage = import_by_path(settings.SECURE_MEDIA_STORAGE)()
+
     return storage
 
 

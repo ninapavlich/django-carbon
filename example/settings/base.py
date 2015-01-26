@@ -6,6 +6,8 @@ import sys
 import example as project_module
 import inspect
 
+from example import env
+
 #==============================================================================
 # Generic Django project settings
 #==============================================================================
@@ -154,8 +156,8 @@ MIDDLEWARE_CLASSES += (
 #==============================================================================
 # AWS
 #==============================================================================
-AWS_ACCESS_KEY_ID       = 'AKIAJP7UIPZYLOQ2TBYQ'
-AWS_SECRET_ACCESS_KEY   = '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'
+AWS_ACCESS_KEY_ID       = env.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY   = env.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = 'django-carbon'
 AWS_STORAGE_BUCKET_NAME_MEDIA = 'django-carbon'
 AWS_STATIC_FOLDER = 'static'
