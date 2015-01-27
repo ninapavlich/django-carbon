@@ -2,16 +2,17 @@ from django.contrib import admin
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
-from .models import *
 
+from .models import *
+from .forms import *
 
 
 class TemplateAdmin(BaseTemplateAdmin):
-
-    pass
+    form = TemplateAdminForm
 
 
 class PageAdmin(HierarchicalContentAdmin):
+    form = PageAdminForm
 
     autocomplete_lookup_fields = HierarchicalContentAdmin.autocomplete_lookup_fields
     fk_fields_list = list(autocomplete_lookup_fields['fk'])

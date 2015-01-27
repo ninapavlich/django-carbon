@@ -66,6 +66,8 @@ INSTALLED_APPS = (
     #'haystack',
     'imagekit',
     #'robots',
+    'ckeditor',
+    'django_ace',
 
     'carbon.atoms',
 
@@ -174,6 +176,8 @@ AWS_HEADERS = {
     'Expires': 'Thu, 15 Apr 2010 20:00:00 GMT',
     'Cache-Control': 'max-age=86400',
 }
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 #==============================================================================
 # Static Files

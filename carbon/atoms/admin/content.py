@@ -3,6 +3,9 @@ from django.contrib import admin
 
 from carbon.atoms.models.content import PublishableAtom
 
+
+
+
 class BaseVersionableAdmin(admin.ModelAdmin):
 
     readonly_fields = (
@@ -38,6 +41,7 @@ class BaseVersionableAdmin(admin.ModelAdmin):
 
 
         super(BaseVersionableAdmin, self). save_model(request, obj, form, change)
+
 
 
 

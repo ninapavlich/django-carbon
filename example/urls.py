@@ -25,6 +25,7 @@ urlpatterns +=  patterns('',
     (r'^grappelli/', include('grappelli.urls')),
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),
+    (r'^ckeditor/', include('ckeditor.urls')),
 
     #(r'^robots\.txt$', include('robots.urls')),
 

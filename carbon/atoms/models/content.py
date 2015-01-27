@@ -368,10 +368,10 @@ class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, Conte
 class TemplateMolecule(VersionableAtom):
 
     help = {
-        'custom_template': "",
-        'template':"",
+        'custom_template': "Override html template file with a custom template.",
+        'template':"Choose an existing html template file. This will be overwritten in custom template is filled in.",
         'title':"",
-        'slug':""
+        'slug':"This slug can be referenced within templates: {% extends template-slug %}"
     }
 
     title = models.CharField(_('Page Title'), max_length=255, 
