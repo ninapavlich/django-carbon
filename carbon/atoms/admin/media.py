@@ -57,10 +57,6 @@ class BaseImageAdmin(BaseVersionableAdmin):
 
 class BaseMediaAdmin(BaseVersionableAdmin):
 
-    autocomplete_lookup_fields = {
-        'fk': ('image', ),
-    }
-    raw_id_fields = ( 'image', )
 
     readonly_fields = BaseVersionableAdmin.readonly_fields
     

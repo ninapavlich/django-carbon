@@ -13,6 +13,9 @@ class ProjectCategoryItem(OrderedItemMolecule):
     category = models.ForeignKey('portfolio.ProjectCategory')
     item = models.ForeignKey('portfolio.Project')
 
+    class Meta:
+        unique_together = (("category", "item"),)
+
 
 class ProjectCategory(CategoryMolecule):
     item_class = ProjectCategoryItem
@@ -23,4 +26,3 @@ class ProjectCategory(CategoryMolecule):
 
 class ProjectMedia(MediaMolecule):
     project = models.ForeignKey('portfolio.Project')
-

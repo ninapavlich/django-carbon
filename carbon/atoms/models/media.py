@@ -87,9 +87,8 @@ class RichContentAtom(models.Model):
     """
 
     help = {
-        'credit': "Item credit",
-        'caption': "Item caption",
-        'alt':"Alt text",
+        'credit': "Credit",
+        'caption': "Caption",
         'clean_filename_on_upload':"Clean the filename on upload",
         'allow_overwrite':"Allow file to write over an existing file if the name \
             is the same. If not, we'll automatically add a numerical suffix to \
@@ -100,8 +99,6 @@ class RichContentAtom(models.Model):
         help_text=help['credit'])
     caption = models.TextField(_("Caption"), blank = True,
         help_text=help['caption'] )
-    alt = models.CharField(_("Alt Text"), max_length=255, blank=True,
-        help_text=help['alt'])
     clean_filename_on_upload = models.BooleanField( 
         _("Clean filename on upload"), default = True, 
         help_text=help['clean_filename_on_upload'] )
@@ -200,12 +197,15 @@ class RichContentAtom(models.Model):
 
 
 
-class ImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
+class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
-    try:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'))
-    except:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
+    help = {
+        'alt':"Alt text",
+    }
+
+   
+    alt = models.CharField(_("Alt Text"), max_length=255, blank=True,
+        help_text=help['alt'])
 
     # -- Variations
     thumbnail_jpg = ImageSpecField( source='image', format='JPEG', 
@@ -236,45 +236,31 @@ class ImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     variants = ('thumbnail',)
 
-class SecureImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
+class ImageMolecule( BaseImageMolecule ):
+
+
+
+    try:
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'))
+    except:
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
+
+
+    class Meta:
+        abstract = True
+
+
+
+class SecureImageMolecule( BaseImageMolecule ):
 
     try:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'))
     except:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
 
-    # -- Variations
-    thumbnail_jpg = ImageSpecField( source='image', format='JPEG', 
-        processors=[ResizeToFit(settings.IMAGE_THUMBNAIL_WIDTH, 
-        settings.IMAGE_THUMBNAIL_HEIGHT)], 
-        options={'quality': settings.IMAGE_THUMBNAIL_QUALITY})
-    thumbnail_png = ImageSpecField( source='image', format='PNG', 
-        processors=[ResizeToFit(settings.IMAGE_THUMBNAIL_WIDTH, 
-        settings.IMAGE_THUMBNAIL_HEIGHT)],
-        options={'quality': settings.IMAGE_THUMBNAIL_QUALITY})
-
-    use_png = models.BooleanField( default = False, 
-        verbose_name='Use .PNG (instead of .JPG)')
-
-    class Meta:
-        abstract = True
-
-    @property
-    def file(self):
-        return self.image  
-
-    @property
-    def thumbnail(self):
-        if self.use_png:
-            return self.thumbnail_png  
-        else:
-            return self.thumbnail_jpg
-
-    variants = ('thumbnail',)    
-    
     
 
-class MediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
+class MediaMolecule( ImageMolecule ):
 
     class Meta:
         verbose_name_plural = 'media'
@@ -285,9 +271,7 @@ class MediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     except:
         file = models.FileField(upload_to=title_file_name, blank=True, null=True)
 
-    image = models.ForeignKey(settings.IMAGE_MODEL, blank=True, null=True, on_delete=models.SET_NULL)
-
-class SecureMediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
+class SecureMediaMolecule( SecureImageMolecule ):
 
     class Meta:
         verbose_name_plural = 'secure media'
@@ -298,7 +282,6 @@ class SecureMediaMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     except:
         file = models.FileField(upload_to=title_file_name, blank=True, null=True)       
 
-    image = models.ForeignKey(settings.IMAGE_MODEL, blank=True, null=True, on_delete=models.SET_NULL) 
 
 
 
