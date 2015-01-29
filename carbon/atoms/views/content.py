@@ -8,29 +8,22 @@ from django.views.generic.detail import SingleObjectMixin
 class PublishableView(SingleObjectMixin):
 
 
-    def get_object(self, queryset=None):
-        
-        object = super(PublishableView, self).get_object(queryset)
-        
+
+    def render_to_response(self, context, **response_kwargs):
+
         if self.object.is_published() == False:
             raise Http404(_("No %(verbose_name)s found matching the query") %
-                    {'verbose_name': queryset.model._meta.verbose_name})
+                    {'verbose_name': self.object._meta.verbose_name})
 
-        return object  
+        return super(PublishableView, self).render_to_response(context)
 
 
 class ModerationView(SingleObjectMixin):
 
+    def render_to_response(self, context, **response_kwargs):
 
-    def get_object(self, queryset=None):
-        
-        object = super(ModerationView, self).get_object(queryset)
-        
-        if self.object.is_published() == False:
+        if self.object.is_moderated() == False:
             raise Http404(_("No %(verbose_name)s found matching the query") %
-                    {'verbose_name': queryset.model._meta.verbose_name})
+                    {'verbose_name': self.object._meta.verbose_name})
 
-        return object  
-
-
-        
+        return super(ModerationView, self).render_to_response(context)

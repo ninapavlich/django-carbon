@@ -2,11 +2,16 @@ from django.contrib import admin
 
 from .content import *
 
-class BaseTagAdmin(admin.ModelAdmin):
+class BaseTagAdmin(BaseContentAdmin):
 
     def admin_hierarchy(self, obj):
         return obj.admin_hierarchy
     admin_hierarchy.allow_tags = True
+
+    autocomplete_lookup_fields = {
+        'fk': ('template',),
+    }
+    raw_id_fields = ( 'template',)
     
     
     list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
@@ -42,8 +47,8 @@ class BaseTagAdmin(admin.ModelAdmin):
     )
    
     path_fields = (
-        ('uuid'),
-        ('path', ),
+        ('template'),
+        ('path', 'uuid',),
         ('path_generated', 'path_override'),
         ('temporary_redirect', 'permanent_redirect'),
         'order'
@@ -66,7 +71,7 @@ class BaseTagAdmin(admin.ModelAdmin):
         }),
         ("Path", {
             'fields': path_fields,
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ( 'grp-collapse grp-open', )
         }),
         ("Publication", {
             'fields': publication_fields,
@@ -90,9 +95,9 @@ class BaseTagAdmin(admin.ModelAdmin):
 class BaseCategoryAdmin(BaseTagAdmin):
 
     autocomplete_lookup_fields = {
-        'fk': ('parent',),
+        'fk': ('parent','template',),
     }
-    raw_id_fields = ( 'parent',)
+    raw_id_fields = ( 'parent','template')
 
     core_fields = BaseTagAdmin.core_fields
     core_fields_list = list(core_fields)

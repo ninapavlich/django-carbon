@@ -30,7 +30,7 @@ class PageTag(TagMolecule):
         verbose_name_plural = 'Page Tags'
 
     def get_absolute_url(self):
-        return reverse('pages_tag', kwargs = {'slug': self.slug })   
+        return reverse('pages_tag', kwargs = {'path': self.slug })   
 
 
 class Menu(VersionableAtom):

@@ -293,7 +293,7 @@ class ModerationAtom(models.Model):
         help_text=help['content_cleaned'])
 
 
-    def is_published(self):
+    def is_moderated(self):
 
         if self.moderation_status == ModerationAtom.PUBLISHED:
 
@@ -408,10 +408,9 @@ class TemplateMolecule(VersionableAtom):
         #Add DB Templates
         all_templates = self.__class__.objects.all()
         for template in all_templates:
-            key = 'template_%s'%template.slug
+            key = 'template_%s'%(template.slug)
             context[key] = DjangoTemplate(template.get_content())
 
-        
         if self.custom_template:
             return DjangoTemplate(self.custom_template).render(context)
         else:
@@ -432,6 +431,9 @@ class TemplateMolecule(VersionableAtom):
 
         if not self.slug:
             self.slug = self.generate_slug()
+
+        if self.slug:
+            self.slug = self.slug.replace("-", "_")
 
         #Clear html template if custom content is defined
         if self.custom_template != None and self.custom_template != '':

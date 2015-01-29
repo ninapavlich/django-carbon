@@ -9,9 +9,9 @@ class AccessibleView(SingleObjectMixin):
 
     def get_object(self, queryset=None):
         
-        object = super(AccessibleView, self).get_object(queryset)
+        self.object = super(AccessibleView, self).get_object(queryset)
         
         if self.object.access_allowed(self.request) == False:
             raise PermissionDenied()
 
-        return object
+        return self.object

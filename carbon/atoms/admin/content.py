@@ -98,8 +98,7 @@ class BaseContentAdmin(admin.ModelAdmin):
    
     path_fields = (
         ('template'),
-        ('uuid'),
-        ('path', ),
+        ('path', 'uuid'),
         ('path_generated', 'path_override'),
         ('temporary_redirect', 'permanent_redirect'),
         'order'
