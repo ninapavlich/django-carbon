@@ -30,6 +30,7 @@ urlpatterns +=  patterns('',
     #(r'^robots\.txt$', include('robots.urls')),
 
     # -- Pages
+    url(r'^', include('carbon.compounds.portfolio.urls')),
     url(r'^', include('carbon.compounds.page.urls')),
 
     # - Static URLS

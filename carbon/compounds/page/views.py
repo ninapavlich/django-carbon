@@ -4,8 +4,6 @@ from carbon.atoms.views.content import *
 
 from .models import *
 
-from .templates import CustomTemplateResponse
-#from django.template.response import TemplateResponse
 
 class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
 

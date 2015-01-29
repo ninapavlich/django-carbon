@@ -41,6 +41,8 @@ class VersionableAtom(models.Model):
     # def __init__(self, *args, **kwargs):
     #     super(Versionable, self).save(*args, **kwargs)
 
+    
+
     def save(self, *args, **kwargs):
         
         self.increment_version_number()
@@ -170,6 +172,10 @@ class AddressibleAtom(models.Model):
         path = self.path
         if path.startswith('/'):
             path = path[1:]
+
+        if path.endswith('/'):
+            path = path[:-1]
+
         return path
 
     def build_path(self):

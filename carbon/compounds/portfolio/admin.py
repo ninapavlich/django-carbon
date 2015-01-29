@@ -8,16 +8,25 @@ from .models import *
 
 
 class ProjectCategoryItemAdminInline(admin.TabularInline):
+
+    def edit_url(self, obj):
+        if obj.item:
+            object_type = type(obj.item).__name__            
+            url = reverse('admin:%s_%s_change' %(obj.item._meta.app_label,  obj.item._meta.module_name),  args=[obj.item.id] )
+            return u"<a href='%s' >Edit project</a>"%(url)
+    edit_url.allow_tags = True
+
     model = ProjectCategoryItem
     extra = 0
     sortable_field_name = 'order'
 
-    fields = ('order','item')
+    fields = ('order','item', 'edit_url')
 
     autocomplete_lookup_fields = {
         'fk': ('item',),
     }
     raw_id_fields = ( 'item',)
+    readonly_fields = ('edit_url',)
 
 class ProjectCategoryItemInProjectAdminInline(admin.TabularInline):
     def edit_url(self, obj):
@@ -25,7 +34,6 @@ class ProjectCategoryItemInProjectAdminInline(admin.TabularInline):
             object_type = type(obj.category).__name__            
             url = reverse('admin:%s_%s_change' %(obj.category._meta.app_label,  obj.category._meta.module_name),  args=[obj.category.id] )
             return u"<a href='%s' >Edit Category</a>"%(url)
-        
     edit_url.allow_tags = True
 
     model = ProjectCategoryItem

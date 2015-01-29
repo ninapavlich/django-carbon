@@ -324,11 +324,12 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
     def get_items(self):
         if not self.item_class:
             raise NotImplementedError('Class should specify an item_class value')
-            self.item_class.objects.filter(category=self).order_by('order')
+        
+        return self.item_class.objects.filter(category=self).order_by('order')
 
     def get_children(self):
         items = self.get_items()
-        return [item.item for item in items]
+        return [item.item for item in items if item.item.is_published()]
 
     @staticmethod
     def autocomplete_search_fields():

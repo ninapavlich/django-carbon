@@ -15,6 +15,16 @@ class Page(HierarchicalAtom, ContentMolecule):
 
     tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
+    def get_url_path(self):
+        path = self.path
+        if path.startswith('/'):
+            path = path[1:]
+
+        # if path.endswith('/'):
+        #     path = path[:1]
+            
+        return path
+
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
