@@ -62,12 +62,18 @@ class AddressibleView(SingleObjectMixin):
             return self.object
 
         if self.kwargs.get('path'):
-            path = "/" + self.kwargs.get('path', '')
+            path = self.kwargs.get('path', '')
         else:
             path = self.request.path
 
-        queryset = self.get_queryset()
+        #Make sure path starts and ends with slashes
+        if not path.endswith("/"):
+            path = "%s/"%path
 
+        if not path.startswith("/"):
+            path = "/%s"%path
+
+        queryset = self.get_queryset()
         
         try:
             obj = queryset.filter(path=path)[0]

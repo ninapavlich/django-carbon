@@ -7,8 +7,6 @@ from .models import *
 from .forms import *
 
 
-class TemplateAdmin(BaseTemplateAdmin):
-    form = TemplateAdminForm
 
 
 class PageAdmin(HierarchicalContentAdmin):
@@ -109,7 +107,6 @@ class MenuAdmin(BaseVersionableAdmin):
 
 
 
-admin.site.register(Template, TemplateAdmin)
 admin.site.register(Page, PageAdmin)
 admin.site.register(PageTag, PageTagAdmin)
 admin.site.register(Menu, MenuAdmin)

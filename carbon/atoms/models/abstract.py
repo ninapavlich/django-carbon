@@ -102,6 +102,7 @@ class AddressibleAtom(models.Model):
         'temporary_redirect': "Temporarily redirect to a different path",
         'permanent_redirect': "Permanently redirect to a different path",
         'order': "Simple order of item. ",
+        'template': 'Template for view'
     }
     
 
@@ -115,6 +116,12 @@ class AddressibleAtom(models.Model):
 
     
     order = models.IntegerField(default=0, help_text=help['order'])
+
+
+    template = models.ForeignKey(settings.TEMPLATE_MODEL, null=True, blank=True,
+        help_text=help['template'])
+
+    
 
     path = models.CharField(_('path'), max_length=255, 
         help_text=help['path'], blank=True, null=True)
@@ -170,7 +177,7 @@ class AddressibleAtom(models.Model):
 
         if has_parent and self.parent:
             parent_path = self.parent.path
-            if parent_path.endswith('/') == False:
+            if not parent_path.endswith('/'):
                 parent_path = "%s/"%(parent_path)
 
             return "%s%s/" % (parent_path, self.slug)

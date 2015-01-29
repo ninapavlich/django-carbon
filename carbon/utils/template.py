@@ -13,7 +13,6 @@ def get_page_templates_raw(ignore_templates = None):
 
     files = []
     template_dir = settings.TEMPLATE_DIRS[0]
-    print template_dir
     for root, dirnames, filenames in os.walk(template_dir):
         for filename in fnmatch.filter(filenames, '*.html'):
             raw_file_name = os.path.join(root, filename)

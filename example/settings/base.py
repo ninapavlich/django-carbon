@@ -71,6 +71,7 @@ INSTALLED_APPS = (
 
     'carbon.atoms',
 
+    'carbon.compounds.global',
     'carbon.compounds.account',
     'carbon.compounds.media',
     'carbon.compounds.page',
@@ -320,3 +321,5 @@ IMAGE_MODEL = 'media.Image'
 SECURE_IMAGE_MODEL = 'media.SecureImage'
 IMAGE_STORAGE = 'example.s3utils.MediaS3BotoStorage'
 SECURE_IMAGE_STORAGE = 'example.s3utils.SecureMediaS3BotoStorage'
+
+TEMPLATE_MODEL = 'global.Template'

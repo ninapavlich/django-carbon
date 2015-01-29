@@ -2,27 +2,25 @@ from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+
 
 from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom
 from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMolecule
 
 
 
-
-class Template(TemplateMolecule):
-
-    pass
-
-
 class Page(HierarchicalAtom, ContentMolecule):
 
-    template = models.ForeignKey('page.Template', null=True, blank=True)
     tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
+
+    def get_absolute_url(self):
+        return reverse('pages_page', kwargs = {'path': self.path })   
 
 
 
@@ -30,6 +28,9 @@ class PageTag(TagMolecule):
 
     class Meta:
         verbose_name_plural = 'Page Tags'
+
+    def get_absolute_url(self):
+        return reverse('pages_tag', kwargs = {'slug': self.slug })   
 
 
 class Menu(VersionableAtom):

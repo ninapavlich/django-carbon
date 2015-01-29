@@ -23,3 +23,8 @@ class PageDetail(NonAdminCachableView, AddressibleView, PublishableView, DetailV
 
         return super(PageDetail, self).render_to_response(context)
 
+
+
+class PageTagView(NonAdminCachableView, AddressibleView, PublishableView, DetailView):
+
+    model = PageTag

@@ -382,7 +382,7 @@ class TemplateMolecule(VersionableAtom):
 
     custom_template = models.TextField(_('custom template'), 
         help_text=help['custom_template'], null=True, blank=True)
-    template = models.CharField(_('Template'), max_length=255, 
+    file_template = models.CharField(_('Template'), max_length=255, 
         choices=get_page_templates(), null=True, blank=True,
         help_text=help['template'])
 
@@ -394,9 +394,9 @@ class TemplateMolecule(VersionableAtom):
     def get_content(self):
         if self.custom_template:
             return self.custom_template
-        elif self.template:
-            loader = FileSystemLoader(self.template)
-            source = loader.load_template_source(self.template)
+        elif self.file_template:
+            loader = FileSystemLoader(self.file_template)
+            source = loader.load_template_source(self.file_template)
             return source[0]
         return ''
 
@@ -415,7 +415,7 @@ class TemplateMolecule(VersionableAtom):
         if self.custom_template:
             return DjangoTemplate(self.custom_template).render(context)
         else:
-            template = loader.get_template(self.template)
+            template = loader.get_template(self.file_template)
             return template.render(context)
 
     def generate_slug(self):
@@ -435,7 +435,7 @@ class TemplateMolecule(VersionableAtom):
 
         #Clear html template if custom content is defined
         if self.custom_template != None and self.custom_template != '':
-            self.template = None
+            self.file_template = None
 
         super(TemplateMolecule, self).save(*args, **kwargs)
 

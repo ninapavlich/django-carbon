@@ -97,6 +97,7 @@ class BaseContentAdmin(admin.ModelAdmin):
     )
    
     path_fields = (
+        ('template'),
         ('uuid'),
         ('path', ),
         ('path_generated', 'path_override'),
@@ -131,7 +132,7 @@ class BaseContentAdmin(admin.ModelAdmin):
         }),
         ("Path", {
             'fields': path_fields,
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ( 'grp-collapse', )
         }),
         ("Publication", {
             'fields': publication_fields,
@@ -230,7 +231,7 @@ class BaseTemplateAdmin(BaseVersionableAdmin):
 
     core_fields = (
         ('title','slug'),
-        'template',
+        'file_template',
         'custom_template',
 
     )
