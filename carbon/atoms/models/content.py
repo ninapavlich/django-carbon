@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from django.template import Template as DjangoTemplate
 from django.template import loader
+from django.template.loaders.filesystem import Loader as FileSystemLoader
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -390,6 +391,15 @@ class TemplateMolecule(VersionableAtom):
     def autocomplete_search_fields():
         return ("title__icontains",)
 
+    def get_content(self):
+        if self.custom_template:
+            return self.custom_template
+        elif self.template:
+            loader = FileSystemLoader(self.template)
+            source = loader.load_template_source(self.template)
+            return source[0]
+        return ''
+
     def render(self, context):
 
         file_templates = get_page_templates_raw()
@@ -398,9 +408,9 @@ class TemplateMolecule(VersionableAtom):
         #Add DB Templates
         all_templates = self.__class__.objects.all()
         for template in all_templates:
-            if template.custom_template:
-                key = 'template_%s'%template.slug
-                context[key] = DjangoTemplate(template.custom_template)
+            key = 'template_%s'%template.slug
+            context[key] = DjangoTemplate(template.get_content())
+
         
         if self.custom_template:
             return DjangoTemplate(self.custom_template).render(context)

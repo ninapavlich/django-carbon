@@ -10,7 +10,7 @@ class PageAdminForm(forms.ModelForm):
 
 
 class TemplateAdminForm(forms.ModelForm):
-    custom_template = forms.CharField(widget=AceWidget(mode='html', width="850px", height="800px", showprintmargin=True))
+    custom_template = forms.CharField(widget=AceWidget(mode='html', width="850px", height="800px", showprintmargin=True), required=False)
     class Meta:
         model = Template
 
