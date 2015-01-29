@@ -20,7 +20,7 @@ class Page(HierarchicalAtom, ContentMolecule):
         return ("admin_note__icontains","title__icontains")
 
     def get_absolute_url(self):
-        return reverse('pages_page', kwargs = {'path': self.path })   
+        return reverse('pages_page', kwargs = {'path': self.get_url_path() })   
 
 
 
@@ -30,8 +30,12 @@ class PageTag(TagMolecule):
         verbose_name_plural = 'Page Tags'
 
     def get_absolute_url(self):
-        return reverse('pages_tag', kwargs = {'path': self.slug })   
+        return reverse('pages_tag', kwargs = {'path': self.get_url_path() })   
 
+    def get_children(self):
+        all_children = Page.objects.filter(tags__in=[self])
+        return [child for child in all_children if child.is_published()]
+        
 
 class Menu(VersionableAtom):
 

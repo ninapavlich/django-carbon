@@ -54,10 +54,10 @@ class BaseContentAdmin(admin.ModelAdmin):
     admin_hierarchy.allow_tags = True
     
     autocomplete_lookup_fields = {
-        'fk': ('image', 'published_by'),
+        'fk': ('image', 'published_by', 'template'),
         'm2m': ('authors','editors',)
     }
-    raw_id_fields = ( 'image', 'authors', 'editors', 'published_by')
+    raw_id_fields = ( 'image', 'authors', 'editors', 'published_by', 'template')
     
     list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
     list_display_links = ( "admin_hierarchy", "path", "title",)

@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from django.core.paginator import Paginator, InvalidPage
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseForbidden, HttpResponsePermanentRedirect
 from django.utils.decorators import method_decorator
@@ -23,6 +24,82 @@ class NonUserCachableView(object):
     def dispatch(self, *args, **kwargs):
         return super(NonUserCachableView, self).dispatch(*args, **kwargs)    
 
+class HasChildrenView(object):
+    paginate_by = 10
+    paginate_orphans = 0
+    paginator_class = Paginator
+    allow_empty = True
+    page_kwarg = 'page'
+
+    def paginate_queryset(self, queryset, page_size):
+        """
+        Paginate the queryset, if needed.
+        """
+        paginator = self.get_paginator(
+            queryset, page_size, orphans=self.paginate_orphans,
+            allow_empty_first_page=self.allow_empty)
+        page_kwarg = self.page_kwarg
+        page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+        try:
+            page_number = int(page)
+        except ValueError:
+            if page == 'last':
+                page_number = paginator.num_pages
+            else:
+                raise Http404(_("Page is not 'last', nor can it be converted to an int."))
+        try:
+            page = paginator.page(page_number)
+            return (paginator, page, page.object_list, page.has_other_pages())
+        except InvalidPage as e:
+            raise Http404(_('Invalid page (%(page_number)s): %(message)s') % {
+                'page_number': page_number,
+                'message': str(e)
+            })
+
+    def get_paginator(self, queryset, per_page, orphans=0,
+                      allow_empty_first_page=True, **kwargs):
+        """
+        Return an instance of the paginator for this view.
+        """
+        return self.paginator_class(
+            queryset, per_page, orphans=orphans,
+            allow_empty_first_page=allow_empty_first_page, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        if not self.object:
+            self.object = self.get_object()
+
+        try:
+            self.object_list = self.object.get_children()
+        except:
+            self.object_list = None 
+
+        return super(HasChildrenView, self).post(request, *args, **kwargs)
+
+
+    def get(self, request, *args, **kwargs):
+
+        if not self.object:
+            self.object = self.get_object()
+
+        try:
+            self.object_list = self.object.get_children()
+        except:
+            self.object_list = None      
+
+        return super(HasChildrenView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(HasChildrenView, self).get_context_data(**kwargs)
+        if self.object_list != None:
+            paginator, page, queryset, is_paginated = self.paginate_queryset(self.object_list, self.paginate_by)
+            context['paginator'] = paginator
+            context['page_obj'] = page
+            context['is_paginated'] = is_paginated
+            context['object_list'] = queryset
+
+        return context
 
 class AddressibleView(SingleObjectMixin):
     object = None

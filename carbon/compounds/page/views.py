@@ -15,6 +15,6 @@ class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailV
 
 
 
-class PageTagView(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
+class PageTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
     model = PageTag

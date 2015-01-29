@@ -326,7 +326,7 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
             raise NotImplementedError('Class should specify an item_class value')
             self.item_class.objects.filter(category=self).order_by('order')
 
-    def get_item_objects(self):
+    def get_children(self):
         items = self.get_items()
         return [item.item for item in items]
 

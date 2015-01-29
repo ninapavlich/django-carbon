@@ -166,6 +166,12 @@ class AddressibleAtom(models.Model):
                     print 'Error getting object by uuid %s - %s'%(traceback.format_exc(), sys.exc_info()[0])
         return None
 
+    def get_url_path(self):
+        path = self.path
+        if path.startswith('/'):
+            path = path[1:]
+        return path
+
     def build_path(self):
 
         try: 

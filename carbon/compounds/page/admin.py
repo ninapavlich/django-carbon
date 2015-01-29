@@ -13,23 +13,18 @@ class PageAdmin(HierarchicalContentAdmin):
     form = PageAdminForm
 
     autocomplete_lookup_fields = HierarchicalContentAdmin.autocomplete_lookup_fields
-    fk_fields_list = list(autocomplete_lookup_fields['fk'])
-    fk_fields_list.insert(0, 'template')
-    autocomplete_lookup_fields['fk'] = tuple(fk_fields_list)
-
+    
     m2m_fields_list = list(autocomplete_lookup_fields['m2m'])
     m2m_fields_list.insert(0, 'tags')
     autocomplete_lookup_fields['m2m'] = tuple(m2m_fields_list)
 
     raw_id_fields = HierarchicalContentAdmin.raw_id_fields
     raw_id_fields_list = list(raw_id_fields)
-    raw_id_fields_list.insert(0, 'template')
     raw_id_fields_list.insert(0, 'tags')
     raw_id_fields = tuple(raw_id_fields_list)
 
     core_fields = HierarchicalContentAdmin.core_fields
     core_fields_list = list(core_fields)
-    core_fields_list.insert(2, 'template')
     core_fields_list.insert(5, 'tags')
     core_fields = tuple(core_fields_list)
 
