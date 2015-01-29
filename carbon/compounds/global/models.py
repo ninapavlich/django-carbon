@@ -13,4 +13,4 @@ class Template(TemplateMolecule):
 
     @staticmethod
     def autocomplete_search_fields():
-        return ("admin_note__icontains","title__icontains")
+        return ("admin_note__icontains","title__icontains",)

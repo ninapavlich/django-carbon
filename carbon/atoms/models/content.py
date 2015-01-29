@@ -24,13 +24,13 @@ class PublishableAtom(models.Model):
     DRAFT = 10
     REVIEW = 20
     PUBLISHED = 100
-    EXPIRED = 30
+    #EXPIRED = 30
     UNPUBLISHED = 40
     PUB_STATUS_CHOICES = (
         (DRAFT, _("Draft")),
         (REVIEW, _("Needs Review")),
         (PUBLISHED, _("Published")),
-        (EXPIRED, _("Expired")),
+        # (EXPIRED, _("Expired")),
         (UNPUBLISHED, _("Unpublished")),
     )
 
