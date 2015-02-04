@@ -9,7 +9,7 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'media', '0001_initial'), (b'media', '0002_auto_20150125_2359'), (b'media', '0003_auto_20150126_0058'), (b'media', '0004_auto_20150126_0152'), (b'media', '0005_auto_20150129_0107'), (b'media', '0006_auto_20150129_0433'), (b'media', '0007_auto_20150204_0236')]
+    replaces = [(b'media', '0001_squashed_0007_auto_20150204_0236'), (b'media', '0002_auto_20150204_0239')]
 
     dependencies = [
         ('global', '__first__'),
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SecureImage',
             fields=[
-                ('secureimagemolecule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default=1, serialize=False, to='atoms.SecureImageMolecule')),
+                ('secureimagemolecule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='atoms.SecureImageMolecule')),
             ],
             options={
                 'abstract': False,
