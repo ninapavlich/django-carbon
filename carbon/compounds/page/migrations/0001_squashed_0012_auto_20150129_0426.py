@@ -8,9 +8,13 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
+    replaces = [(b'page', '0001_initial'), (b'page', '0002_menu_menuitem'), (b'page', '0003_auto_20150125_2359'), (b'page', '0004_auto_20150125_2359'), (b'page', '0005_auto_20150126_0456'), (b'page', '0006_auto_20150126_0516'), (b'page', '0007_template_parent'), (b'page', '0008_auto_20150126_1553'), (b'page', '0009_auto_20150126_1615'), (b'page', '0010_auto_20150128_2237'), (b'page', '0011_auto_20150129_0107'), (b'page', '0012_auto_20150129_0426')]
+
     dependencies = [
+        ('media', '0001_squashed_0007_auto_20150204_0236'),
+        ('global', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('media', '0001_initial'),
+        ('contenttypes', '0001_initial'),
     ]
 
     operations = [
@@ -72,7 +76,7 @@ class Migration(migrations.Migration):
                 ('created_date', models.DateTimeField(auto_now_add=True, verbose_name='Created Date', null=True)),
                 ('modified_date', models.DateTimeField(auto_now=True, verbose_name='Modified Date', null=True)),
                 ('admin_note', models.TextField(null=True, verbose_name='admin note', blank=True)),
-                ('title', models.CharField(help_text=b'The display title for this object.', max_length=255, verbose_name='Title')),
+                ('title', models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True)),
                 ('slug', models.CharField(max_length=255, blank=True, help_text=b'Auto-generated page slug for this object.', unique=True, verbose_name='Slug', db_index=True)),
                 ('uuid', models.CharField(max_length=255, blank=True, help_text=b'Auto-generated page slug for this object.', unique=True, verbose_name='UUID', db_index=True)),
                 ('order', models.IntegerField(default=0, help_text=b'Simple order of item. ')),
@@ -83,7 +87,7 @@ class Migration(migrations.Migration):
                 ('temporary_redirect', models.CharField(help_text=b'Temporarily redirect to a different path', max_length=255, verbose_name='Temporary Redirect', blank=True)),
                 ('permanent_redirect', models.CharField(help_text=b'Permanently redirect to a different path', max_length=255, verbose_name='Permanent Redirect', blank=True)),
                 ('publication_date', models.DateTimeField(null=True, verbose_name='Publication Date', blank=True)),
-                ('publication_status', models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (30, 'Expired'), (40, 'Unpublished')])),
+                ('publication_status', models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')])),
                 ('page_meta_description', models.CharField(help_text=b'A short description of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Description', blank=True)),
                 ('page_meta_keywords', models.CharField(help_text=b'A short list of keywords of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Page Keywords', blank=True)),
                 ('is_searchable', models.BooleanField(default=True, help_text=b'Allow search engines to index this object and display in sitemap.')),
@@ -102,40 +106,90 @@ class Migration(migrations.Migration):
                 ('modified_by', models.ForeignKey(related_name='page_pagetag_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('published_by', models.ForeignKey(related_name='page_pagetag_published_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('social_share_image', models.ForeignKey(related_name='page_pagetag_social_images', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', help_text=b'Standards for the social share image vary, but an image at least 300x200px should work well.', null=True)),
+                ('expire_on_date', models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True)),
+                ('publish_on_date', models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True)),
+                ('template', models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True)),
             ],
             options={
                 'verbose_name_plural': 'Page Tags',
             },
             bases=(models.Model,),
         ),
+        migrations.AddField(
+            model_name='page',
+            name='tags',
+            field=models.ManyToManyField(to=b'page.PageTag', null=True, blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='page',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
         migrations.CreateModel(
-            name='Template',
+            name='Menu',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('version', models.IntegerField(default=0)),
                 ('created_date', models.DateTimeField(auto_now_add=True, verbose_name='Created Date', null=True)),
                 ('modified_date', models.DateTimeField(auto_now=True, verbose_name='Modified Date', null=True)),
                 ('admin_note', models.TextField(null=True, verbose_name='admin note', blank=True)),
-                ('title', models.CharField(help_text=b'', max_length=255, verbose_name='Page Title')),
-                ('content', models.TextField(help_text=b'', verbose_name='content')),
-                ('created_by', models.ForeignKey(related_name='page_template_created_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('modified_by', models.ForeignKey(related_name='page_template_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('title', models.CharField(help_text=b'', max_length=255, verbose_name='Title')),
+                ('slug', models.CharField(max_length=255, blank=True, help_text=b'', unique=True, verbose_name='Slug', db_index=True)),
+                ('created_by', models.ForeignKey(related_name='page_menu_created_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='page_menu_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'abstract': False,
             },
             bases=(models.Model,),
         ),
-        migrations.AddField(
+        migrations.CreateModel(
+            name='MenuItem',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('version', models.IntegerField(default=0)),
+                ('created_date', models.DateTimeField(auto_now_add=True, verbose_name='Created Date', null=True)),
+                ('modified_date', models.DateTimeField(auto_now=True, verbose_name='Modified Date', null=True)),
+                ('admin_note', models.TextField(null=True, verbose_name='admin note', blank=True)),
+                ('title', models.CharField(help_text=b'', max_length=255, verbose_name='Title')),
+                ('order', models.IntegerField(default=0, help_text=b'')),
+                ('object_id', models.PositiveIntegerField()),
+                ('path', models.CharField(help_text=b'Override path for this menu item', max_length=255, null=True, verbose_name='Path', blank=True)),
+                ('target', models.CharField(default=b'_self', help_text=b'', max_length=255, verbose_name='Target', choices=[(b'_blank', '_blank'), (b'_self', '_self'), (b'_parent', '_parent'), (b'_top', '_top')])),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('created_by', models.ForeignKey(related_name='page_menuitem_created_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='page_menuitem_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('parent', models.ForeignKey(to='page.Menu')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AlterField(
             model_name='page',
-            name='tags',
-            field=models.ManyToManyField(to='page.PageTag'),
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='page',
-            name='template',
-            field=models.ForeignKey(to='page.Template'),
+            name='expire_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='page',
+            name='publish_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='page',
+            name='publication_status',
+            field=models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')]),
             preserve_default=True,
         ),
     ]

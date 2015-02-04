@@ -9,9 +9,12 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
+    replaces = [(b'portfolio', '0001_initial'), (b'portfolio', '0002_auto_20150120_0451'), (b'portfolio', '0003_auto_20150125_2359'), (b'portfolio', '0004_auto_20150126_0058'), (b'portfolio', '0005_auto_20150126_0152'), (b'portfolio', '0006_auto_20150126_0456'), (b'portfolio', '0007_auto_20150129_0107'), (b'portfolio', '0008_auto_20150129_0426'), (b'portfolio', '0009_auto_20150129_0433'), (b'portfolio', '0010_auto_20150204_0236')]
+
     dependencies = [
+        ('media', '0001_squashed_0007_auto_20150204_0236'),
+        ('global', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('media', '0001_initial'),
     ]
 
     operations = [
@@ -121,7 +124,7 @@ class Migration(migrations.Migration):
                 ('created_date', models.DateTimeField(auto_now_add=True, verbose_name='Created Date', null=True)),
                 ('modified_date', models.DateTimeField(auto_now=True, verbose_name='Modified Date', null=True)),
                 ('admin_note', models.TextField(null=True, verbose_name='admin note', blank=True)),
-                ('title', models.CharField(help_text=b'The display title for this object.', max_length=255, verbose_name='Title')),
+                ('title', models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True)),
                 ('slug', models.CharField(max_length=255, blank=True, help_text=b'Auto-generated page slug for this object.', unique=True, verbose_name='Slug', db_index=True)),
                 ('uuid', models.CharField(max_length=255, blank=True, help_text=b'Auto-generated page slug for this object.', unique=True, verbose_name='UUID', db_index=True)),
                 ('order', models.IntegerField(default=0, help_text=b'Simple order of item. ')),
@@ -146,5 +149,209 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
             bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='facebook_author_id',
+            field=models.CharField(help_text=b'Numeric Facebook ID', max_length=255, null=True, verbose_name=b'Facebook Author ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='google_author_id',
+            field=models.CharField(help_text=b'Google author id, e.g. the AUTHOR_ID in https://plus.google.com/AUTHOR_ID/posts', max_length=255, null=True, verbose_name=b'Google Admin ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='in_sitemap',
+            field=models.BooleanField(default=True, help_text=b'Is in sitemap'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='is_searchable',
+            field=models.BooleanField(default=True, help_text=b'Allow search engines to index this object and display in sitemap.'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='nofollow',
+            field=models.BooleanField(default=False, help_text=b'Robots nofollow'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='noindex',
+            field=models.BooleanField(default=False, help_text=b'Robots noindex'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='page_meta_description',
+            field=models.CharField(help_text=b'A short description of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Description', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='page_meta_keywords',
+            field=models.CharField(help_text=b'A short list of keywords of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Page Keywords', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='sharable',
+            field=models.BooleanField(default=False, help_text=b'Is URL a sharable URL'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='sitemap_changefreq',
+            field=models.CharField(default=b'monthly', help_text=b'How frequently does page content update', max_length=255, verbose_name='Sitemap Change Frequency', choices=[(b'never', 'Never'), (b'yearly', 'Yearly'), (b'monthly', 'Monthly'), (b'weekly', 'Weekly'), (b'daily', 'Daily'), (b'hourly', 'Hourly'), (b'always', 'Always')]),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='sitemap_priority',
+            field=models.CharField(default=b'0.5', max_length=255, blank=True, help_text=b'Sitemap priority', null=True, verbose_name=b'Sitemap Priority'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='social_share_image',
+            field=models.ForeignKey(related_name='portfolio_projectcategory_social_images', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', help_text=b'Standards for the social share image vary, but an image at least 300x200px should work well.', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='social_share_type',
+            field=models.CharField(default=b'article', choices=[(b'article', b'Article'), (b'book', b'Book'), (b'profile', b'Profile'), (b'website', b'Website'), (b'video.movie', b'Video - Movie'), (b'video.episode', b'Video - Episode'), (b'video.tv_show', b'Video - TV Show'), (b'video.other', b'Video - Other'), (b'music.song', b'Music - Song'), (b'music.album', b'Music - Album'), (b'music.radio_station', b'Music - Playlist'), (b'music.radio_station', b'Music - Radio Station')], max_length=255, blank=True, null=True, verbose_name=b'Social type'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='tiny_url',
+            field=models.CharField(help_text=b'Tiny URL used for social sharing', max_length=255, null=True, verbose_name='tiny url', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='twitter_author_id',
+            field=models.CharField(help_text=b'Twitter handle, including "@" e.g. @cgpartners', max_length=255, null=True, verbose_name=b'Twitter Admin ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='project',
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='projectcategory',
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterModelOptions(
+            name='projectmedia',
+            options={'verbose_name_plural': 'media'},
+        ),
+        migrations.AddField(
+            model_name='projectmedia',
+            name='allow_overwrite',
+            field=models.BooleanField(default=False, help_text=b"Allow file to write over an existing file if the name             is the same. If not, we'll automatically add a numerical suffix to             ensure file doesn't override existing files.", verbose_name='Allow Overwrite'),
+            preserve_default=True,
+        ),
+        migrations.RemoveField(
+            model_name='projectmedia',
+            name='use_png',
+        ),
+        migrations.AlterField(
+            model_name='projectmedia',
+            name='image',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='project',
+            name='expire_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='project',
+            name='publish_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='expire_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='publish_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='project',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectcategory',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectmedia',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='project',
+            name='publication_status',
+            field=models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')]),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='projectcategory',
+            name='publication_status',
+            field=models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')]),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='projectmedia',
+            name='use_png',
+            field=models.BooleanField(default=False, verbose_name=b'Use .PNG (instead of .JPG)'),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='projectmedia',
+            name='image',
+            field=models.ImageField(null=True, upload_to=carbon.atoms.models.media.title_file_name, blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='projectmedia',
+            name='caption',
+            field=models.TextField(help_text=b'Caption', verbose_name='Caption', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='projectmedia',
+            name='credit',
+            field=models.CharField(help_text=b'Credit', max_length=255, verbose_name='Credit', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='projectcategoryitem',
+            unique_together=set([('category', 'item')]),
         ),
     ]

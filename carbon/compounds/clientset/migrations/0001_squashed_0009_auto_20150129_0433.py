@@ -9,10 +9,14 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
+    replaces = [(b'clientset', '0001_initial'), (b'clientset', '0002_auto_20150120_0451'), (b'clientset', '0003_auto_20150125_2359'), (b'clientset', '0004_auto_20150126_0058'), (b'clientset', '0005_auto_20150126_0152'), (b'clientset', '0006_auto_20150126_0456'), (b'clientset', '0007_auto_20150129_0107'), (b'clientset', '0008_auto_20150129_0426'), (b'clientset', '0009_auto_20150129_0433')]
+
     dependencies = [
+        ('media', '0001_squashed_0007_auto_20150204_0236'),
         ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('media', '0001_initial'),
+        ('atoms', '__first__'),
+        ('global', '__first__'),
     ]
 
     operations = [
@@ -59,8 +63,8 @@ class Migration(migrations.Migration):
                 ('authors', models.ManyToManyField(help_text=b'', related_name='clientset_client_authors', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
                 ('created_by', models.ForeignKey(related_name='clientset_client_created_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('editors', models.ManyToManyField(help_text=b'', related_name='clientset_client_editors', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
-                ('groups_blacklist', models.ManyToManyField(related_name='clientset_client_blacklist_groups', null=True, to='auth.Group', blank=True)),
-                ('groups_whitelist', models.ManyToManyField(related_name='clientset_client_whitelist_groups', null=True, to='auth.Group', blank=True)),
+                ('groups_blacklist', models.ManyToManyField(related_name='clientset_client_blacklist_groups', null=True, to=b'auth.Group', blank=True)),
+                ('groups_whitelist', models.ManyToManyField(related_name='clientset_client_whitelist_groups', null=True, to=b'auth.Group', blank=True)),
                 ('image', models.ForeignKey(related_name='clientset_client_images', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', help_text=b'Featured image', null=True)),
                 ('modified_by', models.ForeignKey(related_name='clientset_client_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('published_by', models.ForeignKey(related_name='clientset_client_published_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
@@ -155,5 +159,263 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
             bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='facebook_author_id',
+            field=models.CharField(help_text=b'Numeric Facebook ID', max_length=255, null=True, verbose_name=b'Facebook Author ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='google_author_id',
+            field=models.CharField(help_text=b'Google author id, e.g. the AUTHOR_ID in https://plus.google.com/AUTHOR_ID/posts', max_length=255, null=True, verbose_name=b'Google Admin ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='in_sitemap',
+            field=models.BooleanField(default=True, help_text=b'Is in sitemap'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='is_searchable',
+            field=models.BooleanField(default=True, help_text=b'Allow search engines to index this object and display in sitemap.'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='nofollow',
+            field=models.BooleanField(default=False, help_text=b'Robots nofollow'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='noindex',
+            field=models.BooleanField(default=False, help_text=b'Robots noindex'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='page_meta_description',
+            field=models.CharField(help_text=b'A short description of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Description', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='page_meta_keywords',
+            field=models.CharField(help_text=b'A short list of keywords of the page, used for SEO and not displayed to the user.', max_length=2000, verbose_name='Meta Page Keywords', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='sharable',
+            field=models.BooleanField(default=False, help_text=b'Is URL a sharable URL'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='sitemap_changefreq',
+            field=models.CharField(default=b'monthly', help_text=b'How frequently does page content update', max_length=255, verbose_name='Sitemap Change Frequency', choices=[(b'never', 'Never'), (b'yearly', 'Yearly'), (b'monthly', 'Monthly'), (b'weekly', 'Weekly'), (b'daily', 'Daily'), (b'hourly', 'Hourly'), (b'always', 'Always')]),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='sitemap_priority',
+            field=models.CharField(default=b'0.5', max_length=255, blank=True, help_text=b'Sitemap priority', null=True, verbose_name=b'Sitemap Priority'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='social_share_image',
+            field=models.ForeignKey(related_name='clientset_clientsetcategory_social_images', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', help_text=b'Standards for the social share image vary, but an image at least 300x200px should work well.', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='social_share_type',
+            field=models.CharField(default=b'article', choices=[(b'article', b'Article'), (b'book', b'Book'), (b'profile', b'Profile'), (b'website', b'Website'), (b'video.movie', b'Video - Movie'), (b'video.episode', b'Video - Episode'), (b'video.tv_show', b'Video - TV Show'), (b'video.other', b'Video - Other'), (b'music.song', b'Music - Song'), (b'music.album', b'Music - Album'), (b'music.radio_station', b'Music - Playlist'), (b'music.radio_station', b'Music - Radio Station')], max_length=255, blank=True, null=True, verbose_name=b'Social type'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='tiny_url',
+            field=models.CharField(help_text=b'Tiny URL used for social sharing', max_length=255, null=True, verbose_name='tiny url', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='twitter_author_id',
+            field=models.CharField(help_text=b'Twitter handle, including "@" e.g. @cgpartners', max_length=255, null=True, verbose_name=b'Twitter Admin ID', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='client',
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='clientmedia',
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='clientsetcategory',
+            name='title',
+            field=models.CharField(help_text=b'The display title for this object.', max_length=255, null=True, verbose_name='Title', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterModelOptions(
+            name='clientmedia',
+            options={'verbose_name_plural': 'secure media'},
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='use_png',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='image',
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='expire_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='publish_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='client',
+            name='expire_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='client',
+            name='publish_on_date',
+            field=models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='client',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='clientsetcategory',
+            name='template',
+            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='client',
+            name='publication_status',
+            field=models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')]),
+            preserve_default=True,
+        ),
+        migrations.AlterField(
+            model_name='clientsetcategory',
+            name='publication_status',
+            field=models.IntegerField(default=10, help_text=b'Current publication status', choices=[(10, 'Draft'), (20, 'Needs Review'), (100, 'Published'), (40, 'Unpublished')]),
+            preserve_default=True,
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='admin_note',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='alt',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='caption',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='clean_filename_on_upload',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='created_by',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='created_date',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='credit',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='hierarchy',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='id',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='modified_by',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='modified_date',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='order',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='path',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='path_generated',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='path_override',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='permanent_redirect',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='slug',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='temporary_redirect',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='title',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='uuid',
+        ),
+        migrations.RemoveField(
+            model_name='clientmedia',
+            name='version',
+        ),
+        migrations.AddField(
+            model_name='clientmedia',
+            name='secureimagemolecule_ptr',
+            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default=1, serialize=False, to='atoms.SecureImageMolecule'),
+            preserve_default=False,
         ),
     ]
