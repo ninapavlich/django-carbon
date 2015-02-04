@@ -13,37 +13,49 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 
 class Image(ImageMolecule):
 
-    variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
+    #EXAMPLE VARIANTS
+    # variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
 
-    square_600 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFill(600, 600)], options={'quality': 85})
+    # square_600 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFill(600, 600)], options={'quality': 85})
 
-    width_1200 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
+    # width_1200 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
 
-    width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None)], options={'quality': 85})
+    # width_1200_fill = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
+
+    class Meta:
+        abstract = True
 
 
 class Media(MediaMolecule):
-    pass
+
+    class Meta:
+        abstract = True
 
 class SecureImage(SecureImageMolecule):
 
-    variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
+    #EXAMPLE VARIANTS
+    # variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
 
-    square_600 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFill(600, 600)], options={'quality': 85})
+    # square_600 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFill(600, 600)], options={'quality': 85})
 
-    width_1200 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
+    # width_1200 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
 
-    width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None)], options={'quality': 85})
+    # width_1200_fill = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
+
+    class Meta:
+        abstract = True
 
 
 class SecureMedia(SecureMediaMolecule):
-    pass
+
+    class Meta:
+        abstract = True
 
 
 @receiver(pre_delete, sender=Image, dispatch_uid='image_delete_signal')

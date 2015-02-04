@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import ugettext_lazy as _
 
 from .forms import *
-from .models import User, Organization
+# from .models import User, Organization
 
 
 
@@ -52,7 +52,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     
 
 
-admin.site.register(Organization, OrganizationAdmin)    
-admin.site.register(User, UserAdmin)
+# admin.site.register(Organization, OrganizationAdmin)    
+# admin.site.register(User, UserAdmin)
 
 

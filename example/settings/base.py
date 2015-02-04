@@ -71,12 +71,12 @@ INSTALLED_APPS = (
 
     'carbon.atoms',
 
-    'carbon.compounds.core',
-    'carbon.compounds.account',
-    'carbon.compounds.media',
-    'carbon.compounds.page',
-    'carbon.compounds.portfolio',
-    'carbon.compounds.clientset',
+    'example.apps.core',
+    'example.apps.account',
+    'example.apps.media',
+    'example.apps.page',
+    'example.apps.portfolio',
+    'example.apps.clientset',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',

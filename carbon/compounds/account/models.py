@@ -12,30 +12,40 @@ class User(UserMolecule):
 
     objects = UserManager()
 
+    class Meta:
+        abstract = True
+
 
 class Address(StreetAddressMolecule):
 
-	pass
+    class Meta:
+        abstract = True
 
 
 class Organization(VersionableAtom):
 
- 	creator = models.ForeignKey(settings.AUTH_USER_MODEL, 
+    class Meta:
+        abstract = True
+
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True)
 
- 	def get_admins(self):
- 		return OrganizationMember.objects.filter(organization=self,access=AccessAtom.OWNER)
+    def get_admins(self):
+        return OrganizationMember.objects.filter(organization=self,access=AccessAtom.OWNER)
 
- 	def get_editors(self):
- 		return OrganizationMember.objects.filter(organization=self,access=AccessAtom.WRITE)
+    def get_editors(self):
+        return OrganizationMember.objects.filter(organization=self,access=AccessAtom.WRITE)
 
- 	def get_viewers(self):
- 		return OrganizationMember.objects.filter(organization=self,access=AccessAtom.READ)
+    def get_viewers(self):
+        return OrganizationMember.objects.filter(organization=self,access=AccessAtom.READ)
 
 class OrganizationMember(VersionableAtom, AccessAtom):
 
-	organization = models.ForeignKey('Organization', 
+    class Meta:
+        abstract = True
+
+    organization = models.ForeignKey('Organization', 
         blank=True, null=True)
 
- 	user = models.ForeignKey(settings.AUTH_USER_MODEL, 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True)

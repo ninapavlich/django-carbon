@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from carbon.atoms.admin.media import *
-from .models import *
+# from .models import *
 
 
 
@@ -19,7 +19,7 @@ class SecureMediaAdmin(BaseMediaAdmin):
     pass
 
 
-admin.site.register(Image, ImageAdmin)
-admin.site.register(SecureImage, SecureImageAdmin)    
-admin.site.register(Media, MediaAdmin)    
-admin.site.register(SecureMedia, SecureMediaAdmin)    
+# admin.site.register(Image, ImageAdmin)
+# admin.site.register(SecureImage, SecureImageAdmin)    
+# admin.site.register(Media, MediaAdmin)    
+# admin.site.register(SecureMedia, SecureMediaAdmin)    
