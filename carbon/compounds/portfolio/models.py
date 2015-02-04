@@ -9,7 +9,14 @@ from carbon.atoms.models.media import MediaMolecule
 class Project(ContentMolecule):
     
     def get_absolute_url(self):
-    	return reverse('projects_project', kwargs = {'path': self.get_url_path() })   
+    	return reverse('projects_project', kwargs = {'path': self.get_url_path() })  
+
+    def get_items(self):
+        return ProjectCategoryItem.objects.filter(item=self).order_by('order') 
+
+    def get_categories(self):
+        items = self.get_items()
+        return [item.category for item in items]
 
 
 class ProjectCategoryItem(OrderedItemMolecule):

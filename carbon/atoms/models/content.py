@@ -331,6 +331,18 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
         items = self.get_items()
         return [item.item for item in items if item.item.is_published()]
 
+    def get_next_item(self, item):
+        items = self.item_class.objects.filter(category=self,order__gte=item.order).order_by('order')
+        if len(items) > 0:
+            return items[0].item
+        return None
+
+    def get_previous_item(self, item):
+        items = self.item_class.objects.filter(category=self,order__lte=item.order).order_by('-order')
+        if len(items) > 0:
+            return items[0].item
+        return None
+
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
