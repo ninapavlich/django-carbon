@@ -91,11 +91,11 @@ class MenuItem(VersionableAtom):
     #Point to an object
     try:
         content_type = models.ForeignKey(ContentType, 
-            limit_choices_to={"model__in": settings.MENU_MODEL_CHOICES})
+            limit_choices_to={"model__in": settings.MENU_MODEL_CHOICES}, null=True, blank=True)
     except:
-        content_type = models.ForeignKey(ContentType)
+        content_type = models.ForeignKey(ContentType, null=True, blank=True)
 
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
     #Point to an explicit path

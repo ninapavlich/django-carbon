@@ -88,6 +88,7 @@ class MenuAdmin(BaseVersionableAdmin):
         'slug',
     )
 
+    list_display = ( "title",)
     fieldsets = (
         ("Main", {
             'fields': core_fields,
