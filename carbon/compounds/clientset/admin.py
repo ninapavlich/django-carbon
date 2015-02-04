@@ -1,21 +1,24 @@
 from django.contrib import admin
 
-from .models import *
+# from .models import *
 
 
 class ClientSetItemAdminInline(admin.TabularInline):
-    model = ClientSetItem	
+    # model = ClientSetItem	
+    pass
 
 class ClientSetCategoryAdmin(admin.ModelAdmin):
-    inline = [ClientSetItemAdminInline]
-
+    # inline = [ClientSetItemAdminInline]
+    pass
 
 class ClientMediaAdminInline(admin.TabularInline):
-    model = ClientMedia	
+    # model = ClientMedia	
+    pass
 
 class ClientAdmin(admin.ModelAdmin):
-    inline = [ClientMediaAdminInline]
+    # inline = [ClientMediaAdminInline]
+    pass
 
 
-admin.site.register(ClientSetCategory, ClientSetCategoryAdmin)
-admin.site.register(Client, ClientAdmin)
+# admin.site.register(ClientSetCategory, ClientSetCategoryAdmin)
+# admin.site.register(Client, ClientAdmin)

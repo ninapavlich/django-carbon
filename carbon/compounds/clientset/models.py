@@ -8,17 +8,25 @@ from carbon.atoms.models.media import *
 
 
 class Client(ContentMolecule, AccessibleAtom):
-    pass
+    class Meta:
+        abstract = True
 
 class ClientMedia(SecureMediaMolecule):
     client = models.ForeignKey('clientset.Client')
+
+    class Meta:
+        abstract = True
 
 class ClientSetItem(OrderedItemMolecule):
     category = models.ForeignKey('clientset.ClientSetCategory')
     item = models.ForeignKey('clientset.ClientMedia')
 
+    class Meta:
+        abstract = True
+
 
 class ClientSetCategory(CategoryMolecule):
     item_class = ClientSetItem
     class Meta:
-        verbose_name_plural = 'Client Set Categories'
+        abstract = True
+        verbose_name_plural = 'Client Set Categories'        

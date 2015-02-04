@@ -8,6 +8,7 @@ from .models import *
 
 
 class ProjectCategoryItemAdminInline(admin.TabularInline):
+    # model = ProjectCategoryItem
 
     def edit_url(self, obj):
         if obj.item:
@@ -16,7 +17,7 @@ class ProjectCategoryItemAdminInline(admin.TabularInline):
             return u"<a href='%s' >Edit project</a>"%(url)
     edit_url.allow_tags = True
 
-    model = ProjectCategoryItem
+    
     extra = 0
     sortable_field_name = 'order'
 
@@ -29,6 +30,8 @@ class ProjectCategoryItemAdminInline(admin.TabularInline):
     readonly_fields = ('edit_url',)
 
 class ProjectCategoryItemInProjectAdminInline(admin.TabularInline):
+    # model = ProjectCategoryItem
+
     def edit_url(self, obj):
         if obj.category:
             object_type = type(obj.category).__name__            
@@ -36,7 +39,6 @@ class ProjectCategoryItemInProjectAdminInline(admin.TabularInline):
             return u"<a href='%s' >Edit Category</a>"%(url)
     edit_url.allow_tags = True
 
-    model = ProjectCategoryItem
     extra = 0
     
     fields = ('category','edit_url')
@@ -52,7 +54,7 @@ class ProjectCategoryAdmin(BaseCategoryAdmin):
     inlines = [ProjectCategoryItemAdminInline]
 
 class ProjectMediaAdminInline(admin.TabularInline):
-    model = ProjectMedia    
+    # model = ProjectMedia    
     extra = 0
     sortable_field_name = 'order'
     
@@ -86,5 +88,5 @@ class ProjectAdmin(BaseContentAdmin):
     inlines = [ProjectMediaAdminInline, ProjectCategoryItemInProjectAdminInline]
 
 
-admin.site.register(Project, ProjectAdmin)
-admin.site.register(ProjectCategory, ProjectCategoryAdmin)
+# admin.site.register(Project, ProjectAdmin)
+# admin.site.register(ProjectCategory, ProjectCategoryAdmin)

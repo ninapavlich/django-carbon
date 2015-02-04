@@ -7,7 +7,7 @@ from .models import *
 
 class ProjectDetailView(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
 
-    model = Project
+    # model = Project
 
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
@@ -32,4 +32,5 @@ class ProjectDetailView(NonAdminCachableView, PublishableView, AddressibleView, 
 
 class ProjectCategoryView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
-    model = ProjectCategory
+    # model = ProjectCategory
+    pass
