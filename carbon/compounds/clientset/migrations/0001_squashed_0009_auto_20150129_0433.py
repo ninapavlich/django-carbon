@@ -9,10 +9,10 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'clientset', '0001_initial'), (b'clientset', '0002_auto_20150120_0451'), (b'clientset', '0003_auto_20150125_2359'), (b'clientset', '0004_auto_20150126_0058'), (b'clientset', '0005_auto_20150126_0152'), (b'clientset', '0006_auto_20150126_0456'), (b'clientset', '0007_auto_20150129_0107'), (b'clientset', '0008_auto_20150129_0426'), (b'clientset', '0009_auto_20150129_0433')]
+    # replaces = [(b'clientset', '0001_initial'), (b'clientset', '0002_auto_20150120_0451'), (b'clientset', '0003_auto_20150125_2359'), (b'clientset', '0004_auto_20150126_0058'), (b'clientset', '0005_auto_20150126_0152'), (b'clientset', '0006_auto_20150126_0456'), (b'clientset', '0007_auto_20150129_0107'), (b'clientset', '0008_auto_20150129_0426'), (b'clientset', '0009_auto_20150129_0433')]
 
     dependencies = [
-        ('media', '0001_squashed_0007_auto_20150204_0236'),
+        ('media', '0001_squashed_0002_auto_20150204_0239'),
         ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('atoms', '__first__'),

@@ -9,10 +9,10 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'portfolio', '0001_initial'), (b'portfolio', '0002_auto_20150120_0451'), (b'portfolio', '0003_auto_20150125_2359'), (b'portfolio', '0004_auto_20150126_0058'), (b'portfolio', '0005_auto_20150126_0152'), (b'portfolio', '0006_auto_20150126_0456'), (b'portfolio', '0007_auto_20150129_0107'), (b'portfolio', '0008_auto_20150129_0426'), (b'portfolio', '0009_auto_20150129_0433'), (b'portfolio', '0010_auto_20150204_0236')]
+    # replaces = [(b'portfolio', '0001_initial'), (b'portfolio', '0002_auto_20150120_0451'), (b'portfolio', '0003_auto_20150125_2359'), (b'portfolio', '0004_auto_20150126_0058'), (b'portfolio', '0005_auto_20150126_0152'), (b'portfolio', '0006_auto_20150126_0456'), (b'portfolio', '0007_auto_20150129_0107'), (b'portfolio', '0008_auto_20150129_0426'), (b'portfolio', '0009_auto_20150129_0433'), (b'portfolio', '0010_auto_20150204_0236')]
 
     dependencies = [
-        ('media', '0001_squashed_0007_auto_20150204_0236'),
+        ('media', '0001_squashed_0002_auto_20150204_0239'),
         ('global', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

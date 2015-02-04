@@ -8,10 +8,10 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'page', '0001_initial'), (b'page', '0002_menu_menuitem'), (b'page', '0003_auto_20150125_2359'), (b'page', '0004_auto_20150125_2359'), (b'page', '0005_auto_20150126_0456'), (b'page', '0006_auto_20150126_0516'), (b'page', '0007_template_parent'), (b'page', '0008_auto_20150126_1553'), (b'page', '0009_auto_20150126_1615'), (b'page', '0010_auto_20150128_2237'), (b'page', '0011_auto_20150129_0107'), (b'page', '0012_auto_20150129_0426')]
+    # replaces = [(b'page', '0001_initial'), (b'page', '0002_menu_menuitem'), (b'page', '0003_auto_20150125_2359'), (b'page', '0004_auto_20150125_2359'), (b'page', '0005_auto_20150126_0456'), (b'page', '0006_auto_20150126_0516'), (b'page', '0007_template_parent'), (b'page', '0008_auto_20150126_1553'), (b'page', '0009_auto_20150126_1615'), (b'page', '0010_auto_20150128_2237'), (b'page', '0011_auto_20150129_0107'), (b'page', '0012_auto_20150129_0426')]
 
     dependencies = [
-        ('media', '0001_squashed_0007_auto_20150204_0236'),
+        ('media', '0001_squashed_0002_auto_20150204_0239'),
         ('global', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('contenttypes', '0001_initial'),

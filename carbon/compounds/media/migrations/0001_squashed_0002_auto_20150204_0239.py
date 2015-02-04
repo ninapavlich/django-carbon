@@ -9,7 +9,7 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'media', '0001_squashed_0007_auto_20150204_0236'), (b'media', '0002_auto_20150204_0239')]
+    # replaces = [(b'media', '0001_squashed_0007_auto_20150204_0236'), (b'media', '0002_auto_20150204_0239')]
 
     dependencies = [
         ('global', '__first__'),
