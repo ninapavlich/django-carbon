@@ -13,10 +13,13 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 
 class Image(ImageMolecule):
 
-    variants = ('thumbnail','width_1200')
+    variants = ('thumbnail','width_1200', 'width_1200_fill')
 
     width_1200 = ImageSpecField( source='image', format='PNG',
         processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+
+    width_1200_fill = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFill(1200, None)], options={'quality': 90})
 
 
 class Media(MediaMolecule):
@@ -24,10 +27,13 @@ class Media(MediaMolecule):
 
 class SecureImage(SecureImageMolecule):
 
-    variants = ('thumbnail','width_1200')
+    variants = ('thumbnail','width_1200', 'width_1200_fill')
 
     width_1200 = ImageSpecField( source='image', format='PNG',
         processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+
+    width_1200_fill = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFill(1200, None)], options={'quality': 90})
 
 
 class SecureMedia(SecureMediaMolecule):
