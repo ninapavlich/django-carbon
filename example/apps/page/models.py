@@ -8,8 +8,8 @@ from carbon.compounds.page.models import MenuItem as BaseMenuItem
 
 
 class Page(BasePage):
-
-    pass
+	
+	tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
 
 class PageTag(BasePageTag):  

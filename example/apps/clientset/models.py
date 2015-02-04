@@ -10,10 +10,11 @@ class Client(BaseClient):
     pass
 
 class ClientMedia(BaseClientMedia):
-    pass
+    client = models.ForeignKey('clientset.Client')
 
 class ClientSetItem(BaseClientSetItem):
-    pass
+    category = models.ForeignKey('clientset.ClientSetCategory')
+    item = models.ForeignKey('clientset.ClientMedia')
 
 class ClientSetCategory(BaseClientSetCategory):
-    pass
+    item_class = ClientSetItem

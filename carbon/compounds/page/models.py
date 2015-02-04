@@ -13,7 +13,8 @@ from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMo
 
 class Page(HierarchicalAtom, ContentMolecule):
 
-    tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
+    # YOU MUST IMPLEMENT THIS:
+    # tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
     def get_url_path(self):
         path = self.path

@@ -12,21 +12,26 @@ class Client(ContentMolecule, AccessibleAtom):
         abstract = True
 
 class ClientMedia(SecureMediaMolecule):
-    client = models.ForeignKey('clientset.Client')
+
+    # YOU MUST IMPLEMENT THIS:
+    # client = models.ForeignKey('clientset.Client')
 
     class Meta:
         abstract = True
 
 class ClientSetItem(OrderedItemMolecule):
-    category = models.ForeignKey('clientset.ClientSetCategory')
-    item = models.ForeignKey('clientset.ClientMedia')
+
+    # YOU MUST IMPLEMENT THIS:
+    # category = models.ForeignKey('clientset.ClientSetCategory')
+    # item = models.ForeignKey('clientset.ClientMedia')
 
     class Meta:
         abstract = True
 
 
 class ClientSetCategory(CategoryMolecule):
-    item_class = ClientSetItem
+    # YOU MUST IMPLEMENT THIS:
+    # item_class = ClientSetItem
     class Meta:
         abstract = True
         verbose_name_plural = 'Client Set Categories'        

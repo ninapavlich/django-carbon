@@ -21,4 +21,4 @@ class Organization(BaseOrganization):
 
 class OrganizationMember(BaseOrganizationMember):
 
-    pass
+    organization = models.ForeignKey('Organization', blank=True, null=True)

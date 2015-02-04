@@ -44,8 +44,9 @@ class OrganizationMember(VersionableAtom, AccessAtom):
     class Meta:
         abstract = True
 
-    organization = models.ForeignKey('Organization', 
-        blank=True, null=True)
+    # YOU MUST IMPLEMENT THIS:
+    # organization = models.ForeignKey('Organization', 
+    #     blank=True, null=True)
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True)
