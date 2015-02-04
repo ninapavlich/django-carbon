@@ -19,7 +19,7 @@ class Image(ImageMolecule):
         processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
 
     width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFill(1200, None)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None)], options={'quality': 90})
 
 
 class Media(MediaMolecule):
@@ -33,7 +33,7 @@ class SecureImage(SecureImageMolecule):
         processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
 
     width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFill(1200, None)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None)], options={'quality': 90})
 
 
 class SecureMedia(SecureMediaMolecule):
