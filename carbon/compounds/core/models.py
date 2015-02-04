@@ -11,6 +11,9 @@ from carbon.atoms.models.content import TemplateMolecule
 
 class Template(TemplateMolecule):
 
+    class Meta:
+        abstract = True
+
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains",)

@@ -5,12 +5,16 @@ from django.utils.translation import ugettext_lazy as _
 from carbon.atoms.models.content import *
 
 class Tag(TagMolecule):
-    pass
+    class Meta:
+        abstract = True
 
 class Category(CategoryMolecule):
-    pass
+    class Meta:
+        abstract = True
 
 class Article(ContentMolecule):
+    class Meta:
+        abstract = True
   
     tags = models.ManyToManyField('blog.Tag', blank=True, null=True)
     category = models.ForeignKey('blog.Category', blank=True, null=True, 
