@@ -301,3 +301,5 @@ class AddressibleAtom(models.Model):
         #If path has changed, notify children
         if path_has_changed:
             [p.save() for p in self.get_children()]
+
+    

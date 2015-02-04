@@ -6,9 +6,9 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 
-from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom
-from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMolecule
-
+from carbon.utils.slugify import unique_slugify
+from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom, AddressibleAtom
+from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMolecule, PublishableAtom
 
 
 class Page(HierarchicalAtom, ContentMolecule):
@@ -47,21 +47,8 @@ class PageTag(TagMolecule):
         return [child for child in all_children if child.is_published()]
         
 
-class Menu(VersionableAtom):
 
-    help = {
-        'title': "",
-        'slug': "",
-    }
-
-    title = models.CharField(_('Title'), max_length=255, 
-        help_text=help['title'])
-
-    slug = models.CharField(_('Slug'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['slug'])
-
-
-class MenuItem(VersionableAtom):
+class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom):
 
     help = {
         'title': "",
@@ -82,12 +69,7 @@ class MenuItem(VersionableAtom):
         (TOP, _(TOP))        
     )
 
-    parent = models.ForeignKey('page.Menu')
-
-    title = models.CharField(_('Title'), max_length=255, help_text=help['title'])
-
-    order = models.IntegerField(default=0, help_text=help['order'])
-
+    
     #Point to an object
     try:
         content_type = models.ForeignKey(ContentType, 
@@ -98,9 +80,6 @@ class MenuItem(VersionableAtom):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    #Point to an explicit path
-    path = models.CharField(_('Path'), max_length=255, help_text=help['path'], 
-        blank=True, null=True)
 
     target = models.CharField(_('Target'), max_length=255, help_text=help['target'], 
         choices=TARGET_CHOICES, default=SELF)
@@ -110,7 +89,17 @@ class MenuItem(VersionableAtom):
             if hasattr(self.content_object, 'get_absolute_url'):
                 return self.content_object.get_absolute_url()
         
-        return self.path
+        return self.path_override
 
     def get_link(self):
         '<a href="%s" target="%s">%s</a>'%(self.get_path, self.target, self.title)
+
+
+    def save(self, *args, **kwargs):
+
+        #Published by default
+        if not self.pk:
+            self.publication_status = PublishableAtom.PUBLISHED
+
+        super(MenuItem, self).save(*args, **kwargs)
+    

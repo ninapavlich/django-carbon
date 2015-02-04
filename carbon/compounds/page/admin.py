@@ -75,20 +75,27 @@ class MenuItemInline(admin.TabularInline):
         'fk': [],
     }
 
-    fields = ('order','title', 'content_type', 'object_id', 'path', 'target')
+
+    fields = ('order','title',  'content_type', 'object_id', 'path_override', 'target', 'publication_status', 'publish_on_date', 'expire_on_date')
+
+
     sortable_field_name = 'order'
     extra = 0
 
 
-class MenuAdmin(BaseVersionableAdmin):
+class MenuItemAdmin(BaseVersionableAdmin):
 
-    prepopulated_fields = {"slug": ("title",)}
+    
     core_fields = (
         'title',
         'slug',
+        'publication_status'
     )
+    prepopulated_fields = {"slug": ("title",)}
+    ordering = ("hierarchy",)
 
-    list_display = ( "title",)
+    list_display = ( "admin_hierarchy", "title",'publication_status')
+    list_display_links = ('title',)
     fieldsets = (
         ("Main", {
             'fields': core_fields,
@@ -99,10 +106,11 @@ class MenuAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
+
     inlines = [MenuItemInline]
 
 
 
 admin.site.register(Page, PageAdmin)
 admin.site.register(PageTag, PageTagAdmin)
-admin.site.register(Menu, MenuAdmin)
+admin.site.register(MenuItem, MenuItemAdmin)
