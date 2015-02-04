@@ -71,7 +71,7 @@ INSTALLED_APPS = (
 
     'carbon.atoms',
 
-    'carbon.compounds.global',
+    'carbon.compounds.core',
     'carbon.compounds.account',
     'carbon.compounds.media',
     'carbon.compounds.page',

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('media', '0001_squashed_0002_auto_20150204_0239'),
-        ('global', '__first__'),
+        ('core', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('contenttypes', '0001_initial'),
     ]
@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
                 ('social_share_image', models.ForeignKey(related_name='page_pagetag_social_images', on_delete=django.db.models.deletion.SET_NULL, blank=True, to='media.Image', help_text=b'Standards for the social share image vary, but an image at least 300x200px should work well.', null=True)),
                 ('expire_on_date', models.DateTimeField(help_text=b"Object state will be set to 'Expired' on this date.", null=True, verbose_name='Expire on Date', blank=True)),
                 ('publish_on_date', models.DateTimeField(help_text=b"Object state will be set to 'Published' on this date.", null=True, verbose_name='Publish on Date', blank=True)),
-                ('template', models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True)),
+                ('template', models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True)),
             ],
             options={
                 'verbose_name_plural': 'Page Tags',
@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='page',
             name='template',
-            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            field=models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True),
             preserve_default=True,
         ),
         migrations.CreateModel(

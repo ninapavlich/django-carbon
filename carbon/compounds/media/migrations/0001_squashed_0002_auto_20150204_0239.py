@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     # replaces = [(b'media', '0001_squashed_0007_auto_20150204_0236'), (b'media', '0002_auto_20150204_0239')]
 
     dependencies = [
-        ('global', '__first__'),
+        ('core', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('atoms', '__first__'),
     ]
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 ('created_by', models.ForeignKey(related_name='media_image_created_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('modified_by', models.ForeignKey(related_name='media_image_modified_by', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('allow_overwrite', models.BooleanField(default=False, help_text=b"Allow file to write over an existing file if the name             is the same. If not, we'll automatically add a numerical suffix to             ensure file doesn't override existing files.", verbose_name='Allow Overwrite')),
-                ('template', models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True)),
+                ('template', models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True)),
             ],
             options={
                 'abstract': False,
@@ -163,7 +163,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='media',
             name='template',
-            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            field=models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True),
             preserve_default=True,
         ),
         migrations.RemoveField(

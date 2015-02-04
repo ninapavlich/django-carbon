@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('atoms', '__first__'),
-        ('global', '__first__'),
+        ('core', '__first__'),
     ]
 
     operations = [
@@ -307,13 +307,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='client',
             name='template',
-            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            field=models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='clientsetcategory',
             name='template',
-            field=models.ForeignKey(blank=True, to='global.Template', help_text=b'Template for view', null=True),
+            field=models.ForeignKey(blank=True, to='core.Template', help_text=b'Template for view', null=True),
             preserve_default=True,
         ),
         migrations.AlterField(
