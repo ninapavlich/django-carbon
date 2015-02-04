@@ -111,6 +111,6 @@ class MenuItemAdmin(BaseVersionableAdmin):
 
 
 
-admin.site.register(Page, PageAdmin)
-admin.site.register(PageTag, PageTagAdmin)
-admin.site.register(MenuItem, MenuItemAdmin)
+# admin.site.register(Page, PageAdmin)
+# admin.site.register(PageTag, PageTagAdmin)
+# admin.site.register(MenuItem, MenuItemAdmin)

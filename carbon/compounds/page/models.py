@@ -32,6 +32,9 @@ class Page(HierarchicalAtom, ContentMolecule):
     def get_absolute_url(self):
         return reverse('pages_page', kwargs = {'path': self.get_url_path() })   
 
+    class Meta:
+        abstract = True
+
 
 
 class PageTag(TagMolecule):  
@@ -45,6 +48,9 @@ class PageTag(TagMolecule):
     def get_children(self):
         all_children = Page.objects.filter(tags__in=[self])
         return [child for child in all_children if child.is_published()]
+
+    class Meta:
+        abstract = True
         
 
 
@@ -102,4 +108,7 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
             self.publication_status = PublishableAtom.PUBLISHED
 
         super(MenuItem, self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
     

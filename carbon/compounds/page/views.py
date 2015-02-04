@@ -7,12 +7,13 @@ from .models import *
 
 class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
 
-    model = Page
-
+    # model = Page
+    pass
     
 
 
 
 class PageTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
-    model = PageTag
+    # model = PageTag
+    pass
