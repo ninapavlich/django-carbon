@@ -13,13 +13,16 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 
 class Image(ImageMolecule):
 
-    variants = ('thumbnail','width_1200', 'width_1200_fill')
+    variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
+
+    square_600 = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFill(600, 600)], options={'quality': 85})
 
     width_1200 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
 
     width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None)], options={'quality': 85})
 
 
 class Media(MediaMolecule):
@@ -27,13 +30,16 @@ class Media(MediaMolecule):
 
 class SecureImage(SecureImageMolecule):
 
-    variants = ('thumbnail','width_1200', 'width_1200_fill')
+    variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
+
+    square_600 = ImageSpecField( source='image', format='PNG',
+        processors=[ResizeToFill(600, 600)], options={'quality': 85})
 
     width_1200 = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None, False)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
 
     width_1200_fill = ImageSpecField( source='image', format='PNG',
-        processors=[ResizeToFit(1200, None)], options={'quality': 90})
+        processors=[ResizeToFit(1200, None)], options={'quality': 85})
 
 
 class SecureMedia(SecureMediaMolecule):
