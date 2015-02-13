@@ -13,7 +13,7 @@ class ProjectCategoryItemAdminInline(admin.TabularInline):
     def edit_url(self, obj):
         if obj.item:
             object_type = type(obj.item).__name__            
-            url = reverse('admin:%s_%s_change' %(obj.item._meta.app_label,  obj.item._meta.module_name),  args=[obj.item.id] )
+            url = reverse('admin:%s_%s_change' %(obj.item._meta.app_label,  obj.item._meta.model_name),  args=[obj.item.id] )
             return u"<a href='%s' >Edit project</a>"%(url)
     edit_url.allow_tags = True
 
@@ -35,7 +35,7 @@ class ProjectCategoryItemInProjectAdminInline(admin.TabularInline):
     def edit_url(self, obj):
         if obj.category:
             object_type = type(obj.category).__name__            
-            url = reverse('admin:%s_%s_change' %(obj.category._meta.app_label,  obj.category._meta.module_name),  args=[obj.category.id] )
+            url = reverse('admin:%s_%s_change' %(obj.category._meta.app_label,  obj.category._meta.model_name),  args=[obj.category.id] )
             return u"<a href='%s' >Edit Category</a>"%(url)
     edit_url.allow_tags = True
 

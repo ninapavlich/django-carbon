@@ -11,10 +11,14 @@ class Page(BasePage):
 	
 	tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
+	def get_absolute_url(self):
+        return reverse('pages_page', kwargs = {'path': self.get_url_path() })  
 
 class PageTag(BasePageTag):  
 
-    pass
+	def get_absolute_url(self):
+        return reverse('pages_tag', kwargs = {'path': self.get_url_path() })   
+    
         
 
 class MenuItem(BaseMenuItem):

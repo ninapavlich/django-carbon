@@ -91,7 +91,7 @@ def url_to_edit_object(object):
         if object_type == 'SearchResult':
             object = object.object
         
-        url = reverse('admin:%s_%s_change' %(object._meta.app_label,  object._meta.module_name),  args=[object.id] )
+        url = reverse('admin:%s_%s_change' %(object._meta.app_label,  object._meta.model_name),  args=[object.id] )
         return url
     except:
         return None

@@ -83,10 +83,10 @@ class HasChildrenView(object):
         if not self.object:
             self.object = self.get_object()
 
-        try:
-            self.object_list = self.object.get_children()
-        except:
-            self.object_list = None      
+        # try:
+        self.object_list = self.object.get_children()
+        #except:
+        #    self.object_list = None      
 
         return super(HasChildrenView, self).get(request, *args, **kwargs)
 

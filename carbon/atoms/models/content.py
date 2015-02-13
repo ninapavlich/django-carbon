@@ -10,6 +10,8 @@ from django.template.loaders.filesystem import Loader as FileSystemLoader
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
 
+from carbon.atoms.managers.content import PublishableManager
+
 from .abstract import *
 
 
@@ -33,6 +35,8 @@ class PublishableAtom(models.Model):
         # (EXPIRED, _("Expired")),
         (UNPUBLISHED, _("Unpublished")),
     )
+
+    objects = PublishableManager()
 
     publication_date = models.DateTimeField(_('Publication Date'), blank=True, null=True)
     published_by = models.ForeignKey(settings.AUTH_USER_MODEL, 
@@ -306,9 +310,18 @@ class ModerationAtom(models.Model):
 
 
 class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
+    #Basically just a tag but with hierarchy
+    item_class = None
+    tag_property_name = 'tags'
 
     class Meta:
         abstract = True      
+
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        
+        return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
     @staticmethod
     def autocomplete_search_fields():
@@ -317,6 +330,7 @@ class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, So
 class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
     #Basically just a tag but with hierarchy
     item_class = None
+    category_property_name = 'category'
 
     class Meta:
         abstract = True
@@ -325,20 +339,20 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
         if not self.item_class:
             raise NotImplementedError('Class should specify an item_class value')
         
-        return self.item_class.objects.filter(category=self).order_by('order')
+        return self.item_class.objects.published().filter(**{ self.category_property_name: self }).order_by('order')
 
     def get_children(self):
         items = self.get_items()
         return [item.item for item in items if item.item.is_published()]
 
     def get_next_item(self, item):
-        items = self.item_class.objects.filter(category=self,order__gte=item.order).order_by('order')
+        items = self.item_class.objects.published().filter(**{ self.category_property_name: self }).filter(order__gte=item.order).order_by('order')
         if len(items) > 0:
             return items[0].item
         return None
 
     def get_previous_item(self, item):
-        items = self.item_class.objects.filter(category=self,order__lte=item.order).order_by('-order')
+        items = self.item_class.objects.published().filter(**{ self.category_property_name: self }).filter(order__lte=item.order).order_by('-order')
         if len(items) > 0:
             return items[0].item
         return None
