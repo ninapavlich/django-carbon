@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import django.http
 import django.template
+from django.conf import settings
 
 from django.utils.cache import patch_vary_headers
 
@@ -20,7 +21,7 @@ class Django403Middleware(object):
       try:
         return views.access_denied(request)
       except django.template.TemplateDoesNotExist, e:
-        return views.fallback_403(request)
+        return fallback_403(request)
 
     return response
 
@@ -97,4 +98,77 @@ class DoNotTrackMiddleware(object):
         """
         patch_vary_headers(response, ('DNT',))
 
+        return response
+
+class SiteMiddlewear(object):
+    def process_request(self, request):
+        try:
+
+            request.site = Site.objects.get_current()
+        except:
+            request.site = {
+                'domain': '',
+                'name': settings.GRAPPELLI_ADMIN_TITLE,
+            }
+
+
+
+class CustomSettingsMiddlewear(object):
+    def process_request(self, request):
+
+        try:
+
+            all_settings = settings.CUSTOM_SETTINGS
+            for setting in all_settings:
+                if hasattr(settings, setting):
+                    value = getattr(settings, setting)
+                    setattr(request, setting, value)
+                    #print "Added %s to request %s"%(setting, getattr(request, setting))
+        except:
+            pass
+
+class ImpersonateMiddleware(object):
+    def process_request(self, request):
+        request.impersonating = None
+        request.original_user = None
+        
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated() and  request.user.is_superuser and "__impersonate" in request.GET:
+            request.session['impersonate_id'] = int(request.GET["__impersonate"])
+        elif "__unimpersonate" in request.GET:
+            if "impersonate_id" in request.session:
+                del request.session['impersonate_id']
+
+            if '__unimpersonate' in request.GET:
+                new_query = request.GET.copy()
+                del new_query['__unimpersonate']
+                new_path = "%s?%s"%(request.path, new_query.urlencode())
+                return HttpResponseRedirect(new_path)
+        
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated() and request.user.is_superuser and 'impersonate_id' in request.session:
+            try:
+                UserModel = get_user_model()
+                user = UserModel._default_manager.get(pk=request.session['impersonate_id'])
+                request.original_user = request.user
+                request.impersonating = request.user = user   
+                
+
+                if '__impersonate' in request.GET:
+                    new_query = request.GET.copy()
+                    del new_query['__impersonate']
+                    new_path = "%s?%s"%(request.path, new_query.urlencode())
+                    return HttpResponseRedirect(new_path)
+
+
+            except:
+                pass
+
+
+class AdminLoggedInCookieMiddlewear(object):
+    def process_response(self, request, response):
+
+        is_staff = hasattr(request, 'user') and request.user and request.user.is_authenticated() and request.user.is_staff
+        if is_staff and not request.COOKIES.get('admin_logged_in'):
+            response.set_cookie("admin_logged_in", '1')
+        elif not is_staff and request.COOKIES.get('admin_logged_in'):
+            response.delete_cookie("admin_logged_in")
         return response
