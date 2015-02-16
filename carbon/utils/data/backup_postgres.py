@@ -25,23 +25,24 @@ def _setup(backup_dir):
 def _backup_name(prefix="database_backup"):
 
     now = datetime.now()
-    now_string ="%s-%s-%s" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2))
+    now_string ="%s-%s-%s_%s-%s" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), str(now.hour).zfill(2), str(now.minute).zfill(2))
     file_name = "%s_%s.sql" % (prefix, now_string)
 
     logging.debug("Setting backup name for as %s" % (file_name))
     return file_name
 
 def _run_backup(file_name, backup_dir, database_settings="default"):
+    
     user = settings.DATABASES[database_settings]['USER']
     name = settings.DATABASES[database_settings]['NAME']
-    port = '5432'#settings.DATABASES[database_settings]['PORT']
+    password = settings.DATABASES[database_settings]['PASSWORD']
+    port = settings.DATABASES[database_settings]['PORT'] or 5432
     host = settings.DATABASES[database_settings]['HOST']
     
-    #mysqldump -P 3310 -h 127.0.0.1 -u mysql_user -p database_name table_name
-
-    cmd = "%(pgdump)s -P %(port)s -h %(host)s -u %(user)s %(database)s > %(log_dir)s/%(file)s" % {
+    #export PGPASSWORD=db_password; pg_dump -h 127.0.0.1 -U db_username db_name > path/to/file.sql 
+    cmd = "export PGPASSWORD=%(password)s; %(pgdump)s -h %(host)s -U %(user)s %(database)s > %(log_dir)s/%(file)s" % {
+        'password' : password,
         'pgdump' : PG_CMD,
-        'port' : port,
         'host' : host,
         'user' : user,
         'database' : name,
@@ -85,10 +86,9 @@ def _zip_backup(file_name, backup_dir):
     else:
         return None
 
-def _upload_backup(file_name):
+def _upload_backup(bucket_name, file_name, dest_dir):
     base_name = os.path.basename(file_name)
-    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-    
+        
     conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(bucket_name)
 
@@ -101,17 +101,21 @@ def _upload_backup(file_name):
 
     from boto.s3.key import Key
     k = Key(bucket)
-    k.key = u"%s%s"%(settings.AWS_DB_BACKUP_PATH, base_name)
+    k.key = u"%s%s"%(dest_dir, base_name)
+    print 'KEY %s'%(k.key)
     k.set_contents_from_filename(file_name, cb=percent_cb, num_cb=10)
 
-def backup_database(database_settings="default", prefix="database_backup", backup_dir="/tmp"):
-    _setup(backup_dir)
+    #Remove tmp file
+    os.remove(file_name)
+
+def backup_database(bucket_name, database_settings="default", dest_dir="database/", prefix="database_backup", tmp_dir="/tmp"):
+    _setup(tmp_dir)
     file_name = _backup_name(prefix)
     
-    _run_backup(file_name, backup_dir, database_settings)
-    zipped_file = _zip_backup(file_name, backup_dir)
+    _run_backup(file_name, tmp_dir, database_settings)
+    zipped_file = _zip_backup(file_name, tmp_dir)
 
-    _upload_backup(zipped_file)
+    _upload_backup(bucket_name, zipped_file, dest_dir)
         
     
 if __name__ == '__main__':
