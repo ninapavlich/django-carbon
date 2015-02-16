@@ -1,7 +1,10 @@
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
+from django.utils.translation import ugettext as _
 from django.views.generic import DetailView
+from django.views.generic.base import RedirectView
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
@@ -23,8 +26,7 @@ class PageTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChi
     # model = PageTag
     pass
 
-
-
+        
 
 def admin_import_links( request ):    
     

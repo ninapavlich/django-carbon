@@ -119,12 +119,22 @@ class LegacyURLRefererInline(admin.TabularInline):
 
 class LegacyURLAdmin(BaseVersionableAdmin):
 
+    def visit_old_link(self, obj):
+        return "<a href='%s%s' target='_blank'>Visit Old Link</a>"%(settings.LEGACY_URL_ARCHIVE_DOMAIN, obj.url)
+    visit_old_link.allow_tags = True
+
+
+    def test_redirect(self, obj):
+        return "<a href='%s' target='_blank'>Test Redirect</a>"%(obj.url)
+    test_redirect.allow_tags = True
+
     
     core_fields = (
         ('url'),
         ( 'content_type', 'object_id',),
         ('path_override'),
         ('path'),
+        ('visit_old_link','test_redirect')
     )
     
 
@@ -144,7 +154,7 @@ class LegacyURLAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path',)
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','visit_old_link','test_redirect')
 
     # inlines = [LegacyURLRefererInline]    
 
