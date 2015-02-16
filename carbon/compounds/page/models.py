@@ -64,7 +64,8 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
         'slug': "",
         'path': "Override path for this menu item",
         'target': "",
-        'order':""
+        'order':"",
+        'css_classes':"Extra css classes to add to "
     }
 
     BLANK = '_blank'
@@ -93,6 +94,9 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
     target = models.CharField(_('Target'), max_length=255, help_text=help['target'], 
         choices=TARGET_CHOICES, default=SELF)
 
+    css_classes = models.CharField(_('CSS Classes'), max_length=255, help_text=help['target'], 
+        choices=TARGET_CHOICES, default=SELF)
+
     def get_path(self):
         if self.content_object:
             if hasattr(self.content_object, 'get_absolute_url'):
@@ -101,7 +105,7 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
         return self.path_override
 
     def get_link(self):
-        '<a href="%s" target="%s">%s</a>'%(self.get_path, self.target, self.title)
+        '<a href="%s" target="%s" class="%s">%s</a>'%(self.get_path, self.target, self.css_classes, self.title)
 
 
     def save(self, *args, **kwargs):

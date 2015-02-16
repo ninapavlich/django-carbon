@@ -11,7 +11,7 @@ setup(name = 'django_carbon',
       zip_safe = False,
       include_package_data=True,
       install_requires = ['setuptools', 'Django', 'boto', 'django-ace', 'django-appconf', 'django-ckeditor', 'django-debug-toolbar', 'django-extensions',
-      'django-grappelli', 'django-imagekit', 'django-localflavor','pilkit', 'django-storages', 'six', 'sqlparse', 'wsgiref'],
+      'django-grappelli', 'django-imagekit', 'django-localflavor', 'django-reversion', 'pilkit', 'django-storages', 'six', 'sqlparse', 'wsgiref'],
       classifiers=[
             'Development Status :: 1 - Planning',
             'Environment :: Web Environment',

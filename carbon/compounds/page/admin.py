@@ -69,7 +69,7 @@ class PageTagAdmin(BaseTagAdmin):
 
 
 class MenuItemInline(admin.TabularInline):
-    model = MenuItem
+    #model = MenuItem
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': [],
@@ -87,9 +87,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
 
     
     core_fields = (
-        'title',
-        'slug',
-        'publication_status'
+        ('title','slug'),
     )
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("hierarchy",)
@@ -107,7 +105,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
         })
     )
 
-    inlines = [MenuItemInline]
+    # inlines = [MenuItemInline]
 
 
 

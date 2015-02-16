@@ -1,12 +1,12 @@
 from django.contrib import admin
-
+import reversion
 
 from carbon.atoms.models.content import PublishableAtom
 
 
 
 
-class BaseVersionableAdmin(admin.ModelAdmin):
+class BaseVersionableAdmin(reversion.VersionAdmin):
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
@@ -47,7 +47,7 @@ class BaseVersionableAdmin(admin.ModelAdmin):
 
 
 
-class BaseContentAdmin(admin.ModelAdmin):
+class BaseContentAdmin(reversion.VersionAdmin):
 
     def admin_hierarchy(self, obj):
         return obj.admin_hierarchy
@@ -81,12 +81,12 @@ class BaseContentAdmin(admin.ModelAdmin):
 
     core_fields = (
         ('title','slug'),
+        ('template', 'publication_status'),
         'content',
         ('image_preview','image')
     )
 
     publication_fields = (
-        ('publication_status'),
         ('publication_date', 'published_by'),
         ('publish_on_date', 'expire_on_date'),
         ('authors'),
@@ -97,7 +97,6 @@ class BaseContentAdmin(admin.ModelAdmin):
     )
    
     path_fields = (
-        ('template'),
         ('path', 'uuid'),
         ('path_generated', 'path_override'),
         ('temporary_redirect', 'permanent_redirect'),
