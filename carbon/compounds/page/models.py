@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
+from bs4 import BeautifulSoup
 
 from carbon.utils.slugify import unique_slugify
 from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom, AddressibleAtom
@@ -160,29 +161,7 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    @staticmethod
-    def autocomplete_search_fields():
-        return ("id__iexact", "url__icontains", "title__icontains",)
-
-    @staticmethod
-    def create_legacy_url(target_url, target_name, referer_url=None, referer_title=None):
-        link, link_created = LegacyURL.objects.get_or_create(url=target_url)
-
-        if link_created or target_url != target_name:
-            link.title = target_name
-            link.save()
-
-
-        if referer_url:
-            referer_link, referer_created = LegacyURLReferer.objects.get_or_create(legacy_url=link,referer_url=referer_url)
-            if referer_created:
-                if settings.DEBUG:
-                    print "Create new referer %s %s to %s"%(referer_title, referer_url, target_url)
-                referer_link.referer_title = referer_title
-                referer_link.save()
-
-        return link
-
+    
     class Meta:
         abstract = True        
 
@@ -212,3 +191,130 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
                 print "ERROR RETRIEVING ABSOLUTE URL From %s"%(self.content_object)         
         
         return None
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "url__icontains", "title__icontains",)
+
+    @classmethod
+    def import_links(file, request=None):
+
+        try:
+            ignore_files = settings.LEGACY_URL_IGNORE_LIST
+            legacy_domain = settings.LEGACY_URL_ARCHIVE_DOMAIN
+            legacy_domain_ssl = settings.LEGACY_URL_ARCHIVE_DOMAIN.replace("http://", "https://")
+        except:
+            ignore_files = []
+            legacy_domain = None
+            legacy_domain_ssl = None
+        
+        if legacy_domain or legacy_domain_ssl:
+            try:
+                
+
+                
+                items_found = 0
+
+                ctr = 0
+                for row in csv.reader(file.read().splitlines()):
+
+                    #dont read from first row -- which contains column titles
+                    if ctr > 0:
+
+                        status_check    = row[0].lower()
+                        url             = row[1]
+                        referer         = row[2]
+                        
+                        if legacy_domain in url or legacy_domain_ssl in url:
+                            
+                            is_allowed = True
+                            for piece in ignore_files:
+                                if piece in url:
+                                    is_allowed = False
+
+                            if is_allowed:
+
+                                items_found     += 1
+                                                        
+                                http = httplib2.Http()
+                                status, response = http.request(url)
+                                soup = BeautifulSoup(response)  
+                                page_title = soup.title.string.strip()
+                                print "%s (%s)"%(url, page_title)
+                                legacy_link = LegacyURL.create_legacy_url(url, page_title)
+                                
+
+                    ctr += 1
+
+                return '%s links parsed' % (items_found)
+            except Exception, e:
+                return "There was an error reading the .csv file: %s"%(e)
+
+    @classmethod
+    def create_legacy_url(cls, target_url, target_name, referer_url=None, referer_title=None):
+        link, link_created = cls.objects.get_or_create(url=target_url)
+
+        if link_created or target_url != target_name:
+            link.title = target_name
+            link.save()
+
+
+        if referer_url:
+            referer_link, referer_created = cls.objects.get_or_create(legacy_url=link,referer_url=referer_url)
+            if referer_created:
+                if settings.DEBUG:
+                    print "Create new referer %s %s to %s"%(referer_title, referer_url, target_url)
+                referer_link.referer_title = referer_title
+                referer_link.save()
+
+        return link
+
+    @classmethod
+    def create_legacy_url(cls, url, title=None):
+
+        path = cls.clean_path(url)
+
+        if not title:
+            title = path
+
+        if path:
+            legacy_link = cls.create_legacy_url(path, title)
+
+            return legacy_link
+
+        return None
+
+    @classmethod
+    def add_referer(cls, referer_url, referer_title, target_url):
+
+        path = cls.clean_path(target_url)
+        if path:
+            legacy_link = cls.create_legacy_url(path, path, referer_url, referer_title)
+            return legacy_link
+        return None
+
+    @classmethod
+    def clean_path(cls, url):
+
+        legacy_domain = settings.LEGACY_URL_ARCHIVE_DOMAIN
+        legacy_domain_ssl = settings.LEGACY_URL_ARCHIVE_DOMAIN.replace("http://", "https://")
+
+        path = url
+        path = path.replace(legacy_domain, '')
+        path = path.replace(legacy_domain_ssl, '')
+
+        if 'http' in path:
+            #print "Must be a different domain %s"%(path)
+            return None
+
+        if path == '' or path == None or path == '#':
+            return None
+
+        #Make sure path includes starting /
+        if path.startswith('/') == False:
+            path = '/%s'%path
+
+        return path
+
+
+    
