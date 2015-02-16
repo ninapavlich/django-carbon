@@ -108,6 +108,47 @@ class MenuItemAdmin(BaseVersionableAdmin):
     # inlines = [MenuItemInline]
 
 
+class LegacyURLRefererInline(admin.TabularInline):
+    #model = LegacyURLReferer
+
+    fields = ('referer_title','referer_url', 'created_date')
+    extra = 0
+
+    readonly_fields = BaseVersionableAdmin.readonly_fields
+
+
+class LegacyURLAdmin(BaseVersionableAdmin):
+
+    
+    core_fields = (
+        ('url'),
+        ( 'content_type', 'object_id',),
+        ('path_override'),
+        ('path'),
+    )
+    
+
+    list_display = ( "url", "path",'created_date')
+    autocomplete_lookup_fields = {
+        'generic': [['content_type', 'object_id']],
+        'fk': [],
+    }
+
+    fieldsets = (
+        ("Main", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': BaseVersionableAdmin.meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path',)
+
+    # inlines = [LegacyURLRefererInline]    
+
+
 
 # admin.site.register(Page, PageAdmin)
 # admin.site.register(PageTag, PageTagAdmin)

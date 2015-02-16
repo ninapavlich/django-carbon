@@ -245,6 +245,11 @@ class AddressibleAtom(models.Model):
         unique_slugify(self, self.title)
         return self.slug
 
+    def generate_path(self):
+        if self.path_override != None and self.path_override != '':
+            return  self.path_override
+        return self.path_generated
+
     def get_absolute_url(self):
         return self.path
     
@@ -283,11 +288,8 @@ class AddressibleAtom(models.Model):
             
         self.path_generated = self.build_path()
 
-
-        if self.path_override != None and self.path_override != '':
-            self.path = self.path_override
-        else:
-            self.path = self.path_generated
+        
+        self.path = self.generate_path()
         self.hierarchy = self.build_hierarchy_path()
 
         path_has_changed = False

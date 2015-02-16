@@ -10,10 +10,9 @@ from carbon.utils.slugify import unique_slugify
 from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom, AddressibleAtom
 from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMolecule, PublishableAtom
 
-
 class Page(HierarchicalAtom, ContentMolecule):
 
-    # YOU MUST IMPLEMENT THIS:
+    # YOU GOTTA IMPLEMENT THIS:
     # tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
     def get_url_path(self):
@@ -30,7 +29,7 @@ class Page(HierarchicalAtom, ContentMolecule):
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
 
-    # YOU MUST IMPLEMENT THIS:
+    # YOU GOTTA IMPLEMENT THIS:
     # def get_absolute_url(self):
     #     return reverse('pages_page', kwargs = {'path': self.get_url_path() })   
 
@@ -44,7 +43,7 @@ class PageTag(TagMolecule):
     class Meta:
         verbose_name_plural = 'Page Tags'
 
-    # YOU MUST IMPLEMENT THIS:
+    # YOU GOTTA IMPLEMENT THIS:
     # def get_absolute_url(self):
     #     return reverse('pages_tag', kwargs = {'path': self.get_url_path() })   
 
@@ -119,3 +118,97 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
     class Meta:
         abstract = True
     
+
+
+class LegacyURLReferer(VersionableAtom):
+
+    help = {
+        'legacy_url': "",
+        'referer_title': "",
+        'referer_url': "",
+    }
+
+   
+    #legacy_url = models.ForeignKey('LegacyURL')
+
+    referer_title = models.CharField(_('Referer Title'), max_length=255, 
+        help_text=help['referer_title'], blank=True, null=True)
+
+    referer_url = models.CharField(_('Referer URL'), max_length=255, 
+        help_text=help['referer_url'], blank=True, null=True)
+
+
+    class Meta:
+        abstract = True
+
+class LegacyURL(VersionableAtom, AddressibleAtom):
+
+    help = {
+        'url': "",
+    }
+
+    url = models.CharField(_("URL"), max_length = 255, blank = False,
+        db_index=True)
+   
+    #Point to an object
+    try:
+        content_type = models.ForeignKey(ContentType, 
+            limit_choices_to={"model__in": settings.LEGACY_URL_CHOICES}, null=True, blank=True)
+    except:
+        content_type = models.ForeignKey(ContentType, null=True, blank=True)
+
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "url__icontains", "title__icontains",)
+
+    @staticmethod
+    def create_legacy_url(target_url, target_name, referer_url=None, referer_title=None):
+        link, link_created = LegacyURL.objects.get_or_create(url=target_url)
+
+        if link_created or target_url != target_name:
+            link.title = target_name
+            link.save()
+
+
+        if referer_url:
+            referer_link, referer_created = LegacyURLReferer.objects.get_or_create(legacy_url=link,referer_url=referer_url)
+            if referer_created:
+                if settings.DEBUG:
+                    print "Create new referer %s %s to %s"%(referer_title, referer_url, target_url)
+                referer_link.referer_title = referer_title
+                referer_link.save()
+
+        return link
+
+    class Meta:
+        abstract = True        
+
+    def get_children(self):
+        return []
+
+    @property
+    def has_redirect_url(self):
+        url = self.get_redirect_url()
+        if url:
+            return True
+        return False
+
+    def get_redirect_url(self):
+        if self.path:
+            return self.path
+        return self.compute_get_redirect_url()  
+
+    def generate_path(self):
+        if self.path_override:
+            return self.path_override
+        if self.content_object:
+            try:
+                url = self.content_object.get_absolute_url()
+                return url
+            except:
+                print "ERROR RETRIEVING ABSOLUTE URL From %s"%(self.content_object)         
+        
+        return None
