@@ -189,7 +189,7 @@ class AddressibleAtom(models.Model):
 
         if has_parent and self.parent:
             parent_path = self.parent.path
-            if not parent_path.endswith('/'):
+            if parent_path and not parent_path.endswith('/'):
                 parent_path = "%s/"%(parent_path)
 
             return "%s%s/" % (parent_path, self.slug)

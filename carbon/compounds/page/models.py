@@ -97,12 +97,13 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
     css_classes = models.CharField(_('CSS Classes'), max_length=255, help_text=help['target'], 
         choices=TARGET_CHOICES, default=SELF)
 
-    def get_path(self):
+    def generate_path(self):
         if self.content_object:
             if hasattr(self.content_object, 'get_absolute_url'):
                 return self.content_object.get_absolute_url()
         
         return self.path_override
+
 
     def get_link(self):
         '<a href="%s" target="%s" class="%s">%s</a>'%(self.get_path, self.target, self.css_classes, self.title)

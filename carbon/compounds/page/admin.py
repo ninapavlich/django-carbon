@@ -76,8 +76,8 @@ class MenuItemInline(admin.TabularInline):
     }
 
 
-    fields = ('order','title',  'content_type', 'object_id', 'path_override', 'target', 'publication_status', 'publish_on_date', 'expire_on_date')
-
+    fields = ('order', 'title',  'content_type', 'object_id', 'path_override', 'target', 'publication_status', 'publish_on_date', 'expire_on_date')
+    
 
     sortable_field_name = 'order'
     extra = 0
@@ -92,7 +92,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("hierarchy",)
 
-    list_display = ( "admin_hierarchy", "title",'publication_status')
+    list_display = ( "admin_hierarchy", "title", 'path', 'publication_status')
     list_display_links = ('title',)
     fieldsets = (
         ("Main", {
@@ -104,7 +104,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path',)
     # inlines = [MenuItemInline]
 
 

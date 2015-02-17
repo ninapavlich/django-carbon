@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from carbon.utils.data.backup_mysql import backup_database as backup_database_mysql
 from carbon.utils.data.backup_postgres import backup_database as backup_database_postgres
+from carbon.utils.data.backup_sqlite import backup_database as backup_database_sqlite
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -73,12 +74,14 @@ class Command(BaseCommand):
                 db = settings.DATABASES[options['database_name']]
                 db_engine = db['ENGINE']
                 if 'mysql' in db_engine.lower():
-                    print "USE MYSQL BACKUP"
+                    backup_database_mysql(bucket_name, options['database_name'], options['dest_dir'], options['prefix'], options['temp_dir'])
+
                 elif 'postgresql_psycopg2' in db_engine.lower():
                     backup_database_postgres(bucket_name, options['database_name'], options['dest_dir'], options['prefix'], options['temp_dir'])
 
                 elif 'sqlite3' in db_engine.lower():
-                    print "USE SQLITE BACKUP"
+                    backup_database_sqlite(bucket_name, options['database_name'], options['dest_dir'], options['prefix'], options['temp_dir'])
+                    
             else:
                 print "ERROR: No database found with name %s in settings.DATABASES"%(options['database_name'])
 
