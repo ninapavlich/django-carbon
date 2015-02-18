@@ -9,7 +9,8 @@ import logging
 from datetime import datetime
 from django.conf import settings
 import boto.s3
-import sqlite3
+import traceback
+
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
@@ -40,12 +41,15 @@ def _run_backup(file_name, backup_dir, database_settings="default"):
     host = settings.DATABASES[database_settings]['HOST']
     
     #mysqldump -P 3310 -h 127.0.0.1 -u mysql_user -p database_name table_name
-
-    output_file = '%s/%s'%(backup_dir, file_name)
-    con = sqlite3.connect(name)
-    with open(output_file, 'w') as f:
-        for line in con.iterdump():
-            f.write('%s\n' % line)
+    try:
+        import sqlite3
+        output_file = '%s/%s'%(backup_dir, file_name)
+        con = sqlite3.connect(name)
+        with open(output_file, 'w') as f:
+            for line in con.iterdump():
+                f.write('%s\n' % line)
+    except Exception, err:
+        print "Error outputting SQLite database %s"%(traceback.format_exc())
     
 
 def _zip_backup(file_name, backup_dir):
