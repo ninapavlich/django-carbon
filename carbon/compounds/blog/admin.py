@@ -37,15 +37,19 @@ class BlogArticleAdmin(BaseContentAdmin):
     core_fields_list = list(core_fields)
     core_fields_list.insert(5, 'category')
     core_fields_list.insert(5, 'related')
-    core_fields_list.insert(5, 'tags')
-
-    
+    core_fields_list.insert(5, 'tags')    
     core_fields = tuple(core_fields_list)
 
     path_fields = BaseContentAdmin.path_fields
     publication_fields = BaseContentAdmin.publication_fields
     seo_fields = BaseContentAdmin.seo_fields
+    
     social_fields = BaseContentAdmin.social_fields
+    social_fields_list = list(social_fields)
+    social_fields_list.insert(1, 'allow_comments')
+    social_fields = tuple(social_fields_list)
+    
+
     meta_fields = BaseVersionableAdmin.meta_fields
 
     fieldsets = (

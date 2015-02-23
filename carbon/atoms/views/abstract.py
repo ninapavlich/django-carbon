@@ -65,13 +65,20 @@ class HasChildrenView(object):
             queryset, per_page, orphans=orphans,
             allow_empty_first_page=allow_empty_first_page, **kwargs)
 
+    def get_children(self):
+        try:
+            return self.object.get_children()
+        except:
+            return None
+    
+
     def post(self, request, *args, **kwargs):
 
         if not self.object:
             self.object = self.get_object()
 
         try:
-            self.object_list = self.object.get_children()
+            self.object_list = self.get_children()
         except:
             self.object_list = None 
 
@@ -83,10 +90,10 @@ class HasChildrenView(object):
         if not self.object:
             self.object = self.get_object()
 
-        # try:
-        self.object_list = self.object.get_children()
-        #except:
-        #    self.object_list = None      
+        try:
+            self.object_list = self.get_children()
+        except:
+           self.object_list = None      
 
         return super(HasChildrenView, self).get(request, *args, **kwargs)
 

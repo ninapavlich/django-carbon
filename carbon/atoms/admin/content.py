@@ -112,7 +112,6 @@ class BaseContentAdmin(reversion.VersionAdmin):
 
     social_fields = (
         ('sharable','social_share_type'),
-        'allow_comments',
         'tiny_url',
         'social_share_image',        
     )
