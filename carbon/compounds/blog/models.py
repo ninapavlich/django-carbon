@@ -8,29 +8,28 @@ from carbon.atoms.models.abstract import VersionableAtom
 from carbon.atoms.models.content import *
 
 class BlogTag(TagMolecule):
+    # default_template = 'blog_tag'
+    # item_class = BlogArticle
+
     class Meta:
         abstract = True
 
     def get_absolute_url(self):
         return reverse_lazy('blog_tag', kwargs = {'path': self.get_url_path() })   
 
-    def get_children(self):
-        all_children = Article.objects.filter(tags__in=[self])
-        return [child for child in all_children if child.is_published()]
-
 class BlogCategory(CategoryMolecule):
+    # default_template = 'blog_category'
+    # item_class = BlogArticle
+
     class Meta:
-        verbose_name_plural = 'Blog Categories'
+        verbose_name_plural = 'Blog categories'
         abstract = True
 
     def get_absolute_url(self):
         return reverse_lazy('blog_category', kwargs = {'path': self.get_url_path() })   
 
-    def get_children(self):
-        all_children = Article.objects.filter(category=self)
-        return [child for child in all_children if child.is_published()]
-
 class BlogArticleRole(VersionableAtom):
+
     class Meta:
         abstract = True
 
@@ -60,6 +59,8 @@ class BlogArticleRole(VersionableAtom):
         choices=BLOG_ROLE_CHOICES, help_text=help['role'])
 
 class BlogArticle(ContentMolecule):
+    # default_template = 'blog_article'
+
     help = {
         'allow_comments': "Allow comments on article"
     }

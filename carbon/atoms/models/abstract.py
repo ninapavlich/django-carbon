@@ -130,11 +130,8 @@ class AddressibleAtom(models.Model):
     
     order = models.IntegerField(default=0, help_text=help['order'])
 
-
     template = models.ForeignKey(settings.TEMPLATE_MODEL, null=True, blank=True,
-        help_text=help['template'])
-
-    
+        help_text=help['template'])    
 
     path = models.CharField(_('path'), max_length=255, 
         help_text=help['path'], blank=True, null=True)
@@ -263,9 +260,43 @@ class AddressibleAtom(models.Model):
 
     def get_absolute_url(self):
         return self.path
+
+    def get_default_template(self):
+
+        found_template = None
+        if hasattr(self, 'default_template') and self.default_template:
+            
+            try:
+                app_label = settings.TEMPLATE_MODEL.split('.')[0]
+                object_name = settings.TEMPLATE_MODEL.split('.')[1]
+                model = get_model(app_label, object_name)
+
+                if isinstance( self.default_template, ( int, long ) ):
+                    #try by pk
+                    try:
+                        found_template = model.objects.get(pk=self.default_template)
+                    except:
+                        pass
+
+                if found_template == None:
+                    #try by slug
+                    try:
+                        found_template = model.objects.get(slug=self.default_template)
+                    except:
+                        pass
+            except:
+                pass
+
+        return found_template
     
 
     def save(self, *args, **kwargs):
+        if not self.template:
+            use_default_template = self.get_default_template()
+            if use_default_template:
+                self.template = use_default_template
+
+
 
         if not self.title:
             self.title = 'Untitled %s'%(self.__class__.__name__)
