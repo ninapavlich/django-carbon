@@ -41,7 +41,8 @@ class VersionableAtom(models.Model):
     # def __init__(self, *args, **kwargs):
     #     super(Versionable, self).save(*args, **kwargs)
 
-    
+    def get_children(self):
+        return []
 
     def save(self, *args, **kwargs):
         

@@ -8,8 +8,10 @@ from carbon.atoms.models.abstract import VersionableAtom
 from carbon.atoms.models.content import *
 
 class BlogTag(TagMolecule):
+    publish_by_default = True
     # default_template = 'blog_tag'
     # item_class = BlogArticle
+    # url_domain = settings.BLOG_TAG_DOMAIN
 
     class Meta:
         abstract = True
@@ -18,8 +20,10 @@ class BlogTag(TagMolecule):
         return reverse_lazy('blog_tag', kwargs = {'path': self.get_url_path() })   
 
 class BlogCategory(CategoryMolecule):
+    publish_by_default = True
     # default_template = 'blog_category'
     # item_class = BlogArticle
+    # url_domain = settings.BLOG_CATEGORY_DOMAIN
 
     class Meta:
         verbose_name_plural = 'Blog categories'
@@ -29,6 +33,7 @@ class BlogCategory(CategoryMolecule):
         return reverse_lazy('blog_category', kwargs = {'path': self.get_url_path() })   
 
 class BlogArticleRole(VersionableAtom):
+    # url_domain = settings.BLOG_ARTICLE_DOMAIN
 
     class Meta:
         abstract = True
@@ -76,6 +81,14 @@ class BlogArticle(ContentMolecule):
     tags = models.ManyToManyField('blog.BlogTag', blank=True, null=True)
     category = models.ForeignKey('blog.BlogCategory', blank=True, null=True, 
         on_delete=models.SET_NULL)
+
+
+    def build_path(self):
+
+        if self.category:
+            return "%s%s/" % (self.category.path, self.slug)
+        else:
+            return "/%s%s/" % (settings.BLOG_ARTICLE_DOMAIN, self.slug)
 
     def get_absolute_url(self):
         return reverse_lazy('blog_article', kwargs = {'path': self.get_url_path() }) 

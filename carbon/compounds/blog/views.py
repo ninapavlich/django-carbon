@@ -1,4 +1,4 @@
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
 
@@ -11,7 +11,6 @@ class BlogArticleDetailView(NonAdminCachableView, PublishableView, AddressibleVi
     # model = BlogArticle
     pass
     
-
 class BlogTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
     # model = BlogTag
@@ -20,4 +19,4 @@ class BlogTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChi
 class BlogCategoryView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
     # model = BlogCategory
-    pass    
+    pass

@@ -16,6 +16,7 @@ from .abstract import *
 
 
 class PublishableAtom(models.Model):
+    publish_by_default = False
 
     help = {
         'publication_status': "Current publication status",
@@ -67,6 +68,10 @@ class PublishableAtom(models.Model):
         return False
 
     def save(self, *args, **kwargs):
+
+        #Published by default
+        if not self.pk and self.publish_by_default:
+            self.publication_status = PublishableAtom.PUBLISHED
 
         has_been_published = False
         if self.pk is not None and self.publication_status == PublishableAtom.PUBLISHED:
@@ -340,7 +345,15 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
 
     def get_children(self):
         items = self.get_items()
-        return [item.item for item in items if item.item.is_published()]
+        output = []
+        for child in items:
+            if child.is_published():
+                if hasattr(self, 'item'):
+                    output.append(child.item)
+                else:
+                    output.append(child)
+
+        return output
 
     def get_next_item(self, item):
         children = self.get_children()

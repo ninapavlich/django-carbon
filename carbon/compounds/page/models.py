@@ -34,6 +34,7 @@ class Page(HierarchicalAtom, ContentMolecule):
 
 
 class PageTag(TagMolecule):  
+    publish_by_default = True
 
     class Meta:
         verbose_name_plural = 'Page Tags'
@@ -51,6 +52,7 @@ class PageTag(TagMolecule):
 
 
 class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom):
+    publish_by_default = True
 
     help = {
         'title': "",
@@ -106,14 +108,7 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
         '<a href="%s" target="%s" class="%s" %s>%s</a>'%(self.get_path, self.target, self.css_classes, self.title, self.extra_attributes)
 
 
-    def save(self, *args, **kwargs):
-
-        #Published by default
-        if not self.pk:
-            self.publication_status = PublishableAtom.PUBLISHED
-
-        super(MenuItem, self).save(*args, **kwargs)
-
+    
     class Meta:
         abstract = True
     

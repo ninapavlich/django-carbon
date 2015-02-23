@@ -167,7 +167,12 @@ class AddressibleView(SingleObjectMixin):
 
         queryset = self.get_queryset()
         
+        # search_path = path
+        # if hasattr(self.model, 'url_domain') and self.model.url_domain:
+        #     search_path = path.replace(self.model.url_domain, '')
+        print path
         try:
+
             obj = queryset.filter(path=path)[0]
 
         except:

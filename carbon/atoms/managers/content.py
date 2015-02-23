@@ -20,18 +20,18 @@ class PublishableQueryset(models.query.QuerySet):
 
 
 class PublishableManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return PublishableQueryset(self.model, using=self._db)
 
     def published(self):
         # WARNING: Just because something is set to be published doesn't mean
         # it should be published -- an item could be expired or have some
         # other limitation
-        return self.get_query_set().published()
+        return self.get_queryset().published()
 
     def drafts(self):
-        return self.get_query_set().drafts()
+        return self.get_queryset().drafts()
     
     def unpublished(self):
-        return self.get_query_set().unpublished()
+        return self.get_queryset().unpublished()
 
