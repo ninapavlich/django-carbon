@@ -62,6 +62,17 @@ class HierarchicalAtom(models.Model):
     def get_children(self):
         return self.__class__.objects.filter(parent=self)
 
+    def get_next_child(self, item):
+        children = self.get_children()
+        next_index = (children.index(item) + 1) % len(children)
+        return children[next_index]
+
+    def get_previous_child(self, item):
+        children = self.get_children()
+        previous_index = (children.index(item) + len(children) - 1) % len(children)
+        return children[previous_index]
+
+
     class Meta:
         abstract = True
 

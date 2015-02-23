@@ -7,7 +7,6 @@ class PublishableQueryset(models.query.QuerySet):
     DRAFT = 10
     REVIEW = 20
     PUBLISHED = 100
-    #EXPIRED = 30
     UNPUBLISHED = 40
 
     def published(self):
@@ -25,6 +24,9 @@ class PublishableManager(models.Manager):
         return PublishableQueryset(self.model, using=self._db)
 
     def published(self):
+        # WARNING: Just because something is set to be published doesn't mean
+        # it should be published -- an item could be expired or have some
+        # other limitation
         return self.get_query_set().published()
 
     def drafts(self):

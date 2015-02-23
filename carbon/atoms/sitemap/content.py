@@ -5,8 +5,9 @@ from .abstract import AddressibleSitemap
 
 class PublishableSitemap(AddressibleSitemap):    
 
-    def items(self):        
-        return self.model.objects.published()
+    def items(self):   
+    	all_items = self.model.objects.published()
+    	return [item for item in all_items if item.is_published()]
 
 class SEOSitemap(PublishableSitemap):    
 

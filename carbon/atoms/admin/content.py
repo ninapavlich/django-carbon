@@ -55,15 +55,15 @@ class BaseContentAdmin(reversion.VersionAdmin):
     
     autocomplete_lookup_fields = {
         'fk': ('image', 'published_by', 'template'),
-        'm2m': ('authors','editors',)
+        'm2m': ()
     }
-    raw_id_fields = ( 'image', 'authors', 'editors', 'published_by', 'template')
+    raw_id_fields = ( 'image', 'published_by', 'template')
     
     list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
     list_display_links = ( "admin_hierarchy", "path", "title",)
     list_filter = (
             "publication_status", "created_by", "modified_by", 
-            'published_by','authors','editors','is_searchable','in_sitemap',
+            'published_by','is_searchable','in_sitemap',
             'sitemap_changefreq','sitemap_priority','noindex','nofollow',
             'sharable','social_share_type')
     ordering = ("hierarchy",)
@@ -89,8 +89,6 @@ class BaseContentAdmin(reversion.VersionAdmin):
     publication_fields = (
         ('publication_date', 'published_by'),
         ('publish_on_date', 'expire_on_date'),
-        ('authors'),
-        ('editors'),
         'facebook_author_id',
         'twitter_author_id',
         'google_author_id'

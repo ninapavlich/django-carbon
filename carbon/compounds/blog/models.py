@@ -1,21 +1,80 @@
 from django.db import models
 from django.conf import settings
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+
+from carbon.atoms.models.abstract import VersionableAtom
 
 from carbon.atoms.models.content import *
 
-class Tag(TagMolecule):
+class BlogTag(TagMolecule):
     class Meta:
         abstract = True
 
-class Category(CategoryMolecule):
+    def get_absolute_url(self):
+        return reverse_lazy('blog_tag', kwargs = {'path': self.get_url_path() })   
+
+    def get_children(self):
+        all_children = Article.objects.filter(tags__in=[self])
+        return [child for child in all_children if child.is_published()]
+
+class BlogCategory(CategoryMolecule):
+    class Meta:
+        verbose_name_plural = 'Blog Categories'
+        abstract = True
+
+    def get_absolute_url(self):
+        return reverse_lazy('blog_category', kwargs = {'path': self.get_url_path() })   
+
+    def get_children(self):
+        all_children = Article.objects.filter(category=self)
+        return [child for child in all_children if child.is_published()]
+
+class BlogArticleRole(VersionableAtom):
     class Meta:
         abstract = True
 
-class Article(ContentMolecule):
+    help = {
+        'order': "Display order",
+        'role': "Role that user plays in this article"
+    }
+
+    try:
+        BLOG_ROLE_CHOICES = settings.BLOG_ROLE_CHOICES        
+    except:
+        AUTHOR = 'author'
+        EDITOR = 'editor'
+        PUBLISHER = 'publisher'
+        BLOG_ROLE_CHOICES = (
+            (AUTHOR, _("Author")),
+            (EDITOR, _("Editor")),
+            (PUBLISHER, _("Publisher")),
+        )
+
+    order = models.IntegerField(default=0, help_text=help['order'])   
+    
+    # YOU GOTTA IMPLEMENT THIS:
+    article = models.ForeignKey('blog.BlogArticle')
+    user = models.ForeignKey(settings.BLOG_ROLE_USER_MODEL)
+    role = models.CharField(_('Role'), max_length=255, 
+        choices=BLOG_ROLE_CHOICES, help_text=help['role'])
+
+class BlogArticle(ContentMolecule):
+    help = {
+        'allow_comments': "Allow comments on article"
+    }
+
     class Meta:
         abstract = True
+   
+    allow_comments = models.BooleanField(default=False, 
+        help_text=help['allow_comments'])
   
-    tags = models.ManyToManyField('blog.Tag', blank=True, null=True)
-    category = models.ForeignKey('blog.Category', blank=True, null=True, 
+    related = models.ManyToManyField('self', blank=True, null=True, 
+        symmetrical=True)
+    tags = models.ManyToManyField('blog.BlogTag', blank=True, null=True)
+    category = models.ForeignKey('blog.BlogCategory', blank=True, null=True, 
         on_delete=models.SET_NULL)
+
+    def get_absolute_url(self):
+        return reverse_lazy('blog_article', kwargs = {'path': self.get_url_path() }) 

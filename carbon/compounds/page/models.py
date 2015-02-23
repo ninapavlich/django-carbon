@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from bs4 import BeautifulSoup
@@ -13,8 +13,7 @@ from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMo
 
 class Page(HierarchicalAtom, ContentMolecule):
 
-    # YOU GOTTA IMPLEMENT THIS:
-    # tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
+    tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
 
     def get_url_path(self):
         path = self.path
@@ -26,13 +25,8 @@ class Page(HierarchicalAtom, ContentMolecule):
             
         return path
 
-    @staticmethod
-    def autocomplete_search_fields():
-        return ("admin_note__icontains","title__icontains")
-
-    # YOU GOTTA IMPLEMENT THIS:
-    # def get_absolute_url(self):
-    #     return reverse('pages_page', kwargs = {'path': self.get_url_path() })   
+    def get_absolute_url(self):
+        return reverse_lazy('page_page', kwargs = {'path': self.get_url_path() })   
 
     class Meta:
         abstract = True
@@ -44,9 +38,8 @@ class PageTag(TagMolecule):
     class Meta:
         verbose_name_plural = 'Page Tags'
 
-    # YOU GOTTA IMPLEMENT THIS:
-    # def get_absolute_url(self):
-    #     return reverse('pages_tag', kwargs = {'path': self.get_url_path() })   
+    def get_absolute_url(self):
+        return reverse_lazy('page_tag', kwargs = {'path': self.get_url_path() })   
 
     def get_children(self):
         all_children = Page.objects.filter(tags__in=[self])
@@ -64,8 +57,8 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
         'slug': "",
         'path': "Override path for this menu item",
         'target': "",
-        'order':"",
-        'css_classes':"Extra css classes to add to "
+        'css_classes':"Extra css classes to add to the item",
+        'extra_attributes': "Extra attributes to add to the item"
     }
 
     BLANK = '_blank'
@@ -83,7 +76,8 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
     #Point to an object
     try:
         content_type = models.ForeignKey(ContentType, 
-            limit_choices_to={"model__in": settings.MENU_MODEL_CHOICES}, null=True, blank=True)
+            limit_choices_to={"model__in": settings.MENU_MODEL_CHOICES}, 
+            null=True, blank=True)
     except:
         content_type = models.ForeignKey(ContentType, null=True, blank=True)
 
@@ -91,11 +85,14 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
     content_object = GenericForeignKey('content_type', 'object_id')
 
 
-    target = models.CharField(_('Target'), max_length=255, help_text=help['target'], 
-        choices=TARGET_CHOICES, default=SELF)
+    target = models.CharField(_('Target'), max_length=255, 
+        help_text=help['target'], choices=TARGET_CHOICES, default=SELF)
 
-    css_classes = models.CharField(_('CSS Classes'), max_length=255, help_text=help['target'], 
-        choices=TARGET_CHOICES, default=SELF)
+    css_classes = models.CharField(_('CSS Classes'), max_length=255, 
+        help_text=help['css_classes'], choices=TARGET_CHOICES, default=SELF)
+
+    extra_attributes = models.CharField(_('Extra Attributes'), max_length=255, 
+        help_text=help['extra_attributes'], null=True, blank=True, default='')
 
     def generate_path(self):
         if self.content_object:
@@ -106,7 +103,7 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
 
 
     def get_link(self):
-        '<a href="%s" target="%s" class="%s">%s</a>'%(self.get_path, self.target, self.css_classes, self.title)
+        '<a href="%s" target="%s" class="%s" %s>%s</a>'%(self.get_path, self.target, self.css_classes, self.title, self.extra_attributes)
 
 
     def save(self, *args, **kwargs):
@@ -155,7 +152,8 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
     #Point to an object
     try:
         content_type = models.ForeignKey(ContentType, 
-            limit_choices_to={"model__in": settings.LEGACY_URL_CHOICES}, null=True, blank=True)
+            limit_choices_to={"model__in": settings.LEGACY_URL_CHOICES}, 
+            null=True, blank=True)
     except:
         content_type = models.ForeignKey(ContentType, null=True, blank=True)
 

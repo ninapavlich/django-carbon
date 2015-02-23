@@ -222,23 +222,10 @@ class SocialSharingAtom(models.Model):
 class ContentAtom(models.Model):
     help = {
         'content': "",
-        'image':"",
-        'authors': "",
-        'editors': "",
-        'allow_comments':""
-
     }
 
     content = models.TextField(_('content'), help_text=help['content'], null=True, blank=True)
 
-    authors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, 
-        null=True, related_name='%(app_label)s_%(class)s_authors', help_text=help['authors'])
-
-    editors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, 
-        null=True, related_name='%(app_label)s_%(class)s_editors', help_text=help['editors'])
-   
-    allow_comments = models.BooleanField(default=False, 
-        help_text=help['allow_comments'])
 
     class Meta:
         abstract = True
@@ -323,6 +310,16 @@ class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, So
         
         return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
+    def get_next_item(self, item):
+        children = self.get_children()
+        next_index = (children.index(item) + 1) % len(children)
+        return children[next_index]
+
+    def get_previous_item(self, item):
+        children = self.get_children()
+        previous_index = (children.index(item) + len(children) - 1) % len(children)
+        return children[previous_index]
+
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
@@ -346,16 +343,14 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
         return [item.item for item in items if item.item.is_published()]
 
     def get_next_item(self, item):
-        items = self.item_class.objects.published().filter(**{ self.category_property_name: self }).filter(order__gte=item.order).order_by('order')
-        if len(items) > 0:
-            return items[0].item
-        return None
+        children = self.get_children()
+        next_index = (children.index(item) + 1) % len(children)
+        return children[next_index]
 
     def get_previous_item(self, item):
-        items = self.item_class.objects.published().filter(**{ self.category_property_name: self }).filter(order__lte=item.order).order_by('-order')
-        if len(items) > 0:
-            return items[0].item
-        return None
+        children = self.get_children()
+        previous_index = (children.index(item) + len(children) - 1) % len(children)
+        return children[previous_index]
 
     @staticmethod
     def autocomplete_search_fields():
@@ -416,7 +411,7 @@ class TemplateMolecule(VersionableAtom):
 
     @staticmethod
     def autocomplete_search_fields():
-        return ("title__icontains",)
+        return ("admin_note__icontains","title__icontains")
 
     def get_content(self):
         if self.custom_template:
