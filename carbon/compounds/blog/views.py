@@ -34,6 +34,6 @@ class BlogTagListView(NonAdminCachableView, PublishableView, AddressibleView, Ha
 
     # model = Page
     # def get_children(self):
-    # articles = BlogArticle.objects.published()
+    # articles = BlogTag.objects.published()
     # return [article for article in articles if article.is_published()]
     pass     

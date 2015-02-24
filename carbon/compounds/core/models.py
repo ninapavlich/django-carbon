@@ -13,6 +13,7 @@ class Template(TemplateMolecule):
 
     class Meta:
         abstract = True
+        ordering = ['title']
 
     @staticmethod
     def autocomplete_search_fields():
