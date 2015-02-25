@@ -84,10 +84,10 @@ class BlogArticleAdmin(BaseContentAdmin):
     )
 
 class BlogTagAdmin(BaseTagAdmin):
-    pass
+    form = BlogTagAdminForm
 
 class BlogCategoryAdmin(BaseCategoryAdmin):
-    pass    
+    form = BlogCategoryAdminForm    
 
 
 # admin.site.register(BlogArticle, BlogArticleAdmin)

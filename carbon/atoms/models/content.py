@@ -1,11 +1,12 @@
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
 from django.template import Template as DjangoTemplate
 from django.template import loader
 from django.template.loaders.filesystem import Loader as FileSystemLoader
+from django.utils.text import Truncator
+from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -225,12 +226,21 @@ class SocialSharingAtom(models.Model):
 
 
 class ContentAtom(models.Model):
+    auto_synopsis_length = 30
     help = {
         'content': "",
+        'synopsis': ""
     }
 
     content = models.TextField(_('content'), help_text=help['content'], null=True, blank=True)
+    synopsis = models.TextField(_('synopsis'), help_text=help['synopsis'], null=True, blank=True)
 
+    def get_synopsis(self):
+        if self.synopsis and self.synopsis != '':
+            return self.synopsis
+        elif self.content and self.content != '':
+            return Truncator(self.content).words(self.auto_synopsis_length, html=True)
+        return ''            
 
     class Meta:
         abstract = True
@@ -301,7 +311,7 @@ class ModerationAtom(models.Model):
         abstract = True
 
 
-class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
+class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom,):
     #Basically just a tag but with hierarchy
     item_class = None
     tag_property_name = 'tags'
@@ -329,7 +339,7 @@ class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, So
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
 
-class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom,):
+class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom,):
     #Basically just a tag but with hierarchy
     item_class = None
     category_property_name = 'category'

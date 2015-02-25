@@ -83,6 +83,7 @@ class BaseContentAdmin(reversion.VersionAdmin):
         ('title','slug'),
         ('template', 'publication_status'),
         'content',
+        'synopsis',
         ('image_preview','image')
     )
 

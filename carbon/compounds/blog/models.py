@@ -13,6 +13,8 @@ class BlogTag(TagMolecule):
     # item_class = BlogArticle
     # url_domain = settings.BLOG_TAG_DOMAIN
 
+
+
     class Meta:
         abstract = True
 

@@ -36,6 +36,8 @@ class BaseTagAdmin(BaseContentAdmin):
 
     core_fields = (
         ('title','slug'),
+        'content',
+        'synopsis'
     )
 
     publication_fields = (
