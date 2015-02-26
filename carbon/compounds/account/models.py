@@ -4,11 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from carbon.atoms.models.abstract import VersionableAtom
 from carbon.atoms.models.access import AccessAtom
-from carbon.atoms.models.user import UserMolecule, StreetAddressMolecule
+from carbon.atoms.models.user import UserMolecule, StreetAddressMolecule, UserProfileMolecule
 
 from .manager import UserManager
 
-class User(UserMolecule):
+class User(UserProfileMolecule):
 
     objects = UserManager()
 

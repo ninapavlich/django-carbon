@@ -10,6 +10,15 @@ from .forms import *
 
 
 class UserAdmin(ContribUserAdmin):
+    def preview(self, obj):
+        if obj.image:
+            try:
+                return "<img src='%s' alt='%s preview'/>"%(obj.thumbnail.url, obj.title)
+            except:
+                return ""
+        return ''
+    preview.allow_tags = True
+
 
     form = UserChangeForm
     add_form = UserCreationForm
@@ -26,6 +35,8 @@ class UserAdmin(ContribUserAdmin):
                 ("first_name","last_name"),
                 ('email','date_of_birth'),
                 'password',
+                'about',
+                ('preview','image')
             )
         }),
         (_('CMS Permissions'), {
@@ -42,8 +53,8 @@ class UserAdmin(ContribUserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
-    
-    #readonly_fields = ('last_login','date_joined', 'impersonate_user')
+    readonly_fields = ContribUserAdmin.readonly_fields + ('preview',)
+    #'last_login','date_joined', 'impersonate_user'
 
 
 

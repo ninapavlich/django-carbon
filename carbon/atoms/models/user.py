@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from .abstract import *
 from .access import *
+from .content import HasImageAtom
 
 
 class PersonAtom(models.Model):
@@ -87,4 +88,17 @@ class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMix
 
     class Meta:
         abstract = True
+
+class UserProfileMolecule(UserMolecule, HasImageAtom):
+
+    help = {
+        'about':"",
+    }
+
+    about = models.TextField(_('about'), help_text=help['about'], null=True, blank=True)
+
+
+    class Meta:
+        abstract = True
+
 

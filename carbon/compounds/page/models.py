@@ -8,8 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from bs4 import BeautifulSoup
 
 from carbon.utils.slugify import unique_slugify
-from carbon.atoms.models.abstract import VersionableAtom, HierarchicalAtom, AddressibleAtom
-from carbon.atoms.models.content import ContentMolecule, TagMolecule, TemplateMolecule, PublishableAtom
+from carbon.atoms.models.abstract import *
+from carbon.atoms.models.content import *
 
 class Page(HierarchicalAtom, ContentMolecule):
 
@@ -51,28 +51,11 @@ class PageTag(TagMolecule):
         
 
 
-class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom):
+class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
     publish_by_default = True
 
     help = {
-        'title': "",
-        'slug': "",
-        'path': "Override path for this menu item",
-        'target': "",
-        'css_classes':"Extra css classes to add to the item",
-        'extra_attributes': "Extra attributes to add to the item"
     }
-
-    BLANK = '_blank'
-    SELF = '_self'
-    PARENT = '_parent'
-    TOP = '_top'
-    TARGET_CHOICES = (
-        (BLANK, _(BLANK)),
-        (SELF, _(SELF)),
-        (PARENT, _(PARENT)),
-        (TOP, _(TOP))        
-    )
 
     
     #Point to an object
@@ -85,16 +68,6 @@ class MenuItem(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAt
 
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
-
-
-    target = models.CharField(_('Target'), max_length=255, 
-        help_text=help['target'], choices=TARGET_CHOICES, default=SELF)
-
-    css_classes = models.CharField(_('CSS Classes'), max_length=255, 
-        help_text=help['css_classes'], choices=TARGET_CHOICES, default=SELF)
-
-    extra_attributes = models.CharField(_('Extra Attributes'), max_length=255, 
-        help_text=help['extra_attributes'], null=True, blank=True, default='')
 
     def generate_path(self):
         if self.content_object:
