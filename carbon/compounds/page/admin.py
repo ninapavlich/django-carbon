@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
@@ -68,35 +69,24 @@ class PageTagAdmin(BaseTagAdmin):
     pass
 
 
-class MenuItemInline(admin.StackedInline):
+class MenuItemInline(admin.TabularInline):
     #model = MenuItem
 
-    classes = ('collapse open',)
-    inline_classes = ('collapse open',)
+    def edit_item(self, obj):
+        if obj.pk:
+            object_type = type(obj).__name__
+            url = reverse('admin:%s_%s_change' %(obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
+
+            return '<a href="%s">Edit Children &amp; Extra Fields &gt;</a>'%(url)
+        return ''
+    edit_item.allow_tags = True
+
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': [],
     }
-
-
-    fieldsets = (
-        ("Main", {
-            'fields': (
-                ('order', 'title', ),
-                ( 'content_type', 'object_id',),
-                'path_override',),
-            'classes': ( 'grp-collapse grp-open', )
-        }),
-        ("Extra Properties", {
-            'fields': (
-                ('publication_status','css_classes',),
-                ('target','extra_attributes'),
-            ),
-            'classes': ( 'grp-collapse grp-closed', )
-        })
-    )
-    
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_parent',)
+    fields = ('order','title','content_type', 'object_id','path_override','edit_item',)
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_item',)
 
     sortable_field_name = 'order'
     extra = 0
