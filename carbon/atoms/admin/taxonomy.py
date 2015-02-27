@@ -9,9 +9,9 @@ class BaseTagAdmin(BaseContentAdmin):
     admin_hierarchy.allow_tags = True
 
     autocomplete_lookup_fields = {
-        'fk': ('template',),
+        'fk': ('template','image'),
     }
-    raw_id_fields = ( 'template',)
+    raw_id_fields = ( 'template','image')
     
     
     list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
@@ -29,7 +29,7 @@ class BaseTagAdmin(BaseContentAdmin):
     
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-         "path", "path_generated", "uuid", 
+         "path", "path_generated", "uuid", 'image_preview'
     )
     
 
@@ -37,7 +37,9 @@ class BaseTagAdmin(BaseContentAdmin):
     core_fields = (
         ('title','slug'),
         'content',
-        'synopsis'
+        'synopsis',
+        ('image_preview','image')
+
     )
 
     publication_fields = (
@@ -98,13 +100,13 @@ class BaseTagAdmin(BaseContentAdmin):
 class BaseCategoryAdmin(BaseTagAdmin):
 
     autocomplete_lookup_fields = {
-        'fk': ('parent','template',),
+        'fk': ('parent','template','image'),
     }
-    raw_id_fields = ( 'parent','template')
+    raw_id_fields = ( 'parent','template','image')
 
     core_fields = BaseTagAdmin.core_fields
     core_fields_list = list(core_fields)
-    core_fields_list.insert(0, 'parent')
+    core_fields_list.insert(0, ('edit_parent','parent'))
     core_fields = tuple(core_fields_list)
 
     list_filter = BaseTagAdmin.list_filter
@@ -117,6 +119,8 @@ class BaseCategoryAdmin(BaseTagAdmin):
     seo_fields = BaseTagAdmin.seo_fields
     social_fields = BaseTagAdmin.social_fields
     meta_fields = BaseTagAdmin.meta_fields
+
+    readonly_fields = BaseTagAdmin.readonly_fields + ('edit_parent',)
 
     fieldsets = (
         ("Main Body", {

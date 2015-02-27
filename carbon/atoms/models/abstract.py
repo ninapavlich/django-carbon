@@ -63,6 +63,18 @@ class HierarchicalAtom(models.Model):
     def get_children(self):
         return self.__class__.objects.filter(parent=self)
 
+    def edit_parent(self):
+        style="style='width:278px;display:block;'"
+        if self.parent:
+            
+            try:
+                object_type = type(self.parent).__name__
+                url = reverse('admin:%s_%s_change' %(self.parent._meta.app_label,  self.parent._meta.model_name),  args=[self.parent.id] )
+                return '<a href="%s" %s>&lt; Edit Parent</a>'%(url, style)
+            except:
+                return '<span %s>&nbsp;</span>'%(style)
+        return '<span %s>&nbsp;</span>'%(style)
+
     def get_next_child(self, item):
         children = self.get_children()
         next_index = (children.index(item) + 1) % len(children)
@@ -176,6 +188,14 @@ class AddressibleAtom(models.Model):
                 if settings.DEBUG:
                     print 'Error getting object by uuid %s - %s'%(traceback.format_exc(), sys.exc_info()[0])
         return None
+
+    @property
+    def is_external(self):
+        if self.path_override:
+            if self.path_override.startswith('/'):
+                return False
+            return True
+        return False
 
     def get_url_path(self):
         path = self.path

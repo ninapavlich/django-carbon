@@ -349,35 +349,30 @@ class ModerationAtom(models.Model):
         abstract = True
 
 
-class TagMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom,):
-    #Basically just a tag but with hierarchy
-    item_class = None
-    tag_property_name = 'tags'
+class OrderedItemMolecule(VersionableAtom,):
+
+    help = {
+        'order': "",
+    }
+
+    #When implementing, specify item and tag FKs:
+    #tag = models.ForeignKey('app.Model')
+    #item = models.ForeignKey('app.Model')
+    order = models.IntegerField(default=0, help_text=help['order'])
 
     class Meta:
-        abstract = True      
+        abstract = True  
 
-    def get_children(self):
-        if not self.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
-        
-        return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
-    def get_next_item(self, item):
-        children = self.get_children()
-        next_index = (children.index(item) + 1) % len(children)
-        return children[next_index]
-
-    def get_previous_item(self, item):
-        children = self.get_children()
-        previous_index = (children.index(item) + len(children) - 1) % len(children)
-        return children[previous_index]
+class ContentMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom, HasImageAtom):
+    class Meta:
+        abstract = True
 
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
 
-class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom,):
+class CategoryMolecule(HierarchicalAtom, ContentMolecule):
     #Basically just a tag but with hierarchy
     item_class = None
     category_property_name = 'category'
@@ -418,24 +413,31 @@ class CategoryMolecule(VersionableAtom, HierarchicalAtom, AddressibleAtom, Publi
         return ("admin_note__icontains","title__icontains")
 
 
-class OrderedItemMolecule(VersionableAtom,):
 
-    help = {
-        'order': "",
-    }
-
-    #When implementing, specify item and tag FKs:
-    #tag = models.ForeignKey('app.Model')
-    #item = models.ForeignKey('app.Model')
-    order = models.IntegerField(default=0, help_text=help['order'])
+class TagMolecule(ContentMolecule):
+                
+    #Basically just a tag but with hierarchy
+    item_class = None
+    tag_property_name = 'tags'
 
     class Meta:
-        abstract = True  
+        abstract = True      
 
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        
+        return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
-class ContentMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom, HasImageAtom):
-    class Meta:
-        abstract = True
+    def get_next_item(self, item):
+        children = self.get_children()
+        next_index = (children.index(item) + 1) % len(children)
+        return children[next_index]
+
+    def get_previous_item(self, item):
+        children = self.get_children()
+        previous_index = (children.index(item) + len(children) - 1) % len(children)
+        return children[previous_index]
 
     @staticmethod
     def autocomplete_search_fields():
@@ -526,6 +528,7 @@ class TemplateMolecule(VersionableAtom):
 
 
     class Meta:
+        ordering = ['title']
         abstract = True
 
    

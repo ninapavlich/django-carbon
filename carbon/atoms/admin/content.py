@@ -179,7 +179,7 @@ class HierarchicalContentAdmin(BaseContentAdmin):
 
     core_fields = BaseContentAdmin.core_fields
     core_fields_list = list(core_fields)
-    core_fields_list.insert(0, 'parent')
+    core_fields_list.insert(0, ('edit_parent','parent'))
     core_fields = tuple(core_fields_list)
 
     list_filter = BaseContentAdmin.list_filter
@@ -192,6 +192,8 @@ class HierarchicalContentAdmin(BaseContentAdmin):
     seo_fields = BaseContentAdmin.seo_fields
     social_fields = BaseContentAdmin.social_fields
     meta_fields = BaseVersionableAdmin.meta_fields
+
+    readonly_fields = BaseContentAdmin.readonly_fields + ('edit_parent',)
 
     fieldsets = (
         ("Main Body", {

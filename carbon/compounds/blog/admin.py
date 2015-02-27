@@ -8,20 +8,6 @@ from .forms import *
 
 
 
-class BlogRelatedObjectInline(admin.TabularInline):
-    #model = BlogRelatedObject
-    autocomplete_lookup_fields = {
-        'generic': [['content_type', 'object_id']],
-        'fk': [],
-    }
-
-    fields = (
-        ('order','content_type', 'object_id',),
-        ('title', 'path_override','target'),
-    )
-    sortable_field_name = 'order'
-    extra = 0
-
 class BlogArticleRoleInline(admin.TabularInline):
     #model = BlogArticleRole
     autocomplete_lookup_fields = {
@@ -41,15 +27,17 @@ class BlogArticleAdmin(BaseContentAdmin):
 
     autocomplete_lookup_fields = {
         'fk': ('image', 'published_by', 'template', 'category'),
-        'm2m': ('tags',)
+        'm2m': ('tags','related')
     }
-    raw_id_fields = ( 'image', 'published_by', 'template','category', 'tags', )
+    raw_id_fields = ( 'image', 'published_by', 'template','category', 'tags', 
+        'related')
     
 
     core_fields = BaseContentAdmin.core_fields
     core_fields_list = list(core_fields)
     core_fields_list.insert(5, 'category')
     core_fields_list.insert(5, 'tags')    
+    core_fields_list.insert(5, 'related')    
     core_fields = tuple(core_fields_list)
 
     path_fields = BaseContentAdmin.path_fields

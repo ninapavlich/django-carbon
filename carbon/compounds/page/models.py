@@ -26,6 +26,8 @@ class Page(HierarchicalAtom, ContentMolecule):
         return path
 
     def get_absolute_url(self):
+        if self.is_external:
+            return self.path_override
         return reverse_lazy('page_page', kwargs = {'path': self.get_url_path() })   
 
     class Meta:
@@ -40,6 +42,8 @@ class PageTag(TagMolecule):
         verbose_name_plural = 'Page Tags'
 
     def get_absolute_url(self):
+        if self.is_external:
+            return self.path_override
         return reverse_lazy('page_tag', kwargs = {'path': self.get_url_path() })   
 
     def get_children(self):
