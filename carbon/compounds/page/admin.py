@@ -68,16 +68,35 @@ class PageTagAdmin(BaseTagAdmin):
     pass
 
 
-class MenuItemInline(admin.TabularInline):
+class MenuItemInline(admin.StackedInline):
     #model = MenuItem
+
+    classes = ('collapse open',)
+    inline_classes = ('collapse open',)
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': [],
     }
 
 
-    fields = ('order', 'title',  'content_type', 'object_id', 'path_override', 'target', 'publication_status', 'publish_on_date', 'expire_on_date')
+    fieldsets = (
+        ("Main", {
+            'fields': (
+                ('order', 'title', ),
+                ( 'content_type', 'object_id',),
+                'path_override',),
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Extra Properties", {
+            'fields': (
+                ('publication_status','css_classes',),
+                ('target','extra_attributes'),
+            ),
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
     
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_parent',)
 
     sortable_field_name = 'order'
     extra = 0
@@ -85,12 +104,20 @@ class MenuItemInline(admin.TabularInline):
 
 class MenuItemAdmin(BaseVersionableAdmin):
 
-    
+    autocomplete_lookup_fields = {
+        'fk': ('parent',),
+    }
+    raw_id_fields = ( 'parent',)
+
     core_fields = (
+        ('edit_parent','parent'),
         ('title','slug'),
+        ('content_type', 'object_id',),
+        ('path_override','path')
     )
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("hierarchy",)
+
 
     list_display = ( "admin_hierarchy", "title", 'path', 'publication_status')
     list_display_links = ('title',)
@@ -104,7 +131,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path',)
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_parent')
     # inlines = [MenuItemInline]
 
 
