@@ -103,7 +103,10 @@ class MenuItemAdmin(BaseVersionableAdmin):
         ('edit_parent','parent'),
         ('title','slug'),
         ('content_type', 'object_id',),
-        ('path_override','path')
+        ('path_override',),
+        ('path',),
+        ('publication_status','css_classes',),
+        ('target','extra_attributes')
     )
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("hierarchy",)

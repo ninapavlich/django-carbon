@@ -75,6 +75,11 @@ class HierarchicalAtom(models.Model):
                 return '<span %s>&nbsp;</span>'%(style)
         return '<span %s>&nbsp;</span>'%(style)
 
+    def get_hierarchy(self):
+        if self.parent:
+            return self.parent.get_hierarchy() + [self]
+        return [self]
+
     def get_next_child(self, item):
         children = self.get_children()
         next_index = (children.index(item) + 1) % len(children)
