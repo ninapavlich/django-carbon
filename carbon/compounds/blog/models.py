@@ -83,7 +83,7 @@ class BlogArticle(ContentMolecule):
     allow_comments = models.BooleanField(default=False, 
         help_text=help['allow_comments'])
   
-    related = models.ManyToManyField('self', symmetrical=True)
+    related = models.ManyToManyField('self', blank=True, null=True, symmetrical=True)
     tags = models.ManyToManyField('blog.BlogTag', blank=True, null=True)
     category = models.ForeignKey('blog.BlogCategory', blank=True, null=True, 
         on_delete=models.SET_NULL)

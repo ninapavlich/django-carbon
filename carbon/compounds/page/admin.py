@@ -158,7 +158,7 @@ class LegacyURLAdmin(BaseVersionableAdmin):
     )
     
 
-    list_display = ( "url", "path",'created_date')
+    list_display = ( "url", "path",'created_date', )
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': [],

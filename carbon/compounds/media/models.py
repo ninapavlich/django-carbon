@@ -29,10 +29,13 @@ class Image(ImageMolecule):
         abstract = True
 
 
+
+
 class Media(MediaMolecule):
 
     class Meta:
         abstract = True
+        verbose_name_plural = 'media'
 
 class SecureImage(SecureImageMolecule):
 
@@ -56,6 +59,7 @@ class SecureMedia(SecureMediaMolecule):
 
     class Meta:
         abstract = True
+        verbose_name_plural = 'secure media'
 
 
 @receiver(pre_delete, sender=Image, dispatch_uid='image_delete_signal')

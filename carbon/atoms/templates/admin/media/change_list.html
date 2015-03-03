@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls media_tags %}
+
+{% block object-tools-items %}
+
+	{% for link in extra_urls %}
+	<li><a href="{{link.url}}">{{link.title}}</a></li>
+	{% endfor %}
+
+	{% if not is_popup %}
+        <li><a href="{{recoverlist_url}}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a></li>
+    {% endif %}
+
+    {{block.super}}
+{% endblock %}

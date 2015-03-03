@@ -61,7 +61,7 @@
             
             {% endif %}
 
-            <p class="admin-description"><em>{{object.admin_description|safe}}</em></p>
+            <p class="admin-note"><em>{{object.admin_note|safe}}</em></p>
             <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
         </figure>
 
@@ -136,7 +136,7 @@
         margin:auto;
         max-width: 100%;
     }
-     .admin-description{
+     .admin-note{
         color:#666;
         max-height: 150px;
         overflow-y: auto;
