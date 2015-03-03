@@ -8,6 +8,11 @@ from carbon.atoms.models.content import PublishableAtom
 
 class BaseVersionableAdmin(reversion.VersionAdmin):
 
+    class Media:        
+        css = {
+            "all": ('admin/css/adjustments.css',)
+        }
+
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
     )
@@ -48,6 +53,11 @@ class BaseVersionableAdmin(reversion.VersionAdmin):
 
 
 class BaseContentAdmin(reversion.VersionAdmin):
+    class Media:
+        css = {
+            'all': ('admin/css/adjustments.css',)
+        }
+        js = ('animations.js', 'actions.js')
 
     def admin_hierarchy(self, obj):
         return obj.admin_hierarchy
