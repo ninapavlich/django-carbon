@@ -25,6 +25,14 @@ def filename(full_path):
     head, tail = os.path.split(full_path)
     return tail
 
+@register.assignment_tag()
+def get_variant_links(object):
+  
+  output = object.get_variant_link('image')  
+  for variant in object.variants:
+    output += object.get_variant_link(variant)  
+  return output    
+
 @register.simple_tag
 def upload_js():
     return """

@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% load staticfiles admin_list i18n media_tags cache %}
+{% load staticfiles admin_list i18n media_tags carbon_tags cache %}
 
 {% block title %}Image Picker{{ block.super }}{% endblock %}
 
@@ -44,6 +44,8 @@
     {% for object in object_list %}
 
 
+        {% cache 86400 'admin_image_picker' object.pk %}
+   
         <figure data-credit="{{ object.credit }}" class="g-d-6">
             <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
 
@@ -64,6 +66,8 @@
             <p class="admin-note"><em>{{object.admin_note|safe}}</em></p>
             <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
         </figure>
+        
+        {% endcache %}
 
     {% if forloop.counter|divisibleby:4 %}
     </div>

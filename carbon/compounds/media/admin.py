@@ -17,7 +17,7 @@ from carbon.atoms.admin.media import *
 csrf_protect_m = method_decorator(csrf_protect)
 
 
-def batch_upload_image_response(request):
+def batch_upload_image_response(self, request):
     try:
         latest_log_entry = LogEntry.objects.filter(action_flag=ADDITION).order_by('-action_time')[0]
         ct = ContentType.objects.get_for_id(latest_log_entry.content_type_id)
@@ -43,7 +43,7 @@ def batch_upload_image_response(request):
         return None
 
 
-def batch_upload_media_response(request):
+def batch_upload_media_response(self, request):
     try:
         latest_log_entry = LogEntry.objects.filter(action_flag=ADDITION).order_by('-action_time')[0]
         ct = ContentType.objects.get_for_id(latest_log_entry.content_type_id)
@@ -86,8 +86,12 @@ class BaseMedia(object):
     def changelist_view(self, request, extra_context=None):
         response = super(BaseMedia, self).changelist_view(request, extra_context)
         
-        context_data = response.context_data
-        context_data['extra_urls'] = self.extra_urls
+        try:
+            context_data = response.context_data
+            context_data['extra_urls'] = self.extra_urls
+        except:
+            pass
+            
         return response
 
 
@@ -116,14 +120,14 @@ class MediaAdmin(BaseMediaAdmin):
     extra_urls = [
         {'url':reverse_lazy('admin_document_batch_view'), 'title':'Batch Upload Media'}
     ]
-    batch_response = batch_upload_image_response
+    batch_response = batch_upload_media_response
 
 class SecureMediaAdmin(BaseMediaAdmin):
     
     extra_urls = [
         {'url':reverse_lazy('admin_securedocument_batch_view'), 'title':'Batch Upload Secure Media'}
     ]
-    batch_response = batch_upload_image_response
+    batch_response = batch_upload_media_response
 
 
 

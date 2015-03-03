@@ -2,6 +2,7 @@ import os
 import time
 
 from django.db import models
+from django.db.models.signals import pre_delete
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
@@ -10,6 +11,8 @@ from django.utils.module_loading import import_by_path
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
+import boto
+from boto.s3.connection import S3Connection, Bucket, Key
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
@@ -234,6 +237,14 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
         else:
             return self.thumbnail_jpg
 
+    @property
+    def thumbnail_url(self):
+        try:
+            return self.thumbnail.url
+        except:
+            return ''
+
+
     variants = ('thumbnail',)
 
 class ImageMolecule( BaseImageMolecule ):
@@ -283,6 +294,83 @@ class SecureMediaMolecule( SecureImageMolecule ):
         file = models.FileField(upload_to=title_file_name, blank=True, null=True)       
 
 
+try:
+    image_model = settings.IMAGE_MODEL
+    @receiver(pre_delete, sender=image_model, dispatch_uid='image_delete_signal')
+    def remove_image_file_from_s3(sender, instance, using, **kwargs):
+        base_remove_image_file_from_s3(sender, instance, using)
+except:
+    pass
 
+try:
+    secure_image_model = settings.SECURE_IMAGE_MODEL
+    @receiver(pre_delete, sender=secure_image_model, dispatch_uid='secure_image_delete_signal')
+    def remove_secure_file_from_s3(sender, instance, using, **kwargs):
+        base_remove_image_file_from_s3(sender, instance, using)    
+except:
+    pass
+
+def base_remove_image_file_from_s3(sender, instance, using, **kwargs):
+    try:
+        delete_file_on_delete = settings.IMAGE_MODEL_DELETE_FILE_ON_DELETE
+    except:
+        delete_file_on_delete = False
+
+    if delete_file_on_delete:
+
+        #Figure out what bucket to delete
+        delete_bucket = None
+        if hasattr(instance, 'variants') and instance.variants:
+            for variant in instance.variants:
+                field = getattr(instance, variant)
+                delete_bucket = "/".join(str(field).split('/')[:-1])
+
+            try:
+                if delete_bucket:
+                    conn = boto.s3.connection.S3Connection(
+                        settings.AWS_ACCESS_KEY_ID,
+                        settings.AWS_SECRET_ACCESS_KEY)
+
+                    bucket = Bucket(conn, settings.AWS_MEDIA_BUCKET_NAME)
+
+                    for key in bucket.list(prefix=delete_bucket):
+                        # print 'delete: %s'%(key)
+                        key.delete()               
+
+            except:
+                pass
+
+        try:
+            instance.image.delete(save=False)  
+        except:
+            pass
+
+try:
+    document_model = settings.DOCUMENT_MODEL
+    @receiver(pre_delete, sender=document_model, dispatch_uid='document_delete_signal')
+    def remove_document_file_from_s3(sender, instance, using, **kwargs):
+        base_remove_document_file_from_s3(sender, instance, using)
+except:
+    pass
+
+try:
+    secure_document_model = settings.SECURE_DOCUMENT_MODEL
+    @receiver(pre_delete, sender=secure_document_model, dispatch_uid='secure_document_delete_signal')
+    def remove_secure_file_from_s3document_file_from_s3(sender, instance, using, **kwargs):
+        base_remove_document_file_from_s3(sender, instance, using)
+except:
+    pass
+
+def base_remove_document_file_from_s3(sender, instance, using, **kwargs):
+    try:
+        delete_file_on_delete = settings.DOCUMENT_MODEL_DELETE_FILE_ON_DELETE
+    except:
+        delete_file_on_delete = False
+
+    if delete_file_on_delete:
+        try:
+            instance.media_file.delete(save=False)  
+        except:
+            pass            
 
  
