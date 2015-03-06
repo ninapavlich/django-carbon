@@ -94,9 +94,7 @@ class MenuItemInline(TabularInlineOrderable):
 
 
 class MenuItemAdmin(BaseVersionableAdmin):
-    def display_path(self, obj):
-        return obj.path
-        
+            
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': ('parent',),
@@ -108,7 +106,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
         ('title','slug'),
         ('content_type', 'object_id',),
         ('path_override',),
-        ('display_path',),
+        ('path',),
         ('publication_status','css_classes',),
         ('target','extra_attributes')
     )
@@ -128,7 +126,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('display_path','edit_parent')
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_parent')
     # inlines = [MenuItemInline]
 
 

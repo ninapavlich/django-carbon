@@ -44,6 +44,10 @@ class VersionableAtom(models.Model):
     def get_children(self):
         return []
 
+    def is_published(self):
+        return True
+
+
     def save(self, *args, **kwargs):
         
         self.increment_version_number()
@@ -60,8 +64,11 @@ class HierarchicalAtom(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True,
         related_name="children", on_delete=models.SET_NULL)
 
-    def get_children(self):
-        return self.__class__.objects.filter(parent=self)
+    def get_children(self, require_published=True):
+        all_children = self.__class__.objects.filter(parent=self).order_by('order')
+        if require_published:
+            return [child for child in all_children if child.is_published()]
+        return all_children
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"

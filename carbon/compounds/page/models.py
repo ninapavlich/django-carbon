@@ -88,6 +88,7 @@ class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
     
     class Meta:
         abstract = True
+        ordering = ['order']
     
 
 

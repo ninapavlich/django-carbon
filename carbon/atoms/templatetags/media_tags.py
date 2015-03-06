@@ -2,7 +2,6 @@ from django.db.models import get_model
 from django.template import Library
 from django.core.urlresolvers import reverse
 
-from ..models import *
 
 register = Library()
 
