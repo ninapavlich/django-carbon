@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
 
+from reversion.admin import VersionAdmin
+
 from .models import *
 from .forms import *
 
@@ -11,7 +13,7 @@ from django_inline_wrestler.admin import TabularInlineOrderable
 
 
 
-class PageAdmin(HierarchicalContentAdmin):
+class PageAdmin(VersionAdmin, HierarchicalContentAdmin):
     form = PageAdminForm
 
     autocomplete_lookup_fields = HierarchicalContentAdmin.autocomplete_lookup_fields
@@ -92,8 +94,11 @@ class MenuItemInline(TabularInlineOrderable):
 
 
 class MenuItemAdmin(BaseVersionableAdmin):
-
+    def display_path(self, obj):
+        return obj.path
+        
     autocomplete_lookup_fields = {
+        'generic': [['content_type', 'object_id']],
         'fk': ('parent',),
     }
     raw_id_fields = ( 'parent',)
@@ -103,7 +108,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
         ('title','slug'),
         ('content_type', 'object_id',),
         ('path_override',),
-        ('path',),
+        ('display_path',),
         ('publication_status','css_classes',),
         ('target','extra_attributes')
     )
@@ -123,7 +128,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_parent')
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('display_path','edit_parent')
     # inlines = [MenuItemInline]
 
 

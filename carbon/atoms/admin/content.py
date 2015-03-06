@@ -1,12 +1,11 @@
 from django.contrib import admin
-import reversion
 
 from carbon.atoms.models.content import PublishableAtom
 
 
 
 
-class BaseVersionableAdmin(reversion.VersionAdmin):
+class BaseVersionableAdmin(admin.ModelAdmin):
 
     class Media:        
         css = {
@@ -52,7 +51,7 @@ class BaseVersionableAdmin(reversion.VersionAdmin):
 
 
 
-class BaseContentAdmin(reversion.VersionAdmin):
+class BaseContentAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': ('admin/css/adjustments.css',)
