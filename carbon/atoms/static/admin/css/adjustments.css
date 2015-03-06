@@ -2,3 +2,7 @@
 .grp-tabular .grp-table .grp-tbody .grp-td {
 	max-width: 278px;
 }
+.grp-tabular .grp-table .grp-thead .grp-th, 
+.grp-tabular .grp-table .grp-thead .grp-td {
+	width: 278px;
+}

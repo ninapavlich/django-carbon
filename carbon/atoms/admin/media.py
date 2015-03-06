@@ -40,6 +40,7 @@ class BaseImageAdmin(BaseVersionableAdmin):
         'caption',
 
     )
+    
 
     meta_fields = BaseVersionableAdmin.meta_fields
 

@@ -7,6 +7,7 @@ from carbon.atoms.admin.taxonomy import *
 from .models import *
 from .forms import *
 
+from django_inline_wrestler.admin import TabularInlineOrderable
 
 
 
@@ -69,7 +70,7 @@ class PageTagAdmin(BaseTagAdmin):
     pass
 
 
-class MenuItemInline(admin.TabularInline):
+class MenuItemInline(TabularInlineOrderable):
     #model = MenuItem
 
     def edit_item(self, obj):
@@ -87,8 +88,6 @@ class MenuItemInline(admin.TabularInline):
     }
     fields = ('order','title','content_type', 'object_id','path_override','edit_item',)
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_item',)
-
-    sortable_field_name = 'order'
     extra = 0
 
 

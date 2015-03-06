@@ -6,9 +6,10 @@ from carbon.atoms.admin.taxonomy import *
 from .models import *
 from .forms import *
 
+from django_inline_wrestler.admin import TabularInlineOrderable
 
 
-class BlogArticleRoleInline(admin.TabularInline):
+class BlogArticleRoleInline(TabularInlineOrderable):
     #model = BlogArticleRole
     autocomplete_lookup_fields = {
         'fk': ['user',],
