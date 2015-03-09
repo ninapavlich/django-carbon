@@ -11,6 +11,10 @@ from carbon.utils.slugify import unique_slugify
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
+#TODO
+# class ContentBlock():
+#     pass
+
 class Page(HierarchicalAtom, ContentMolecule):
 
     tags = models.ManyToManyField('page.PageTag', null=True, blank=True)
