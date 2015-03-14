@@ -19,7 +19,7 @@ class ClientMedia(SecureMediaMolecule):
     class Meta:
         abstract = True
 
-class ClientSetItem(OrderedItemMolecule):
+class ClientSetItem(VersionableAtom, OrderedItemAtom):
 
     # YOU MUST IMPLEMENT THIS:
     # category = models.ForeignKey('clientset.ClientSetCategory')

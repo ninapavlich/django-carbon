@@ -1,5 +1,6 @@
 import os
 import time
+import traceback
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -8,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.utils.deconstruct import deconstructible
 from django.utils.module_loading import import_by_path
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -35,7 +37,7 @@ def title_file_name( instance, filename ):
 
     file, extension = os.path.splitext( filename )    
     if instance.clean_filename_on_upload:
-        filename     = "%s%s"%(slugify(file[:245]), extension)
+        filename     = "%s%s"%(slugify(filename[:245]), extension)
         filename     = filename.lower()
 
     full_path = '/'.join( [ subfolder, filename ] )
@@ -144,8 +146,8 @@ class RichContentAtom(models.Model):
         try:
             field = getattr(self, variant_name)
             return field.url
-        except:
-            return None 
+        except Exception, err:
+            print traceback.format_exc()
 
     def get_variant_width(self, variant_name):
         try:

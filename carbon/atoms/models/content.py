@@ -349,19 +349,7 @@ class ModerationAtom(models.Model):
         abstract = True
 
 
-class OrderedItemMolecule(VersionableAtom,):
 
-    help = {
-        'order': "",
-    }
-
-    #When implementing, specify item and tag FKs:
-    #tag = models.ForeignKey('app.Model')
-    #item = models.ForeignKey('app.Model')
-    order = models.IntegerField(default=0, help_text=help['order'])
-
-    class Meta:
-        abstract = True  
 
 
 class ContentMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom, SocialSharingAtom, ContentAtom, HasImageAtom):
@@ -451,84 +439,3 @@ class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, Conte
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
 
-class TemplateMolecule(VersionableAtom):
-
-    help = {
-        'custom_template': "Override html template file with a custom template.",
-        'template':"Choose an existing html template file. This will be overwritten in custom template is filled in.",
-        'title':"",
-        'slug':"This slug can be referenced within templates: {% extends template-slug %}"
-    }
-
-    title = models.CharField(_('Page Title'), max_length=255, 
-        help_text=help['title'])
-    slug = models.CharField(_('Slug'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['slug'])
-
-    custom_template = models.TextField(_('custom template'), 
-        help_text=help['custom_template'], null=True, blank=True)
-    file_template = models.CharField(_('Template'), max_length=255, 
-        choices=get_page_templates(), null=True, blank=True,
-        help_text=help['template'])
-
-
-    @staticmethod
-    def autocomplete_search_fields():
-        return ("admin_note__icontains","title__icontains")
-
-    def get_content(self):
-        if self.custom_template:
-            return self.custom_template
-        elif self.file_template:
-            loader = FileSystemLoader(self.file_template)
-            source = loader.load_template_source(self.file_template)
-            return source[0]
-        return ''
-
-    def render(self, context):
-
-        file_templates = get_page_templates_raw()
-
-        
-        #Add DB Templates
-        all_templates = self.__class__.objects.all()
-        for template in all_templates:
-            key = 'template_%s'%(template.slug)
-            context[key] = DjangoTemplate(template.get_content())
-
-        if self.custom_template:
-            return DjangoTemplate(self.custom_template).render(context)
-        else:
-            template = loader.get_template(self.file_template)
-            return template.render(context)
-
-    def generate_slug(self):
-        unique_slugify(self, self.title, 'slug', None, '_')
-        return self.slug
-
-    def __unicode__(self):
-        return self.title
-
-    def save(self, *args, **kwargs):
-
-        if not self.title:
-            self.title = 'Untitled %s'%(self.__class__.__name__)
-
-        if not self.slug:
-            self.slug = self.generate_slug()
-
-        if self.slug:
-            self.slug = self.slug.replace("-", "_")
-
-        #Clear html template if custom content is defined
-        if self.custom_template != None and self.custom_template != '':
-            self.file_template = None
-
-        super(TemplateMolecule, self).save(*args, **kwargs)
-
-
-    class Meta:
-        ordering = ['title']
-        abstract = True
-
-   

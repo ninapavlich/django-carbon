@@ -41,6 +41,18 @@ class VersionableAtom(models.Model):
     # def __init__(self, *args, **kwargs):
     #     super(Versionable, self).save(*args, **kwargs)
 
+    def edit_item(self):
+        style="style='width:278px;display:block;'"
+        if self.pk:
+            
+            try:
+                object_type = type(self).__name__
+                url = reverse('admin:%s_%s_change' %(self._meta.app_label,  self._meta.model_name),  args=[self.id] )
+                return '<a href="%s" %s>Edit Item &gt;</a>'%(url, style)
+            except:
+                return '<span %s>&nbsp;</span>'%(style)
+        return '<span %s>&nbsp;</span>'%(style)        
+
     def get_children(self):
         return []
 
@@ -123,7 +135,59 @@ class HierarchicalAtom(models.Model):
 #         return search_class.objects.filter(object_id=parent.id, content_type=ContentType.objects.get_for_model(parent))
 
 
+# -- Level 1.5
+class TitleAtom(models.Model):
 
+    help = {
+        'title': "The display title for this object.",
+        'slug': "Auto-generated page slug for this object.",
+    }
+
+    title = models.CharField(_('Title'), max_length=255, 
+        help_text=help['title'], blank=True, null=True)
+
+    slug = models.CharField(_('Slug'), max_length=255, blank=True, 
+        unique=True, db_index=True, help_text=help['slug'])
+
+    class Meta:
+        abstract = True
+        ordering = ['title']
+
+    def __unicode__(self):
+        return self.title
+
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("title__icontains",)
+
+    def generate_slug(self):
+        unique_slugify(self, self.title)
+        return self.slug
+
+    def save(self, *args, **kwargs):
+
+        if not self.title:
+            self.title = 'Untitled %s'%(self.__class__.__name__)
+
+        if not self.slug:
+            self.slug = self.generate_slug()
+
+        super(TitleAtom, self).save(*args, **kwargs)
+
+
+class OrderedItemAtom(models.Model):
+
+    help = {
+        'order': "",
+    }
+
+    #When implementing, specify item and tag FKs:
+    #tag = models.ForeignKey('app.Model')
+    #item = models.ForeignKey('app.Model')
+    order = models.IntegerField(default=0, help_text=help['order'])
+
+    class Meta:
+        abstract = True  
 
 # -- Level 2
 class AddressibleAtom(models.Model):

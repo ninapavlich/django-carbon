@@ -14,8 +14,7 @@ class BaseVersionableAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-    )
-    
+    )   
 
     
     meta_fields = (
@@ -24,8 +23,6 @@ class BaseVersionableAdmin(admin.ModelAdmin):
         ('modified_date', 'modified_by'),
         'admin_note'
     )
-
-
 
     fieldsets = (
         
@@ -48,7 +45,24 @@ class BaseVersionableAdmin(admin.ModelAdmin):
 
 
 
+class BaseVersionableTitleAdmin(BaseVersionableAdmin):
 
+    core_fields = (
+        ('title','slug'),
+
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
 
 
 class BaseContentAdmin(admin.ModelAdmin):
@@ -232,25 +246,3 @@ class HierarchicalContentAdmin(BaseContentAdmin):
         })
     )
 
-class BaseTemplateAdmin(BaseVersionableAdmin):
-
-    prepopulated_fields = {"slug": ("title",)}
-
-    core_fields = (
-        ('title','slug'),
-        'file_template',
-        'custom_template',
-
-    )
-    meta_fields = BaseVersionableAdmin.meta_fields
-    fieldsets = (
-        ("Main Body", {
-            'fields': core_fields,
-            'classes': ( 'grp-collapse grp-open', )
-        }),
-        
-        ("Meta", {
-            'fields': meta_fields,
-            'classes': ( 'grp-collapse grp-closed', )
-        })
-    )    

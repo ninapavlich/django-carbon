@@ -73,16 +73,7 @@ class PageTagAdmin(BaseTagAdmin):
 
 
 class MenuItemInline(TabularInlineOrderable):
-    #model = MenuItem
-
-    def edit_item(self, obj):
-        if obj.pk:
-            object_type = type(obj).__name__
-            url = reverse('admin:%s_%s_change' %(obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
-
-            return '<a href="%s">Edit Children &amp; Extra Fields &gt;</a>'%(url)
-        return ''
-    edit_item.allow_tags = True
+    #model = MenuItem    
 
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
