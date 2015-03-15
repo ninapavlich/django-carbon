@@ -26,6 +26,7 @@ from django.utils.translation import ugettext_lazy as _
 from slimit import minify
 from csscompressor import compress
 import sass
+# import scss
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -157,7 +158,7 @@ class Template(VersionableAtom, TitleAtom):
         if self.custom_template != None and self.custom_template != '':
             self.file_template = None
 
-        super(TemplateMolecule, self).save(*args, **kwargs)
+        super(Template, self).save(*args, **kwargs)
 
 
     class Meta:
@@ -451,16 +452,27 @@ class CSSResource(BaseFrontendResource):
                 return ''
             else:
             
-                # try:
+                try:
+                    # scss.config.LOAD_PATHS = self.get_src_directories()
 
-                    
+                    # _scss_vars = {}
+                    # _scss = scss.Scss(
+                    #     scss_vars=_scss_vars,
+                    #     scss_opts={
+                    #         'compress': True,
+                    #         'debug_info': True,
+                    #     }
+                    # )
+
+                    # compiled = _scss.compile(source)
+
                     compiled = sass.compile(string=source,include_paths=self.get_src_directories())
-                    
                     return compiled
-                # except Exception, err:
-                #     error_message = 'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
-                #     print error_message
-                #     return error_message
+
+                except Exception, err:
+                    error_message = 'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
+                    print error_message
+                    return error_message
 
         #TODO -- add other compilation versions
 
@@ -543,9 +555,9 @@ def write_to_file(filename, directory, content):
         f.write(content)
 
 def get_package_contents(url, target_dir):
-    print 'get unzipped: %s'%(url)
+    # print 'get unzipped: %s'%(url)
     if not os.path.exists(target_dir):
-        print 'create package directory: %s'%(target_dir)
+        # print 'create package directory: %s'%(target_dir)
         os.makedirs(target_dir)
 
     temp_file_name = os.path.basename(url)
@@ -553,7 +565,7 @@ def get_package_contents(url, target_dir):
     
     
     if not os.path.exists(name):
-        print 'download file to %s'%(name)
+        # print 'download file to %s'%(name)
         try:
             name, hdrs = urllib.urlretrieve(url, name)
         except IOError, e:
@@ -581,7 +593,7 @@ def get_package_contents(url, target_dir):
         print "TODO -- add gzip support"
 
 def copy_directory(src, dest):
-    print 'copy from %s to %s'%(src, dest)
+    # print 'copy from %s to %s'%(src, dest)
     try:
         shutil.rmtree(dest)
     except shutil.Error as e:
