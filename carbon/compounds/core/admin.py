@@ -102,16 +102,39 @@ class CSSResourceAdmin(BaseFrontendResourceAdmin):
 class JSResourceAdmin(BaseFrontendResourceAdmin):
     form = JSResourceAdminForm
 
-class BaseFrontendResourceInline(TabularInlineOrderable):
-    fields = ('order','title', 'compiler','file_source_url','edit_item',)
+class BaseFrontendResourceInline(admin.StackedInline):
+    #fields = ('order','title', 'compiler','file_source_url','edit_item',)
     readonly_fields = BaseVersionableTitleAdmin.readonly_fields + ('edit_item',)
+    ordering = ("order",)
+    sortable_field_name = 'order'
+    core_fields = (
+        ('title','slug', 'order', 'edit_item'),
+        ('compiler', 'file_source_url', 'file_source_path'),
+    )
+    source_fields = (
+        'custom_source',
+    )
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Source", {
+            'fields': source_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+    ) 
+    classes = ('grp-collapse grp-open',)
+    prepopulated_fields = {"slug": ("title",)}
     
     extra = 0
 
 class CSSResourceInline(BaseFrontendResourceInline):
-    pass
+    form = CSSResourceAdminForm
+    prepopulated_fields = {"slug": ("title",)}
 
 class JSResourceInline(BaseFrontendResourceInline):
-    pass
+    form = JSResourceAdminForm
+    prepopulated_fields = {"slug": ("title",)}
     
 # admin.site.register(Template, TemplateAdmin)
