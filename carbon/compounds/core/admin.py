@@ -121,7 +121,7 @@ class BaseFrontendResourceInline(admin.StackedInline):
         }),
         ("Source", {
             'fields': source_fields,
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ( 'grp-collapse grp-open', )
         }),
     ) 
     classes = ('grp-collapse grp-open',)

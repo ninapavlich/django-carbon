@@ -227,7 +227,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         #return concatenated source files
         source = ''
         for child in self.get_children():
-            source += child.render()
+            source += '/* --- %s ---- */%s'%(child.slug, child.render())
+
 
         return source
 
@@ -344,7 +345,7 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         raw_source = self.get_source()
         raw_source_name = "%s.%s"%(self.slug, self.get_extension())
         if not self.is_source_package():
-            print 'store_raw_file: %s'%(self.slug)
+            # print 'store_raw_file: %s'%(self.slug)
             write_to_file(raw_source_name, self.get_temp_folder(), raw_source)        
 
     def get_extension(self):
@@ -594,10 +595,11 @@ def get_package_contents(url, target_dir):
 
 def copy_directory(src, dest):
     # print 'copy from %s to %s'%(src, dest)
-    try:
-        shutil.rmtree(dest)
-    except shutil.Error as e:
-        print('Directory not removed. Error: %s' % e)
+    if os.path.exists(dest):
+        try:
+            shutil.rmtree(dest)
+        except shutil.Error as e:
+            print('Directory not removed. Error: %s' % e)
 
     try:
         shutil.copytree(src, dest)
