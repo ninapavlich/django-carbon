@@ -385,6 +385,18 @@ class AddressibleAtom(models.Model):
                 pass
 
         return found_template
+
+    def edit_template(self):
+        style="style='width:278px;display:block;'"
+        if self.template:
+            
+            try:
+                object_type = type(self.parent).__name__
+                url = reverse('admin:%s_%s_change' %(self.template._meta.app_label,  self.template._meta.model_name),  args=[self.template.id] )
+                return '<a href="%s" %s>Edit Template &gt;</a>'%(url, style)
+            except:
+                return '<span %s>&nbsp;</span>'%(style)
+        return '<span %s>&nbsp;</span>'%(style)
     
 
     def save(self, *args, **kwargs):

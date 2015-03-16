@@ -66,6 +66,7 @@ class PageAdmin(VersionAdmin, HierarchicalContentAdmin):
         })
     )
 
+    # list_display = ( "parent", "admin_hierarchy", "hierarchy", "path",  "title", "publication_status",)
 
 
 class PageTagAdmin(BaseTagAdmin):
@@ -104,7 +105,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("hierarchy",)
 
-
+    
     list_display = ( "admin_hierarchy", "title", 'path', 'publication_status')
     list_display_links = ('title',)
     fieldsets = (

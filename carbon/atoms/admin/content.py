@@ -97,14 +97,15 @@ class BaseContentAdmin(admin.ModelAdmin):
     
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-         "path", "path_generated", "uuid", 'image_preview',
+         "path", "path_generated", "uuid", 'image_preview', 'edit_template'
     )
     
 
 
     core_fields = (
         ('title','slug'),
-        ('template', 'publication_status'),
+        ('publication_status'),
+        ('template', 'edit_template'),
         'content',
         'synopsis',
         ('image_preview','image')

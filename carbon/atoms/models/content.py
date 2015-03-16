@@ -93,8 +93,8 @@ class PublishableAtom(models.Model):
 class SEOAtom(models.Model):
    
     help = {
-        'page_meta_description': "A short description of the page, used for SEO and not displayed to the user.",
-        'page_meta_keywords': "A short list of keywords of the page, used for SEO and not displayed to the user.",
+        'page_meta_description': "A short description of the page, used for SEO and not displayed to the user; aim for 150-160 characters.",
+        'page_meta_keywords': "A short list of keywords of the page, used for SEO and not displayed to the user; aim for 150-160 characters.",
         'is_searchable': "Allow search engines to index this object and display in sitemap.",
         'in_sitemap':"Is in sitemap",
         'noindex':"Robots noindex",
