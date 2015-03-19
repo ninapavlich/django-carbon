@@ -56,6 +56,9 @@ class VersionableAtom(models.Model):
     def get_children(self):
         return []
 
+    def get_siblings(self):
+        return []
+
     def is_published(self):
         return True
 
@@ -81,6 +84,12 @@ class HierarchicalAtom(models.Model):
         if require_published:
             return [child for child in all_children if child.is_published()]
         return all_children
+
+    def get_siblings(self, require_published=True):
+        if self.parent:
+            return self.parent.get_children(require_published)
+        else:
+            return []
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"

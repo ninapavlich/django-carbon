@@ -70,6 +70,37 @@ class HasChildrenView(object):
             return self.object.get_children()
         except:
             return None
+
+    def get_siblings(self):
+
+        try:
+            return self.object.get_siblings()
+        except:
+            return None
+
+    def get_next_previous(self, siblings):
+        if siblings == None or len(siblings)==0:
+            return (None, None)
+
+        ids = list(siblings.values_list('id', flat=True))
+        try:
+            index = ids.index(self.object.id)
+        except:
+            index = None
+
+        next_item = None
+        previous_item = None
+        next_index = None
+        previous_index = None
+        if index:
+            next_index = (index + 1) if index < len(siblings)-1 else None
+            previous_index = (index -1 ) if index > 0 else None
+            
+        if next_index:
+            next_item = siblings[next_index]
+        if previous_index:
+            previous_item = siblings[previous_index]
+        return (next_item, previous_item)
     
 
     def post(self, request, *args, **kwargs):
@@ -91,9 +122,20 @@ class HasChildrenView(object):
             self.object = self.get_object()
 
         try:
-            self.object_list = self.get_children()
+            children = self.get_children()
+            self.object_list = children
         except:
-           self.object_list = None      
+           self.object_list = None 
+
+        try:
+            siblings = self.get_siblings()
+            next, previous = self.get_next_previous(siblings)
+        except:
+           siblings = []
+           next = None
+           previous = Non  
+
+
 
         return super(HasChildrenView, self).get(request, *args, **kwargs)
 
@@ -105,6 +147,10 @@ class HasChildrenView(object):
             context['page_obj'] = page
             context['is_paginated'] = is_paginated
             context['object_list'] = queryset
+            context['children'] = children
+            context['siblings'] = queryset
+            context['next'] = next
+            context['previous'] = previous
 
         return context
 

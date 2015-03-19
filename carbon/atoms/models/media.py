@@ -205,7 +205,8 @@ class RichContentAtom(models.Model):
 class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
 
     help = {
-        'alt':"Alt text",
+        'alt':"Alt text (very important for SEO)",
+        'use_png':"Render image as png instead of jpg when possible"
     }
 
    
@@ -223,7 +224,7 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
         options={'quality': settings.IMAGE_THUMBNAIL_QUALITY})
 
     use_png = models.BooleanField( default = False, 
-        verbose_name='Use .PNG (instead of .JPG)')
+        verbose_name='Use .PNG (instead of .JPG)', help_text=help['use_png'])
 
     class Meta:
         abstract = True

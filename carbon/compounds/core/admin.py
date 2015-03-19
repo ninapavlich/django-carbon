@@ -136,5 +136,59 @@ class CSSResourceInline(BaseFrontendResourceInline):
 class JSResourceInline(BaseFrontendResourceInline):
     form = JSResourceAdminForm
     prepopulated_fields = {"slug": ("title",)}
-    
+
+
+
+class AdminAppLinkInline(TabularInlineOrderable):
+
+    # model = AdminLinkItem
+    ordering = ("order",)
+    extra = 0
+    fieldsets = (
+        ( 'Links', { 'fields': ( 'order', 'model_path', ) } ),
+    )
+
+class AdminLinkInline(TabularInlineOrderable):
+
+    # model = AdminLink
+    ordering = ("order",)
+    extra = 0
+    fieldsets = (
+        ( 'Links', { 'fields': ( 'order', 'title', 'url') } ),
+    )    
+  
+class AdminAppGroupAdmin(VersionAdmin, BaseVersionableAdmin):
+    #inlines = [AdminAppLinkInline]
+    core_fields = (
+        ('title',),
+    )
+    meta_fields = BaseVersionableTitleAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    ) 
+
+class AdminSidebarAdmin(VersionAdmin, BaseVersionableAdmin):
+    #inlines = [AdminLinkInline]
+    core_fields = (
+        ('title',),
+    )
+    meta_fields = BaseVersionableTitleAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    ) 
+
 # admin.site.register(Template, TemplateAdmin)

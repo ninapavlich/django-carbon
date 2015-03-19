@@ -171,3 +171,7 @@ def data_verbose(boundField):
         field = boundField.field    
         return hasattr(field, 'choices') and dict(field.choices).get(value,'') or value
     return None
+
+@register.assignment_tag()
+def get_sorted(list, attribute, reverse=False):
+    return sorted(list, key=lambda x: getattr(x, attribute), reverse=reverse)

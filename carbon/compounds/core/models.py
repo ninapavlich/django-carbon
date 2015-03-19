@@ -414,7 +414,7 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         return '%s - %s'%(self.title, self.slug)
 
     class Meta:
-    	ordering = ['order']
+        ordering = ['order']
         abstract = True
 
 class CSSResource(BaseFrontendResource):
@@ -609,3 +609,51 @@ def copy_directory(src, dest):
     # Any error saying that the directory doesn't exist
     except OSError as e:
         print('Directory not copied. Error: %s' % e)        
+
+class AdminAppGroup( VersionableAtom, AddressibleAtom ):
+    class Meta:
+        abstract = True
+
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        return self.item_class.objects.filter(parent=self).order_by('order')
+
+class AdminAppLink(VersionableAtom, AddressibleAtom):
+
+    parent = models.ForeignKey('AdminAppGroup', blank = True, null = True)
+
+    help = {
+        'model_path': "e.x. blog.models.BlogArticle",
+    }
+
+    model_path = models.CharField(_("Model Path"), max_length = 255, blank = False,
+        db_index=True, help_text=help['model_path'])    
+
+
+
+    class Meta:
+        abstract = True
+
+class AdminSidebar( VersionableAtom, AddressibleAtom ):
+    class Meta:
+        abstract = True
+
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        return self.item_class.objects.filter(parent=self).order_by('order')
+
+class AdminLink(VersionableAtom, AddressibleAtom):
+
+    parent = models.ForeignKey('AdminSidebar', blank = True, null = True)
+
+    help = {
+        'url': "",
+    }
+
+    url = models.CharField(_("URL"), max_length = 255, blank = False,
+        db_index=True, help_text=help['url'])      
+
+    class Meta:
+        abstract = True        
