@@ -4,12 +4,14 @@ import sys
 
 from django.db import models
 from django.db.models.loading import get_model
+from django.db.models.query import QuerySet
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
+
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -90,6 +92,62 @@ class HierarchicalAtom(models.Model):
             return self.parent.get_children(require_published)
         else:
             return []
+
+    def get_next_sibling(self, siblings=None, require_published=True):
+        if siblings == None:
+            siblings = self.get_siblings(require_published)
+
+        if len(siblings)==0:
+            return None
+
+        if isinstance(siblings, QuerySet):
+            ids = list(siblings.values_list('id', flat=True))
+        else:
+            ids = [sibling.id for sibling in siblings]
+
+        try:
+            index = ids.index(self.id)
+        except:
+            index = None
+
+        next_item = None
+        next_index = None
+        if index:
+            next_index = (index + 1) if index < len(siblings)-1 else None
+            
+        if next_index:
+            next_item = siblings[next_index]
+        
+
+        return next_item
+
+    def get_previous_sibling(self, siblings=None, require_published=True):
+        if siblings == None:
+            siblings = self.get_siblings(require_published)
+
+        if len(siblings)==0:
+            return None
+
+        if isinstance(siblings, QuerySet):
+            ids = list(siblings.values_list('id', flat=True))
+        else:
+            ids = [sibling.id for sibling in siblings]
+
+        try:
+            index = ids.index(self.id)
+        except:
+            index = None
+
+        previous_item = None
+        previous_index = None
+        if index:
+            previous_index = (index -1 ) if index > 0 else None
+            
+        if previous_index:
+            previous_item = siblings[previous_index]
+        
+        return previous_item
+
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"

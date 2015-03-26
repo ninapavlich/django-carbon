@@ -156,7 +156,7 @@ class SEOAtom(models.Model):
 class SocialSharingAtom(models.Model):  
 
     help = {
-        'sharable': "Is URL a sharable URL",
+        'shareable': "Show sharing widget",
         'tiny_url': "Tiny URL used for social sharing",
         'social_share_image': "Standards for the social share image vary, but an image at least 300x200px should work well.",
         'facebook_author_id': "Numeric Facebook ID",
@@ -194,8 +194,8 @@ class SocialSharingAtom(models.Model):
     )
 
     #SOCIAL
-    sharable = models.BooleanField(default=False, 
-        help_text=help['sharable'])
+    shareable = models.BooleanField(default=False, 
+        help_text=help['shareable'])
     tiny_url = models.CharField(_('tiny url'), max_length=255, 
         help_text=help['tiny_url'], null=True, blank=True)
 

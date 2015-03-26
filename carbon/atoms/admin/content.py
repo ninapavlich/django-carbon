@@ -88,7 +88,7 @@ class BaseContentAdmin(admin.ModelAdmin):
             "publication_status", "created_by", "modified_by", 
             'published_by','is_searchable','in_sitemap',
             'sitemap_changefreq','sitemap_priority','noindex','nofollow',
-            'sharable','social_share_type')
+            'shareable','social_share_type')
     ordering = ("hierarchy",)
 
 
@@ -136,7 +136,7 @@ class BaseContentAdmin(admin.ModelAdmin):
     )
 
     social_fields = (
-        ('sharable','social_share_type'),
+        ('shareable','social_share_type'),
         'tiny_url',
         'social_share_image',        
     )

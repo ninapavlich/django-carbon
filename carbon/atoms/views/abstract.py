@@ -9,6 +9,8 @@ from django.views.generic.detail import SingleObjectMixin
 from django.template import loader, Context, RequestContext, Template
 from django.template.response import SimpleTemplateResponse
 
+
+
 from .decorators import admins_skip_cache, users_skip_cache
 
 
@@ -79,28 +81,7 @@ class HasChildrenView(object):
             return None
 
     def get_next_previous(self, siblings):
-        if siblings == None or len(siblings)==0:
-            return (None, None)
-
-        ids = list(siblings.values_list('id', flat=True))
-        try:
-            index = ids.index(self.object.id)
-        except:
-            index = None
-
-        next_item = None
-        previous_item = None
-        next_index = None
-        previous_index = None
-        if index:
-            next_index = (index + 1) if index < len(siblings)-1 else None
-            previous_index = (index -1 ) if index > 0 else None
-            
-        if next_index:
-            next_item = siblings[next_index]
-        if previous_index:
-            previous_item = siblings[previous_index]
-        return (next_item, previous_item)
+        return (self.object.get_next_sibling(siblings), self.object.get_previous_sibling(siblings))
     
 
     def post(self, request, *args, **kwargs):
@@ -109,9 +90,14 @@ class HasChildrenView(object):
             self.object = self.get_object()
 
         try:
-            self.object_list = self.get_children()
+            children = self.get_children()
+            self.object_list = children
+            self.children = children
         except:
-            self.object_list = None 
+           self.object_list = None 
+
+        self.siblings = self.get_siblings()
+        self.next, self.previous = self.get_next_previous(self.siblings)
 
         return super(HasChildrenView, self).post(request, *args, **kwargs)
 
@@ -124,16 +110,12 @@ class HasChildrenView(object):
         try:
             children = self.get_children()
             self.object_list = children
+            self.children = children
         except:
            self.object_list = None 
 
-        try:
-            siblings = self.get_siblings()
-            next, previous = self.get_next_previous(siblings)
-        except:
-           siblings = []
-           next = None
-           previous = Non  
+        self.siblings = self.get_siblings()
+        self.next, self.previous = self.get_next_previous(self.siblings)
 
 
 
@@ -147,10 +129,10 @@ class HasChildrenView(object):
             context['page_obj'] = page
             context['is_paginated'] = is_paginated
             context['object_list'] = queryset
-            context['children'] = children
-            context['siblings'] = queryset
-            context['next'] = next
-            context['previous'] = previous
+            context['children'] = self.children
+            context['siblings'] = self.siblings
+            context['next'] = self.next
+            context['previous'] = self.previous
 
         return context
 
