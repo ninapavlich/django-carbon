@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import errno
 import re
@@ -7,6 +8,7 @@ import traceback
 import sys
 import shutil
 import zipfile
+import codecs
 
 
 from django.db import models
@@ -72,19 +74,19 @@ def source_file_name( instance, filename ):
     return full_path
 
 def minified_file_name( instance, filename ):
-    print 'mininifed file name: %s'%(filename)
+    # print 'mininifed file name: %s'%(filename)
     
     subfolder = (instance.__class__.__name__).lower()
 
-    print 'subfolder? %s'%(subfolder)
+    # print 'subfolder? %s'%(subfolder)
 
     file, extension = os.path.splitext( filename )   
-    print 'file %s extension %s'%(file, extension) 
+    # print 'file %s extension %s'%(file, extension) 
     #if instance.clean_filename_on_upload:
     filename     = "%s%s%s"%(slugify(filename[:245]), '.min', extension)
     filename     = filename.lower()
 
-    print 'finally? %s'%(filename)
+    # print 'finally? %s'%(filename)
 
     full_path = '/'.join( [ subfolder, filename ] )
 
@@ -227,8 +229,13 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         #return concatenated source files
         source = ''
         for child in self.get_children():
-            source += '/* --- %s ---- */%s'%(child.slug, child.render())
+            rendered = child.render()
+            # .decode('utf-8')
+            source += u'/* --- %s ---- */%s'%(child.slug.decode("utf-8"), rendered.decode("utf-8"))
 
+
+        # unicode_src = source.decode('ascii')
+        # utf8_src = unicode_src.encode('utf-8')
 
         return source
 
@@ -333,7 +340,6 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
                 copy_directory(self.get_package_original_source_folder(), self.get_package_source_folder())
 
-                return ''
             else:
                 response = urllib2.urlopen(self.file_source_url)
                 return response.read()
@@ -552,8 +558,13 @@ def write_to_file(filename, directory, content):
     if not os.path.exists(file_path):
         open(file_path, 'w').close()
 
-    with open(file_path, 'w+') as f:
+    # encoded = content.encode('utf-8', ignore)
+    try:
+        f = codecs.open(file_path, 'w+',encoding='utf-8')
         f.write(content)
+    except Exception, err:
+        error_message = 'Error storing file %s: %s - %s'%(file_path, traceback.format_exc(), sys.exc_info()[0])
+        print error_message
 
 def get_package_contents(url, target_dir):
     # print 'get unzipped: %s'%(url)
