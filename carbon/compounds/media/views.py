@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.db.models.loading import get_model
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.views.generic.base import TemplateView
 
 
@@ -38,12 +38,16 @@ class BasePickerView(ListView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(BaseAdminImageMediaPickerView, self).dispatch(*args, **kwargs)
+        return super(BasePickerView, self).dispatch(*args, **kwargs)
 
 class ImagePickerView(BasePickerView):
     template_name = "admin/media/image_picker.html"
-
     model = get_model(settings.IMAGE_MODEL.split('.')[0], settings.IMAGE_MODEL.split('.')[1])
+
+class ImagePickerVariantView(DetailView):
+    template_name = "admin/media/image_variants.html"
+    model = get_model(settings.IMAGE_MODEL.split('.')[0], settings.IMAGE_MODEL.split('.')[1])
+
 
 
 class ImageBatchView(TemplateView):      

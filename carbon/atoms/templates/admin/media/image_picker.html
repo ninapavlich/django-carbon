@@ -3,6 +3,16 @@
 
 {% block title %}Image Picker{{ block.super }}{% endblock %}
 
+
+{% block breadcrumbs %}
+    <ul>
+        <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+        <li><a href="{% url 'admin:app_list' app_label='media' %}">{% trans 'Media' %}</a></li>
+        <li><a href="{% url 'admin:media_image_changelist' %}">{% trans 'Image' %}</a></li>
+        <li>{% trans 'Image Picker' %}</li>        
+    </ul>
+{% endblock %}
+
 {% block content %}
 
 <header id="grp-content-title">
@@ -21,7 +31,7 @@
         <div class="l-2cr-fluid {% if cl.has_filters and cl.search_fields %}l-d-12{% else %}{% if cl.has_filters or cl.search_fields %}l-d-6{% endif %}{% endif %}">
             <aside class="c-1">
                 <header style="display:none"><h1>{% trans "Search" %}</h1></header>
-                <div id="search" class="g-d-6 g-d-f">
+                <div id="search" class="g-d-f">
                     <form id="grp-changelist-search" action="" method="get">
                         <input type="text" name="q" id="grp-changelist-search" class="grp-search-field" value="{{ request.GET.q }}" palceholder="Search"/>
                         <button type="submit" value="" class="grp-search-button"></button>   
@@ -44,8 +54,8 @@
     {% for object in object_list %}
 
 
+        
         {% cache 86400 'admin_image_picker' object.pk %}
-   
         <figure data-credit="{{ object.credit }}" class="g-d-6">
             <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
 
@@ -56,18 +66,18 @@
                 <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}"/><br />
             </div>
             
-            <p class="picker-links">  
-            {% get_variant_links object as variants %}
-            {{variants|safe}}
-            </p>
+            <a href="{% url 'admin_imagepicker_variant_view' object.id %}" data-target='#{{object.id}}_variant_container' class='variant-link'>Click to load image variants</a>
+            <div id="{{object.id}}_variant_container">
+                <!-- variants load here...-->
+            </div>
             
             {% endif %}
 
-            <p class="admin-note"><em>{{object.admin_note|safe}}</em></p>
+            {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
             <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
         </figure>
-        
         {% endcache %}
+
 
     {% if forloop.counter|divisibleby:4 %}
     </div>
@@ -155,6 +165,19 @@
         max-width: 940px;
         width:100%;
     }
+    .variant-link{
+
+    }
+    .variant-link.loading{
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+        filter: alpha(opacity=50);
+        -moz-opacity: 0.5;
+        -khtml-opacity: 0.5;
+        opacity: 0.5;
+    }
+    .variant-link.loaded{
+        display:none;
+    }
 
     @media (max-width: 600px) {
         .g-d-6{
@@ -166,28 +189,51 @@
 </style>    
 <script>
     (function($) {
-        $('.picker-links a').click(function(e){
-            var img = e.currentTarget;
 
-            window.opener.CKEDITOR.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
-                // -- Set the Image Alt Tag via Caption
-                var dialog = this.getDialog();
-                var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
-                var caption_text = $(img).data("caption");
-                var credit_text = $(img).data("credit");
-                var use_caption = caption_text? credit_text? caption_text+" - "+credit_text : caption_text : credit_text? credit_text : '';
+        function initPickerLinks(){
 
-                var alt_element = dialog.getContentElement( 'info', 'txtAlt' );
-                if(alt_element){
-                    alt_element.setValue(alt_text);
-                }
+            $('.picker-links a:not(.inited)').click(function(e){
+                var img = e.currentTarget;
+                $(e).addClass("inited");
+                console.log("init picker link...")
 
-                var caption_element = dialog.getContentElement( 'info', 'caption' );
-                if(caption_element){
-                    caption_element.setValue(use_caption);
-                }
+                window.opener.CKEDITOR.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
+                    // -- Set the Image Alt Tag via Caption
+                    var dialog = this.getDialog();
+                    var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
+                    var caption_text = $(img).data("caption");
+                    var credit_text = $(img).data("credit");
+                    var use_caption = caption_text? credit_text? caption_text+" - "+credit_text : caption_text : credit_text? credit_text : '';
+
+                    var alt_element = dialog.getContentElement( 'info', 'txtAlt' );
+                    if(alt_element){
+                        alt_element.setValue(alt_text);
+                    }
+
+                    var caption_element = dialog.getContentElement( 'info', 'caption' );
+                    if(caption_element){
+                        caption_element.setValue(use_caption);
+                    }
+                });
+                window.close();
             });
-            window.close();
+
+        }
+        
+        $('a.variant-link').click(function(e){
+            e.preventDefault();
+
+            var url = e.target;
+            var div_target = $(e.target).attr('data-target');
+            
+            $(e.target).addClass("loading");
+            $.get( url, function(data) {
+                $(e.target).removeClass("loading");
+                $(e.target).addClass("loaded");
+                $(div_target).html( data );
+                initPickerLinks();
+            });
+
         });
 
         // -- Helper Functions
