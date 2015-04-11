@@ -2,9 +2,33 @@ from django.db.models import get_model
 from django.template import Library
 from django.core.urlresolvers import reverse
 from django.db.models.loading import get_model
+from django.conf import settings
 
+from ..models import *
 
 register = Library()
+
+
+@register.assignment_tag()
+def get_link_descendants(slug):
+    """
+    This tag gets the children and (if they're there) grandchildren of a link item.
+    """
+
+    output = []
+    app_label = settings.MENU_MODEL.split('.')[0]
+    object_name = settings.MENU_MODEL.split('.')[1]
+    model = get_model(app_label, object_name)
+    children = model.objects.filter(parent__slug=slug).order_by('order')
+    children = [child for child in children if child.is_published()]
+
+    for child in children:
+        output.append({
+            'item':child,
+            'children':get_link_descendants(child.slug)
+        })
+    return output
+
 
 
 @register.assignment_tag()

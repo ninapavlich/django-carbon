@@ -9,5 +9,3 @@ class PageAdminForm(forms.ModelForm):
         model = Page
 
 
-class UploadFileForm(forms.Form):
-    file  = forms.FileField(required=True)

@@ -1,0 +1,59 @@
+{% extends 'admin/base.html' %}
+
+{% load i18n %}
+
+{% block title %}Import File{{ block.super }}{% endblock %}
+
+
+{% block breadcrumbs %}
+    <ul>
+        <li><a href="/admin/">{% trans 'Home' %}</a></li>
+        <li>{% trans 'Import Legacy Links' %}</li>        
+    </ul>
+{% endblock %}
+{% block content %}
+     
+
+
+    {% if form.errors %}
+    {{ form.errors }}
+    {% endif %}
+
+    <form method="post" action="." role="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+
+        <fieldset class="grp-module">
+            <h2 class="grp-collapse-handler">Import Legacy Links with CSV File</h2>
+            <p style="padding:10px;">Use <a href="http://peacockmedia.co.uk/integrity/" target="_blank">Integrity Link Checker</a> to generate a .csv list of links from your current site. Click here to see current <a href="{% url 'admin:core_legacyurl_changelist' %}">legacy links</a>.</p>
+            
+            <div class="grp-row grp-cells-1 image">
+                <div class="l-2c-fluid l-d-4">                    
+                    <div class="c-1">
+                        {{form.file}}
+                    </div>
+                </div>
+            </div>
+
+        </fieldset>
+
+        <!-- Submit-Row -->
+
+        <footer class="grp-module grp-submit-row grp-fixed-footer">
+            
+            <ul>               
+
+                <li>
+                    <input class="grp-button" type="submit" value="Import">
+                </li>
+            </ul>
+        </footer><!-- JS for prepopulated fields -->
+
+        
+    </form>
+    
+    
+</form><!-- FOOTER -->
+    
+{% endblock %}
+

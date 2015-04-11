@@ -9,7 +9,9 @@ import sys
 import shutil
 import zipfile
 import codecs
-
+import csv
+import httplib2
+from bs4 import BeautifulSoup
 
 from django.db import models
 from django.conf import settings
@@ -23,6 +25,8 @@ from django.utils.text import slugify
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.generic import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 #CSS/JS libs
 from slimit import minify
@@ -34,71 +38,301 @@ from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
 
 from carbon.atoms.models.abstract import *
+from carbon.atoms.models.content import *
 
-def title_file_name( instance, filename ):
+
+
+
+class LegacyURLReferer(VersionableAtom):
+
+    help = {
+        'legacy_url': "",
+        'referer_title': "",
+        'referer_url': "",
+    }
+
+   
+    #legacy_url = models.ForeignKey('LegacyURL')
+
+    referer_title = models.CharField(_('Referer Title'), max_length=255, 
+        help_text=help['referer_title'], blank=True, null=True)
+
+    referer_url = models.CharField(_('Referer URL'), max_length=255, 
+        help_text=help['referer_url'], blank=True, null=True)
+
+
+    class Meta:
+        abstract = True
+
+class LegacyURL(VersionableAtom, AddressibleAtom):
+
+    help = {
+        'url': "",
+    }
+
+    url = models.CharField(_("URL"), max_length = 255, blank = False,
+        db_index=True)
+   
+    #Point to an object
+    try:
+        content_type = models.ForeignKey(ContentType, 
+            limit_choices_to={"model__in": settings.LEGACY_URL_CHOICES}, 
+            null=True, blank=True)
+    except:
+        content_type = models.ForeignKey(ContentType, null=True, blank=True)
+
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     
-    subfolder = (instance.__class__.__name__).lower()
+    class Meta:
+        abstract = True        
 
-    file, extension = os.path.splitext( filename )    
-    #if instance.clean_filename_on_upload:
-    #filename     = "%s%s"%(slugify(filename[:245]), extension)
-    filename     = filename.lower()
+    def get_children(self):
+        return []
 
-    full_path = '/'.join( [ subfolder, filename ] )
+    @property
+    def has_redirect_url(self):
+        url = self.get_redirect_url()
+        if url:
+            return True
+        return False
 
-    #if instance.allow_overwrite==True:
-    if hasattr(instance, 'file_source') and instance.file_source.storage.exists(full_path):
-        instance.file_source.storage.delete(full_path)
+    def get_redirect_url(self):
+        if self.path:
+            return self.path
+        return self.compute_get_redirect_url()  
 
-    #if instance.allow_overwrite==True:
-    if hasattr(instance, 'file_minified') and instance.file_minified.storage.exists(full_path):
-        instance.file_minified.storage.delete(full_path)
+    def generate_path(self):
+        if self.path_override:
+            return self.path_override
+        if self.content_object:
+            try:
+                url = self.content_object.get_absolute_url()
+                return url
+            except:
+                print "ERROR RETRIEVING ABSOLUTE URL From %s"%(self.content_object)         
         
-    return full_path
+        return None
 
-def source_file_name( instance, filename ):
+    @staticmethod
+    def autocomplete_search_fields():
+        return ("id__iexact", "url__icontains", "title__icontains",)
+
+    @classmethod
+    def import_links(cls, file, request=None):
+
+        try:
+            ignore_files = settings.LEGACY_URL_IGNORE_LIST
+            legacy_domain = settings.LEGACY_URL_ARCHIVE_DOMAIN
+            legacy_domain_ssl = settings.LEGACY_URL_ARCHIVE_DOMAIN.replace("http://", "https://")
+        except:
+            ignore_files = []
+            legacy_domain = None
+            legacy_domain_ssl = None
+        
+        print legacy_domain
+
+        if legacy_domain or legacy_domain_ssl:
+             # try:
+                
+
+            
+            items_found = 0
+
+            ctr = 0
+            for row in csv.reader(file.read().splitlines()):
+
+                #dont read from first row -- which contains column titles
+                if ctr > 0:
+
+                    status_check    = row[0].lower()
+                    url             = row[1]
+                    referer         = row[2]
+                    
+                    if legacy_domain in url or legacy_domain_ssl in url:
+                        
+                        is_allowed = True
+                        for piece in ignore_files:
+                            if piece in url:
+                                is_allowed = False
+
+                        if is_allowed:
+
+                            items_found     += 1
+                                                    
+                            http = httplib2.Http()
+                            status, response = http.request(url)
+                            soup = BeautifulSoup(response)  
+                            try:
+                                page_title = soup.title.string.strip()
+                            except:
+                                page_title == "Untitled %s"%(url)
+                                
+                            print "%s (%s)"%(url, page_title)
+                            legacy_link = cls.create_legacy_url(url, page_title)
+                            
+
+                ctr += 1
+
+            return '%s links parsed' % (items_found)
+            # except Exception, e:
+            #     return "There was an error reading the .csv file: %s"%(e)
+        else:
+            return "LEGACY_URL_ARCHIVE_DOMAIN not specified in settings"
+
+    @classmethod
+    def create_legacy_url(cls, target_url, target_name, referer_url=None, referer_title=None):
+        
+        path = cls.clean_path(target_url)
+        
+        if path:
+            link, link_created = cls.objects.get_or_create(url=path)
+
+            if link_created or path != target_name:
+                link.title = target_name
+                link.save()
+
+
+            if referer_url:
+                referer_link, referer_created = cls.objects.get_or_create(legacy_url=link,referer_url=referer_url)
+                if referer_created:
+                    if settings.DEBUG:
+                        print "Create new referer %s %s to %s"%(referer_title, referer_url, target_url)
+                    referer_link.referer_title = referer_title
+                    referer_link.save()
+
+            return link
+
+        return None
+
+    @classmethod
+    def add_referer(cls, referer_url, referer_title, target_url):
+
+        path = cls.clean_path(target_url)
+        if path:
+            legacy_link = cls.create_legacy_url(path, path, referer_url, referer_title)
+            return legacy_link
+        return None
+
+    @classmethod
+    def clean_path(cls, url):
+
+        legacy_domain = settings.LEGACY_URL_ARCHIVE_DOMAIN
+        legacy_domain_ssl = settings.LEGACY_URL_ARCHIVE_DOMAIN.replace("http://", "https://")
+
+        path = url
+        path = path.replace(legacy_domain, '')
+        path = path.replace(legacy_domain_ssl, '')
+
+        if 'http' in path:
+            #print "Must be a different domain %s"%(path)
+            return None
+
+        if path == '' or path == None or path == '#':
+            return None
+
+        #Make sure path includes starting /
+        if path.startswith('/') == False:
+            path = '/%s'%path
+
+        return path
+
+########################################################################
+## MENU GROUPS #########################################################
+########################################################################
+
+
+class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
+    publish_by_default = True
+
+    help = {
+    }
+
     
-    subfolder = (instance.__class__.__name__).lower()
+    #Point to an object
+    try:
+        content_type = models.ForeignKey(ContentType, 
+            limit_choices_to={"model__in": settings.MENU_MODEL_CHOICES}, 
+            null=True, blank=True)
+    except:
+        content_type = models.ForeignKey(ContentType, null=True, blank=True)
 
-    file, extension = os.path.splitext( filename )    
-    #if instance.clean_filename_on_upload:
-    filename     = "%s%s"%(slugify(filename[:245]), extension)
-    filename     = filename.lower()
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
-    full_path = '/'.join( [ subfolder, filename ] )
-
-    #if instance.allow_overwrite==True:
-    if instance.file_source.storage.exists(full_path):
-        instance.file_source.storage.delete(full_path)
+    def generate_path(self):
+        if self.content_object:
+            if hasattr(self.content_object, 'get_absolute_url'):
+                return self.content_object.get_absolute_url()
         
-    return full_path
+        return self.path_override
 
-def minified_file_name( instance, filename ):
-    # print 'mininifed file name: %s'%(filename)
+
+    def get_link(self):
+        '<a href="%s" target="%s" class="%s" %s>%s</a>'%(self.get_path, self.target, self.css_classes, self.title, self.extra_attributes)
+
+
     
-    subfolder = (instance.__class__.__name__).lower()
+    class Meta:
+        abstract = True
+        ordering = ['order']
+    
 
-    # print 'subfolder? %s'%(subfolder)
 
-    file, extension = os.path.splitext( filename )   
-    # print 'file %s extension %s'%(file, extension) 
-    #if instance.clean_filename_on_upload:
-    filename     = "%s%s%s"%(slugify(filename[:245]), '.min', extension)
-    filename     = filename.lower()
+class AdminAppGroup( VersionableAtom, AddressibleAtom ):
+    class Meta:
+        abstract = True
 
-    # print 'finally? %s'%(filename)
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        return self.item_class.objects.filter(parent=self).order_by('order')
 
-    full_path = '/'.join( [ subfolder, filename ] )
+class AdminAppLink(VersionableAtom, AddressibleAtom):
 
-    #if instance.allow_overwrite==True:
-    if instance.file_minified.storage.exists(full_path):
-        instance.file_minified.storage.delete(full_path)
-        
-    return full_path
+    parent = models.ForeignKey('AdminAppGroup', blank = True, null = True)
 
-def get_storage():
-    storage = import_by_path(settings.MEDIA_STORAGE)()
-    return storage
+    help = {
+        'model_path': "e.x. blog.models.BlogArticle",
+    }
+
+    model_path = models.CharField(_("Model Path"), max_length = 255, blank = False,
+        db_index=True, help_text=help['model_path'])    
+
+
+
+    class Meta:
+        abstract = True
+
+class AdminSidebar( VersionableAtom, AddressibleAtom ):
+    class Meta:
+        abstract = True
+
+    def get_children(self):
+        if not self.item_class:
+            raise NotImplementedError('Class should specify an item_class value')
+        return self.item_class.objects.filter(parent=self).order_by('order')
+
+class AdminLink(VersionableAtom, AddressibleAtom):
+
+    parent = models.ForeignKey('AdminSidebar', blank = True, null = True)
+
+    help = {
+        'url': "",
+    }
+
+    url = models.CharField(_("URL"), max_length = 255, blank = False,
+        db_index=True, help_text=help['url'])      
+
+    class Meta:
+        abstract = True    
+
+
+
+########################################################################
+## TEMPLATES AND RESOURCES #############################################
+########################################################################
 
 class Template(VersionableAtom, TitleAtom):
 
@@ -167,7 +401,34 @@ class Template(VersionableAtom, TitleAtom):
         ordering = ['title']
         abstract = True
 
-  
+
+
+def title_file_name( instance, filename ):
+    
+    subfolder = (instance.__class__.__name__).lower()
+
+    file, extension = os.path.splitext( filename )    
+    #if instance.clean_filename_on_upload:
+    #filename     = "%s%s"%(slugify(filename[:245]), extension)
+    filename     = filename.lower()
+
+    full_path = '/'.join( [ subfolder, filename ] )
+
+    #if instance.allow_overwrite==True:
+    if hasattr(instance, 'file_source') and instance.file_source.storage.exists(full_path):
+        instance.file_source.storage.delete(full_path)
+
+    #if instance.allow_overwrite==True:
+    if hasattr(instance, 'file_minified') and instance.file_minified.storage.exists(full_path):
+        instance.file_minified.storage.delete(full_path)
+        
+    return full_path
+
+
+def get_storage():
+    storage = import_by_path(settings.MEDIA_STORAGE)()
+    return storage
+
 class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
     help = {
@@ -621,50 +882,4 @@ def copy_directory(src, dest):
     except OSError as e:
         print('Directory not copied. Error: %s' % e)        
 
-class AdminAppGroup( VersionableAtom, AddressibleAtom ):
-    class Meta:
-        abstract = True
-
-    def get_children(self):
-        if not self.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
-        return self.item_class.objects.filter(parent=self).order_by('order')
-
-class AdminAppLink(VersionableAtom, AddressibleAtom):
-
-    parent = models.ForeignKey('AdminAppGroup', blank = True, null = True)
-
-    help = {
-        'model_path': "e.x. blog.models.BlogArticle",
-    }
-
-    model_path = models.CharField(_("Model Path"), max_length = 255, blank = False,
-        db_index=True, help_text=help['model_path'])    
-
-
-
-    class Meta:
-        abstract = True
-
-class AdminSidebar( VersionableAtom, AddressibleAtom ):
-    class Meta:
-        abstract = True
-
-    def get_children(self):
-        if not self.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
-        return self.item_class.objects.filter(parent=self).order_by('order')
-
-class AdminLink(VersionableAtom, AddressibleAtom):
-
-    parent = models.ForeignKey('AdminSidebar', blank = True, null = True)
-
-    help = {
-        'url': "",
-    }
-
-    url = models.CharField(_("URL"), max_length = 255, blank = False,
-        db_index=True, help_text=help['url'])      
-
-    class Meta:
-        abstract = True        
+    
