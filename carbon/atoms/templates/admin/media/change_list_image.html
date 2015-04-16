@@ -6,7 +6,16 @@
 {% block result_list %}
     {{block.super}}
 	<style>
-
+    #result_list thead tr{
+        display: table;
+        padding: 0;
+        border: 0;
+    }
+    #result_list tbody{
+        width: 98%;
+        margin: auto;
+        display: block;
+    }
     #result_list tr{
         display:block;
         position: relative;
