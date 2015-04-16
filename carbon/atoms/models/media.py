@@ -328,7 +328,8 @@ class SecureImageMolecule( BaseImageMolecule ):
     except:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
 
-
+    class Meta:
+        abstract = True
     
 
 class MediaMolecule( ImageMolecule ):
