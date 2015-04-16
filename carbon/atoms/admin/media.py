@@ -156,6 +156,7 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
     )
 
     list_display = ('title','preview','image_width', 'image_height', 'display_size', 'size')
+    list_display_links = ('title', 'preview')
 
 
 

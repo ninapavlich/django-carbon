@@ -27,9 +27,9 @@ def filename(full_path):
 @register.assignment_tag()
 def get_variant_links(object):
   
-  output = object.get_variant_link('image')  
+  output = [object.get_variant_link('image')]  
   for variant in object.variants:
-    output += object.get_variant_link(variant)  
+    output.append(object.get_variant_link(variant))
   return output    
 
 @register.simple_tag

@@ -55,7 +55,7 @@
 
 
         
-        {% cache 86400 'admin_image_picker' object.pk %}
+        
         <figure data-credit="{{ object.credit }}" class="g-d-6">
             <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
 
@@ -66,17 +66,21 @@
                 <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}"/><br />
             </div>
             
-            <a href="{% url 'admin_imagepicker_variant_view' object.id %}" data-target='#{{object.id}}_variant_container' class='variant-link'>Click to load image variants</a>
-            <div id="{{object.id}}_variant_container">
-                <!-- variants load here...-->
-            </div>
+            <p class="picker-links">  
+                {% get_variant_links object as variants %}
+                {% for variant in variants %}
+                {{variant|safe}}
+                {% endfor %}
+            </p>
+
+           
             
             {% endif %}
 
             {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
             <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
         </figure>
-        {% endcache %}
+        
 
 
     {% if forloop.counter|divisibleby:4 %}
@@ -165,8 +169,9 @@
         max-width: 940px;
         width:100%;
     }
-    .variant-link{
-
+    .picker-links a{
+        display:block;
+        margin-bottom:5px;
     }
     .variant-link.loading{
         -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
@@ -199,9 +204,9 @@
         function initPickerLinks(){
 
             $('.picker-links a:not(.inited)').click(function(e){
+                e.preventDefault();
                 var img = e.currentTarget;
                 $(e).addClass("inited");
-                console.log("init picker link...")
 
                 window.opener.CKEDITOR.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
                     // -- Set the Image Alt Tag via Caption
@@ -226,21 +231,23 @@
 
         }
         
-        $('a.variant-link').click(function(e){
-            e.preventDefault();
+        // $('a.variant-link').click(function(e){
+        //     e.preventDefault();
 
-            var url = e.target;
-            var div_target = $(e.target).attr('data-target');
+        //     var url = e.target;
+        //     var div_target = $(e.target).attr('data-target');
             
-            $(e.target).addClass("loading");
-            $.get( url, function(data) {
-                $(e.target).removeClass("loading");
-                $(e.target).addClass("loaded");
-                $(div_target).html( data );
-                initPickerLinks();
-            });
+        //     $(e.target).addClass("loading");
+        //     $.get( url, function(data) {
+        //         $(e.target).removeClass("loading");
+        //         $(e.target).addClass("loaded");
+        //         $(div_target).html( data );
+        //         initPickerLinks();
+        //     });
 
-        });
+        // });
+
+        initPickerLinks();
 
         // -- Helper Functions
         function getUrlParam(paramName) {
@@ -251,5 +258,6 @@
         }
         var funcNum = getUrlParam('CKEditorFuncNum');
     })(grp.jQuery);
+    
 </script>
 {% endblock %}

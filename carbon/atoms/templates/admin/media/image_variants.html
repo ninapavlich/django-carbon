@@ -1,8 +1,0 @@
-{% load staticfiles admin_list i18n media_tags helpful_tags cache %}
-
-{% cache 86400 'admin_image_variants' object.pk %}
-<p class="picker-links">  
-    {% get_variant_links object as variants %}
-    {{variants|safe}}
-</p>
-{% endcache %}

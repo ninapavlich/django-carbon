@@ -130,52 +130,7 @@ class RichContentAtom(models.Model):
 
     
 
-    def get_alt(self):
-        if self.alt:
-            return self.alt
-        return self.title
-
     
-    @property
-    def image_url(self):
-        try:
-            return self.image.url
-        except:
-            return None
-
-
-    def get_variant_url(self, variant_name):
-        try:
-            field = getattr(self, variant_name)
-            return field.url
-        except Exception, err:
-            print traceback.format_exc()
-
-    def get_variant_width(self, variant_name):
-        try:
-            field = getattr(self, variant_name)
-            return field.width
-        except:
-            return None  
-
-
-    def get_variant_height(self, variant_name):
-        try:
-            field = getattr(self, variant_name)
-            return field.height
-        except:
-            return None  
-    
-
-    def get_variant_link(self, variant_name):
-        try:
-            field = getattr(self, variant_name)
-            gussied_name = variant_name.replace("_", " ").title()
-            
-            return '<a href="%s" data-img="%s" data-alt="%s" data-credit="%s" data-caption="%s">%s (%spx x %spx)</a><br />'\
-                %(field.url, field.url, self.get_alt(), self.credit, self.caption, gussied_name, field.width, field.height)
-        except:
-            return ''
 
 
 
@@ -244,6 +199,19 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     class Meta:
         abstract = True
 
+    def get_alt(self):
+        if self.alt:
+            return self.alt
+        return self.title
+
+    
+    @property
+    def image_url(self):
+        try:
+            return self.image.url
+        except:
+            return None
+
     @property
     def file(self):
         return self.image  
@@ -261,6 +229,61 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
             return self.thumbnail.url
         except:
             return ''
+
+
+    def get_variant_url(self, variant_name):
+        try:
+            field = getattr(self, variant_name)
+            return field.url
+        except Exception, err:
+            print traceback.format_exc()
+
+    def get_variant_width(self, variant_name):
+        try:
+            field = getattr(self, variant_name)
+            return field.width
+        except:
+            return None  
+
+
+    def get_variant_height(self, variant_name):
+        try:
+            field = getattr(self, variant_name)
+            return field.height
+        except:
+            return None  
+    
+    def get_variant_link(self, variant_name, include_dimensions=False):
+        # try:
+        field = getattr(self, variant_name)
+        gussied_name = variant_name.replace("_", " ").title()
+        
+        if variant_name=='image':
+            return '<a href="%s" data-img="%s" data-alt="%s" data-credit="%s" data-caption="%s">%s (%spx x %spx)</a>'\
+                %(field.url, field.url, self.get_alt(), self.credit, self.caption, 'Original Image', self.image_width, self.image_height)
+        
+        elif include_dimensions:
+            return '<a href="%s" data-img="%s" data-alt="%s" data-credit="%s" data-caption="%s">%s (%spx x %spx)</a>'\
+                %(field.url, field.url, self.get_alt(), self.credit, self.caption, gussied_name, field.width, field.height)
+        else:
+            field_description = ''
+
+            print hasattr(self, 'help')
+            print variant_name
+            print variant_name in self.help
+            print self.help
+            
+            if hasattr(self, 'help') and variant_name in self.help:
+                field_description = ' (%s)'%self.help[variant_name]
+            elif hasattr(self, 'help_text') and variant_name in self.help_text:
+                field_description = ' (%s)'%self.help_text[variant_name]
+            
+            return '<a href="%s" data-img="%s" data-alt="%s" data-credit="%s" data-caption="%s">%s%s</a>'\
+            %(field.url, field.url, self.get_alt(), self.credit, self.caption, gussied_name, field_description)
+        # except:
+        #     return ''
+
+    
 
     def save(self, *args, **kwargs):
 

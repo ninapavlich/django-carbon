@@ -44,9 +44,6 @@ class ImagePickerView(BasePickerView):
     template_name = "admin/media/image_picker.html"
     model = get_model(settings.IMAGE_MODEL.split('.')[0], settings.IMAGE_MODEL.split('.')[1])
 
-class ImagePickerVariantView(DetailView):
-    template_name = "admin/media/image_variants.html"
-    model = get_model(settings.IMAGE_MODEL.split('.')[0], settings.IMAGE_MODEL.split('.')[1])
 
 
 

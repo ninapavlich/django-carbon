@@ -6,8 +6,7 @@ from .views import *
 urlpatterns = patterns('',
     
     url(r'admin/media/imagepicker/$', ImagePickerView.as_view(), name="admin_imagepicker_view"), 
-    url(r'admin/media/imagepicker/variants/(?P<pk>[0-9]+)/$', ImagePickerVariantView.as_view(), name="admin_imagepicker_variant_view"), 
-
+    
     url(r'admin/media/images/batch/$', ImageBatchView.as_view(), name="admin_image_batch_view"), 
     url(r'admin/media/secureimages/batch/$', SecureImageBatchView.as_view(), name="admin_secureimage_batch_view"), 
     url(r'admin/media/documents/batch/$', DocumentBatchView.as_view(), name="admin_document_batch_view"), 
