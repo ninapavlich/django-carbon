@@ -1,0 +1,116 @@
+{% extends "admin/media/change_list.html" %}
+
+{% load i18n media_tags grp_tags admin_urls admin_static admin_list %}
+
+
+{% block result_list %}
+    {{block.super}}
+	<style>
+
+    #result_list tr{
+        display:block;
+        position: relative;
+        float: left;
+        margin-right: 20px;
+        width:178px;
+        padding:20px;
+        border: 1px solid #ccc;
+        background: #eee;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+
+        
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    #result_list thead tr{
+        width:100%;
+    }
+    #result_list tr td{
+        display: block;
+        background:transparent;
+    }
+    #result_list tr td.field-image_width,
+    #result_list tr td.field-image_height,
+    #result_list tr td.field-display_size,
+    #result_list tr td.field-size{
+        width:25%;
+        float:left;
+
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    #result_list tr td.action-checkbox{
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        border: 0;
+    }
+    #result_list tr.grp-row-odd td, 
+    #result_list tr.grp-row-odd th,
+    #result_list tr.grp-row-even td, 
+    #result_list tr.grp-row-even th, 
+    #result_list tr.grp-alt td, 
+    #result_list tr.grp-alt th{
+        background:transparent;
+    }
+    
+    #result_list tr td img{
+        margin:auto;
+        max-width: 100%;
+        width:100%;
+    }
+    .g-d-24, .g-d-c, .g-all-c {
+        max-width: 1400px;
+        width:100%;
+    }
+    
+    @media (min-width: 1201px) {
+        #result_list tr{
+            width: 19.2%;
+            margin-right: 1%;
+        } 
+        #result_list tr:nth-child(5n+1) {
+            clear:both;
+        }  
+        #result_list tr:nth-child(5n+0) {
+            margin-right: 0;
+        }       
+    }
+    @media (max-width: 1200px) {
+         #result_list tr{
+            width: 24.25%;
+            margin-right: 1%;
+        } 
+        #result_list tr:nth-child(4n+1) {
+            clear:both;
+        }       
+        #result_list tr:nth-child(4n+0) {
+            margin-right: 0;
+        }       
+    }
+    @media (max-width: 800px) {
+         #result_list tr{
+            width:49.5%;
+            margin-right:1%;
+        }  
+        #result_list tr:nth-child(2n+1) {
+            clear:both;
+        }      
+        #result_list tr:nth-child(2n+0) {
+            margin-right: 0;
+        }       
+    }
+    @media (max-width: 450px) {
+        #result_list tr{
+            width:100%;
+            margin-right:0;
+        }            
+    }
+
+</style> 
+{% endblock %}

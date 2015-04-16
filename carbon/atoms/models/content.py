@@ -363,16 +363,20 @@ class ContentMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, SEOAtom
 class CategoryMolecule(HierarchicalAtom, ContentMolecule):
     #Basically just a tag but with hierarchy
     item_class = None
+    item_classes = None
     category_property_name = 'category'
 
     class Meta:
         abstract = True
 
-    def get_items(self):
-        if not self.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
+    def get_children(self):
+        if not self.item_class and not self.item_classes:
+            raise NotImplementedError('Class should specify an item_class or item_classes value')
         
-        return self.item_class.objects.published().filter(**{ self.category_property_name: self }).order_by('order')
+        if self.item_classes:
+            [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
+        else:
+            return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
     def get_children(self):
         items = self.get_items()
@@ -406,16 +410,20 @@ class TagMolecule(ContentMolecule):
                 
     #Basically just a tag but with hierarchy
     item_class = None
+    item_classes = None
     tag_property_name = 'tags'
 
     class Meta:
         abstract = True      
 
     def get_children(self):
-        if not self.item_class:
-            raise NotImplementedError('Class should specify an item_class value')
+        if not self.item_class and not self.item_classes:
+            raise NotImplementedError('Class should specify an item_class or item_classes value')
         
-        return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
+        if self.item_classes:
+            [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
+        else:
+            return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
     def get_next_item(self, item):
         children = self.get_children()

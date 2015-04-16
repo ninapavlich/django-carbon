@@ -68,7 +68,20 @@ def clean_path(path):
 
 
 
- 
+def displaybytes(bytes):
+    if bytes < 1024:
+        return "%sB"%(bytes)
+    kb = (bytes / 1024)
+    if kb < 1024:
+        return '%sKB'%(kb)
+
+    mb = (kb / 1024)
+    if mb < 1024:
+        return '%sMB'%(mb)
+
+    gb = (mb / 1024)
+    return '%sGB'%(gb)
+
 
 
 def get_storage(type):
@@ -112,6 +125,8 @@ class RichContentAtom(models.Model):
         help_text=help['allow_overwrite'] )
 
     
+    size = models.BigIntegerField(null=True, blank=True, help_text='File size in bytes')
+    display_size = models.CharField(_("Display Size"), max_length=255, blank=True, null=True)  
 
     
 
@@ -128,19 +143,6 @@ class RichContentAtom(models.Model):
         except:
             return None
 
-    @property
-    def image_width(self):
-        try:
-            return self.image.width
-        except:
-            return None
-
-    @property
-    def image_height(self):
-        try:
-            return self.image.height
-        except:
-            return None
 
     def get_variant_url(self, variant_name):
         try:
@@ -175,12 +177,21 @@ class RichContentAtom(models.Model):
         except:
             return ''
 
+
+
     def save(self, *args, **kwargs):
 
         
         #Use filename for title if not specified.
         if self.file and not self.title:
             self.title = clean_path(self.file.url)
+
+        if self.file:
+            self.size = self.file.size
+            self.display_size = displaybytes(self.file.size)
+        else:
+            self.size = None
+            self.display_size = None
 
         super(RichContentAtom, self).save(*args, **kwargs)
 
@@ -226,6 +237,10 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     use_png = models.BooleanField( default = False, 
         verbose_name='Use .PNG (instead of .JPG)', help_text=help['use_png'])
 
+    image_width = models.IntegerField(null=True, blank=True)
+    image_height = models.IntegerField(null=True, blank=True)
+    
+
     class Meta:
         abstract = True
 
@@ -247,6 +262,23 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
         except:
             return ''
 
+    def save(self, *args, **kwargs):
+
+        
+        if self.image:
+            self.image_width = self.image.width
+            self.image_height = self.image.height
+            self.size = self.image.size
+            self.display_size = displaybytes(self.image.size)
+        else:
+            self.image_width = None
+            self.image_height = None
+            self.size = None
+            self.display_size = None
+            
+
+        super(BaseImageMolecule, self).save(*args, **kwargs)
+
 
     variants = ('thumbnail',)
 
@@ -260,6 +292,7 @@ class ImageMolecule( BaseImageMolecule ):
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
 
 
+
     class Meta:
         abstract = True
 
@@ -271,6 +304,7 @@ class SecureImageMolecule( BaseImageMolecule ):
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'))
     except:
         image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
+
 
     
 
