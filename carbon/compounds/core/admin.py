@@ -143,7 +143,8 @@ class JSResourceInline(BaseFrontendResourceInline):
 
 
 class MenuItemInline(TabularInlineOrderable):
-    #model = MenuItem    
+    #model = MenuItem  
+    form = MenuItemForm  
 
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],

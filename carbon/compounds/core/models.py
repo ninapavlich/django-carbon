@@ -42,7 +42,6 @@ from carbon.atoms.models.content import *
 
 
 
-
 class LegacyURLReferer(VersionableAtom):
 
     help = {
@@ -244,6 +243,7 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
 
 
 class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
+    
     publish_by_default = True
 
     help = {
@@ -272,6 +272,17 @@ class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
     def get_link(self):
         '<a href="%s" target="%s" class="%s" %s>%s</a>'%(self.get_path, self.target, self.css_classes, self.title, self.extra_attributes)
 
+
+    def save(self, *args, **kwargs):
+
+        #Use title if not specified
+        if not self.title and self.content_object:
+            try:
+                self.title = self.content_object.title
+            except:
+                pass
+
+        super(MenuItem, self).save(*args, **kwargs)
 
     
     class Meta:

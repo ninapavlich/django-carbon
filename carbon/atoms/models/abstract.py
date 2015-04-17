@@ -408,7 +408,7 @@ class AddressibleAtom(models.Model):
             has_parent = False
 
         if has_parent and self.parent:
-            return mark_safe("%s&lfloor; %s" % (self.parent.admin_hierarchy_display, self.title))
+            return mark_safe("%s&lfloor; %s" % (self.admin_hierarchy_display, self.title))
         else:
             return self.title
 
