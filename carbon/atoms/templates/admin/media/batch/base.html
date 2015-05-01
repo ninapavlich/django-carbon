@@ -116,6 +116,8 @@
     <a class="play-pause"></a>
     <ol class="indicator"></ol>
 </div>
+
+
 {% upload_js %}
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -160,10 +162,12 @@
 $(function () {
     'use strict';
 
+    {% block intial_form_data %}
     var intial_form_data = {
         'csrfmiddlewaretoken':'{{csrf_token}}',
         'batch':'True'
     }
+    {% endblock %}
 
     function process_form_data(){
         var form = $('form#fileupload');
@@ -189,7 +193,6 @@ $(function () {
 
     }).bind('fileuploadsubmit', function (e, data) {
         var form_data = process_form_data();
-        console.log(form_data)
         data.formData = form_data;
     });
 
