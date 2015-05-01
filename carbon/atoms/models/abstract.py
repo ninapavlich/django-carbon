@@ -255,6 +255,7 @@ class OrderedItemAtom(models.Model):
 
     class Meta:
         abstract = True  
+        ordering = ['order']
 
 # -- Level 2
 class AddressibleAtom(models.Model):
