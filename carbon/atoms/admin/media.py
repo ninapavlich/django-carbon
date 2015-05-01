@@ -81,11 +81,11 @@ class BaseMedia(object):
     def add_view(self, request, form_url='', extra_context=None):
         default_response = super(BaseMedia, self).add_view(request, form_url, extra_context)
         
-        # if request.method == 'POST' and "batch" in request.POST:
+        if request.method == 'POST' and "batch" in request.POST:
 
-        #     response = self.batch_response(request)
-        #     if response != None:
-        #         return response
+            response = self.batch_response(request)
+            if response != None:
+                return response
 
         return default_response
 
