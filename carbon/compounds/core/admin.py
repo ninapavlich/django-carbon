@@ -131,10 +131,12 @@ class BaseFrontendResourceInline(admin.StackedInline):
 
 class CSSResourceInline(BaseFrontendResourceInline):
     form = CSSResourceAdminForm
+    fk_name = 'parent'
     prepopulated_fields = {"slug": ("title",)}
 
 class JSResourceInline(BaseFrontendResourceInline):
     form = JSResourceAdminForm
+    fk_name = 'parent'
     prepopulated_fields = {"slug": ("title",)}
 
 
@@ -145,7 +147,8 @@ class JSResourceInline(BaseFrontendResourceInline):
 class MenuItemInline(TabularInlineOrderable):
     #model = MenuItem  
     form = MenuItemForm  
-
+    fk_name = 'parent'
+    
     autocomplete_lookup_fields = {
         'generic': [['content_type', 'object_id']],
         'fk': [],
@@ -194,6 +197,7 @@ class MenuItemAdmin(BaseVersionableAdmin):
 class AdminAppLinkInline(TabularInlineOrderable):
 
     # model = AdminLinkItem
+    fk_name = 'parent'
     ordering = ("order",)
     extra = 0
     fieldsets = (
@@ -203,6 +207,7 @@ class AdminAppLinkInline(TabularInlineOrderable):
 class AdminLinkInline(TabularInlineOrderable):
 
     # model = AdminLink
+    fk_name = 'parent'
     ordering = ("order",)
     extra = 0
     fieldsets = (

@@ -43,13 +43,20 @@ class VersionableAtom(models.Model):
     # def __init__(self, *args, **kwargs):
     #     super(Versionable, self).save(*args, **kwargs)
 
+    @property
+    def edit_item_url(self):
+        if self.pk:
+            object_type = type(self).__name__
+            url = reverse('admin:%s_%s_change' %(self._meta.app_label,  self._meta.model_name),  args=[self.id] )
+            return url
+        return None
+
     def edit_item(self):
         style="style='width:278px;display:block;'"
         if self.pk:
             
             try:
-                object_type = type(self).__name__
-                url = reverse('admin:%s_%s_change' %(self._meta.app_label,  self._meta.model_name),  args=[self.id] )
+                url = self.edit_item_url()
                 return '<a href="%s" %s>Edit Item &gt;</a>'%(url, style)
             except:
                 return '<span %s>&nbsp;</span>'%(style)
@@ -257,12 +264,11 @@ class OrderedItemAtom(models.Model):
         abstract = True  
         ordering = ['order']
 
+
 # -- Level 2
-class AddressibleAtom(models.Model):
+class AddressibleAtom(TitleAtom):
    
     help = {
-        'title': "The display title for this object.",
-        'slug': "Auto-generated page slug for this object.",
         'uuid': "UUID generated for object; can be used for short URLs",
         'parent': "Hierarchical parent of this item. Used to define path.",
         'path': 'Actual path used based on generated and override path',
@@ -271,21 +277,17 @@ class AddressibleAtom(models.Model):
         'hierarchy': "Administrative Hierarchy",
         'temporary_redirect': "Temporarily redirect to a different path",
         'permanent_redirect': "Permanently redirect to a different path",
-        'order': "Simple order of item. ",
-        'template': 'Template for view'
+        'template': 'Template for view',
+        'order': "",
     }
     
 
-    title = models.CharField(_('Title'), max_length=255, 
-        help_text=help['title'], blank=True, null=True)
-
-    slug = models.CharField(_('Slug'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['slug'])
     uuid = models.CharField(_('UUID'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['slug'])
+        unique=True, db_index=True, help_text=help['uuid'])
 
+
+    order = models.IntegerField(default=0, help_text=help['order']) 
     
-    order = models.IntegerField(default=0, help_text=help['order'])
 
     template = models.ForeignKey(settings.TEMPLATE_MODEL, null=True, blank=True,
         help_text=help['template'])    
@@ -472,11 +474,6 @@ class AddressibleAtom(models.Model):
             use_default_template = self.get_default_template()
             if use_default_template:
                 self.template = use_default_template
-
-
-
-        if not self.title:
-            self.title = 'Untitled %s'%(self.__class__.__name__)
         
         try: 
             model = type(self)
@@ -489,10 +486,6 @@ class AddressibleAtom(models.Model):
         if has_parent and self.parent:
             if self.parent == self:
                 self.parent = None
-
-        if not self.slug:
-            self.slug = self.generate_slug()
-
 
         if not self.uuid:
             app_label = type(self)._meta.app_label

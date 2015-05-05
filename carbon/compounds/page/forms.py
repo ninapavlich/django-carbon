@@ -7,5 +7,5 @@ class PageAdminForm(forms.ModelForm):
     synopsis = forms.CharField(widget=CKEditorWidget(config=settings.CKEDITOR_CONFIGS['page_synopsis_ckeditor']), required=False)
     class Meta:
         model = Page
-
+        fields = '__all__'
 
