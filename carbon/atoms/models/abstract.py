@@ -56,7 +56,7 @@ class VersionableAtom(models.Model):
         if self.pk:
             
             try:
-                url = self.edit_item_url()
+                url = self.edit_item_url
                 return '<a href="%s" %s>Edit Item &gt;</a>'%(url, style)
             except:
                 return '<span %s>&nbsp;</span>'%(style)
