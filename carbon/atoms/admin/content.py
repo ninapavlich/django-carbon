@@ -35,6 +35,8 @@ class BaseVersionableAdmin(admin.ModelAdmin):
     list_filter = (
             "created_by", "modified_by", )
 
+    search_fields = ('admin_note',)
+
     def save_model(self, request, obj, form, change):
         if not getattr(obj, "created_by"):
             obj.created_by = request.user
@@ -63,7 +65,7 @@ class BaseVersionableTitleAdmin(BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-
+    search_fields = ('title','admin_note')
 
 class BaseContentAdmin(admin.ModelAdmin):
     class Media:
@@ -91,6 +93,7 @@ class BaseContentAdmin(admin.ModelAdmin):
             'shareable','social_share_type')
     ordering = ("hierarchy",)
 
+    search_fields = ('title', 'content', 'synopsis', 'admin_note')
 
 
     prepopulated_fields = {"slug": ("title",)}
