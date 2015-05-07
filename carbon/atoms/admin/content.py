@@ -155,7 +155,7 @@ class BaseContentAdmin(admin.ModelAdmin):
         }),
         ("Path", {
             'fields': path_fields,
-            'classes': ( 'grp-collapse', )
+            'classes': ( 'grp-collapse grp-closed', )
         }),
         ("Publication", {
             'fields': publication_fields,

@@ -221,7 +221,7 @@ class TitleAtom(models.Model):
         help_text=help['title'], blank=True, null=True)
 
     slug = models.CharField(_('Slug'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['slug'])
+        db_index=True, help_text=help['slug'])
 
     class Meta:
         abstract = True
@@ -238,13 +238,16 @@ class TitleAtom(models.Model):
         unique_slugify(self, self.title)
         return self.slug
 
-    def save(self, *args, **kwargs):
-
+    def verify_title_and_slug(self):
         if not self.title:
             self.title = 'Untitled %s'%(self.__class__.__name__)
 
-        if not self.slug:
+        if not self.slug or not self.pk:
             self.slug = self.generate_slug()
+        
+    def save(self, *args, **kwargs):
+
+        self.verify_title_and_slug()
 
         super(TitleAtom, self).save(*args, **kwargs)
 
@@ -497,11 +500,14 @@ class AddressibleAtom(TitleAtom):
             model = type(self)
             original = model.objects.get(pk=self.pk)
         
-            
+        
+        self.verify_title_and_slug()
+
         self.path_generated = self.build_path()
 
         
         self.path = self.generate_path()
+
         self.hierarchy = self.build_hierarchy_path()
 
         path_has_changed = False

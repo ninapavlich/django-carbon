@@ -4,6 +4,7 @@ from .views import *
 
 urlpatterns = patterns('',
 	
-	# url( (r'^%s(?P<path>.*)/$'%settings.FORMS_DOMAIN), FormDetailView.as_view(), name='form_detail'),
+	# url( (r'^%s/(?P<path>.*)/$'%settings.FORMS_DOMAIN), CreateFormEntryView.as_view(), name='form_create_view'),
+	# url( (r'^%s/(?P<path>.*)/(?P<pk>\d+)/$'%settings.FORMS_DOMAIN), UpdateFormEntryView.as_view(), name='form_update_view'),
 
 )

@@ -179,8 +179,7 @@ class AddressibleView(SingleObjectMixin):
             )
 
         return super(AddressibleView, self).render_to_response(context)
-        
-        
+
 
     def get_object(self, queryset=None):
 
