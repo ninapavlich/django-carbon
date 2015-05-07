@@ -15,6 +15,7 @@ class FormFieldInlineAdminForm(forms.ModelForm):
 class FormEntryForm(forms.ModelForm):
 	
 	form_field_prefix = 'form_field_'
+	form_fields = []
 
 	class Meta:
 		model = FormEntry
@@ -26,7 +27,13 @@ class FormEntryForm(forms.ModelForm):
 
 		self.fields['form'].initial = self.form
 
-		self.form_fields = form.get_input_fields()
-		for field in self.form_fields:
-			#TODO -- generate corresponding form field
-			self.fields[self.form_field_prefix+field.slug] = field.get_widget()
+		self.model_form_fields = form.get_input_fields()
+		for model_field in self.model_form_fields:
+
+			form_field = model_field.get_form_field()
+			key = self.form_field_prefix+model_field.slug
+			self.fields[key] = form_field
+			self.form_fields.append(form_field)
+
+	def get_form_fields(self):
+		return self.form_fields

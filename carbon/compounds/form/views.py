@@ -23,12 +23,12 @@ from carbon.atoms.views.abstract import *
 
 class CreateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 	content_type = None
-	
 	def get_form_kwargs(self):
+
 		#ADD REFERNCE TO FORM OBJECT
 		kwargs = super(CreateFormEntryView, self).get_form_kwargs()
 		kwargs = {
-			'form': self.object
+			'form': self.object,
 		}
 		return kwargs
 

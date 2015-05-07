@@ -1,0 +1,13 @@
+<form action="{{object.get_form_action}}" method="post" {% if object.has_multipart %}enctype="multipart/form-data"{% endif %}>
+    {% csrf_token %}
+    
+    <input  type="hidden" name="{{ form.form.name }}" id="{{ form.form.auto_id }}" value="{{ form.form.value|default_if_none:'' }}" />
+
+    {% for field in form %}
+    
+    {{field.as_widget|safe}}
+    
+    {% endfor %}
+
+    <input type="submit" value="{% firstof form.submit_label 'Submit' %}" />
+</form>

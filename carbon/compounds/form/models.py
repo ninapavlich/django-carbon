@@ -11,6 +11,8 @@ from carbon.utils.slugify import unique_slugify
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
+from .widgets import *
+
 class Form(ContentMolecule):
 	field_model = None
 	help = {
@@ -20,7 +22,9 @@ class Form(ContentMolecule):
 		'email_admin_on_submission_template':"",
 		'email_user_on_submission_template':"",
 		'submission_content':"",
-		'redirect_url_on_submission':""
+		'redirect_url_on_submission':"",
+		'submit_label':"",
+		'extra_css_classes':""
 	}
 
 	POST_TO_FORM_PAGE = 'form-page'
@@ -52,15 +56,34 @@ class Form(ContentMolecule):
 	submission_content = models.TextField(help_text=help['submission_content'], 
 		null=True, blank=True)
 
+	submit_label = models.CharField(max_length=255, default="Submit",
+		help_text=help['submit_label'])
+
+	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['extra_css_classes'])
+
 	def get_all_fields(self):
-		return self.field_model.objects.filter(parent=self).order_by('order')
+		return self.field_model.objects.filter(parent=self).exclude(hide=True).order_by('order')
 
 	def get_input_fields(self):
-		return self.field_model.objects.filter(parent=self).exclude(
+		return self.field_model.objects.filter(parent=self).exclude(hide=True).exclude(
 			Q(type=FormField.FORM_INSTRUCTIONS) | 
 			Q(type=FormField.FORM_DIVIDER) |
 			Q(type=FormField.FORM_STEP)
 		).order_by('order')
+
+	def has_multipart(self):
+		fields = self.get_all_fields().filter(
+			Q(type=FormField.FILE) | 
+			Q(type=FormField.SECURE_FILE)
+		)
+		return len(fields) > 0
+
+	def get_form_action(self):
+		if self.form_action == Form.POST_TO_FORM_PAGE:
+			return self.get_absolute_url()
+		else:
+			return '.'
 
 	def get_absolute_url(self):
 		return reverse('form_create_view', kwargs = {'path': self.slug }) 
@@ -152,6 +175,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		'help_text':"",
 		'content':"Rich-text instructions",
 		'default':"Default field value",
+		'extra_css_classes':"",
 		'hide':"Hide field from form without deleting and data entered by users",
 		'choices':"Comma separated options where applicable. If an option "
 			"itself contains commas, surround the option starting with the %s"
@@ -223,28 +247,32 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	default = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['default'])
 
+	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['extra_css_classes'])
+
 
 	hide = models.BooleanField(default=False, help_text=help['hide'])
 
 	def get_choices(self):
 		raw_choices = self.choices.split(',')
-		return raw_choices
+		choices = tuple((n,n) for n in raw_choices)		
+		return choices
 
-	def get_widget(self):
+	def get_form_field(self):
 		field = None
 
 		if self.type == FormField.TEXT_FIELD:
 
 			if self.is_email:
-				field = forms.EmailField(label=self.title)
+				field = forms.EmailField(widget=TextInputWidget(model_field=self), label=self.title)
 			elif self.is_url:
-				field = forms.CharField(label=self.title)
+				field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
 			elif self.is_integer:
-				field = forms.IntegerField(label=self.title)
+				field = forms.IntegerField(widget=TextInputWidget(model_field=self), label=self.title)
 			elif self.is_number:
-				field = forms.DecimalField(label=self.title)
+				field = forms.DecimalField(widget=TextInputWidget(model_field=self), label=self.title)
 			else:
-				field = forms.CharField(label=self.title)
+				field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
 
 
 		elif self.type == FormField.TEXT_AREA:
@@ -296,10 +324,13 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		#     help_text=help['is_digits'])
 		# is_alphanumeric = models.BooleanField(default=False, 
 		#     help_text=help['is_alphanumeric'])
-		# field.required = self.is_required    
-		# field.secondary_label = self.secondary_label    
-		# field.placeholder_text = self.placeholder_text    
-		# field.help_text = self.help_text    
+
+		field.required = self.is_required    
+		field.secondary_label = self.secondary_label    
+		field.placeholder_text = self.placeholder_text    
+		field.help_text = self.help_text    
+
+		field.field_model = self
 
 	
 		return field
