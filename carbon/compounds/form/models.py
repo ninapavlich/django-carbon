@@ -258,6 +258,77 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		choices = tuple((n,n) for n in raw_choices)		
 		return choices
 
+	@property
+	def input_type(self):
+
+		if self.type == FormField.TEXT_FIELD:
+			# search
+			# email
+			# url
+			# tel
+			# number
+			# range
+			# date
+			# month
+			# week
+			# time
+			# datetime
+			# datetime-local
+			# color
+			if self.is_email:
+				return 'email'
+			elif self.is_url:
+				return 'url'
+			elif self.is_integer:
+				return 'number'
+			elif self.is_number:
+				return 'number'
+			else:
+				return 'text'
+
+		elif self.type == FormField.TEXT_AREA:
+			return 'text' #TODO
+
+		elif self.type == FormField.BOOLEAN_CHECKBOXES:
+			return 'checkbox'
+
+		elif self.type == FormField.BOOLEAN_BUTTONS:				
+			return 'checkbox'
+
+		elif self.type == FormField.SELECT_DROPDOWN:
+			return 'select'
+
+		elif self.type == FormField.SELECT_RADIO_BUTTONS:
+			return 'radio'
+
+		elif self.type == FormField.SELECT_BUTTONS:
+			return 'radio'
+
+		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
+			return 'checkbox'
+
+		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
+			return 'select' #TODO
+
+		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
+			return 'select' #TODO
+	
+		elif self.type == FormField.FILE:
+			return 'file'
+
+		elif self.type == FormField.SECURE_FILE:
+			return 'file'
+
+		elif self.type == FormField.DATE:
+			return 'text'
+
+		elif self.type == FormField.TIME:
+			return 'text'
+
+		elif self.type == FormField.DATE_TIME:
+			return 'text'
+
+
 	def get_form_field(self):
 		field = None
 
@@ -276,31 +347,31 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 
 		elif self.type == FormField.TEXT_AREA:
-			field = forms.CharField(label=self.title)
+			field = forms.CharField(widget=Textarea(model_field=self), label=self.title)
 
 		elif self.type == FormField.BOOLEAN_CHECKBOXES:
-			field = forms.BooleanField(label=self.title)
+			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
 
 		elif self.type == FormField.BOOLEAN_BUTTONS:				
-			field = forms.BooleanField(label=self.title)
+			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
 
 		elif self.type == FormField.SELECT_DROPDOWN:
-			field = forms.ChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_RADIO_BUTTONS:
-			field = forms.ChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_BUTTONS:
-			field = forms.ChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			field = forms.MultipleChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
-			field = forms.MultipleChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
-			field = forms.MultipleChoiceField(label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 	
 		elif self.type == FormField.FILE:
@@ -310,13 +381,14 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 			field = forms.FileField(label=self.title)
 
 		elif self.type == FormField.DATE:
-			field = forms.DateField(label=self.title)
+			field = forms.DateField(widget=TextInputWidget(model_field=self), label=self.title)
 
 		elif self.type == FormField.TIME:
-			field = forms.TimeField(label=self.title)
+			field = forms.TimeField(widget=TextInputWidget(model_field=self), label=self.title)
 
 		elif self.type == FormField.DATE_TIME:
-			field = forms.DateTimeField(label=self.title)
+			field = forms.DateTimeField(widget=TextInputWidget(model_field=self), label=self.title)
+			
 
 		# is_required = models.BooleanField(default=False, 
 		#     help_text=help['is_required'])    

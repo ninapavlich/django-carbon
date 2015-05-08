@@ -15,3 +15,7 @@ def get_rendered_field(field):
         return field.field.widget.render(field)
     else:
         return field.field.widget.render(field.html_name, field.value())
+
+@register.filter
+def tostring(value):
+	return str(value)        

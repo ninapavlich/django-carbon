@@ -1,0 +1,28 @@
+{% extends 'form/partials/base_field.html' %}
+{% load form_tags %}
+
+
+
+{% block input %}
+
+{% with model_field.get_choices as field_choices %}
+{% for x,y in field_choices %}
+
+<label for="{{field.name}}_{{x}}">
+
+	<input 
+		type="{% if radio %}radio{% else %}checkbox{% endif %}" 
+		name="{{field.name}}" 
+		id="{{field.name}}_{{x}}" 
+		value = "{{x}}" 
+		{% if x in field.value or x == field.value %}checked{% endif %} 
+	/>
+
+
+	<span>{{ y|safe }}</span>
+
+</label>
+{% endfor %}
+{% endwith %}
+
+{% endblock %}

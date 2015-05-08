@@ -1,0 +1,43 @@
+{% extends 'form/partials/base_field.html' %}
+
+{% load form_tags %}
+
+{% block input %}
+    
+    <select 
+        type="{{model_field.input_type}}"
+        name="{{ field.name }}" 
+        id="{{ field.auto_id }}" 
+
+        {% if extra_attributes %}
+        {{extra_attributes}}
+        {% endif %}
+        
+        {% if multiple %} multiple{% endif %}
+
+        {% if model_field.placeholder_text %} 
+        data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
+        {% endif %}
+    >
+
+        {% if default_option %}<option value="">{{default_option}}</option>{% endif %}
+
+
+
+        {% with model_field.get_choices as field_choices %}
+
+
+        {% for x,y in field_choices %}
+        
+		    <option value="{{ x }}" 
+            {% if multiple %}
+            {% if x in field.value %}selected{% endif %}
+            {% else %}
+            {% if field.value|tostring == x|tostring %}selected{% endif %}
+            {% endif %}
+            >{{ y|safe }}</option>
+		{% endfor %}
+
+        {% endwith %}
+    </select>
+{% endblock %}

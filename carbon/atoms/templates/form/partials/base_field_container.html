@@ -1,0 +1,29 @@
+{% if model_field.type == 'text-field' or model_field.type == 'date' or model_field.type == 'time' or model_field.type == 'date-time' %}
+
+{% include 'form/partials/text_field.html' %}
+
+{% elif model_field.type == 'text-area' %}
+
+{% include 'form/partials/text_area.html' %}
+
+{% elif model_field.type == 'boolean-checkboxes' or model_field.type == 'boolean-buttons' %}
+
+{% include 'form/partials/check_box.html' %}
+
+{% elif model_field.type == 'select-dropdown' %}
+
+{% include 'form/partials/select.html' %}
+
+{% elif model_field.type == 'select-radio-buttons' or model_field.type == 'select-buttons' %}
+
+{% include 'form/partials/input_group.html' with radio=True %}
+
+{% elif model_field.type == 'select-multiple-checkboxes' %}
+
+{% include 'form/partials/input_group.html' %}
+
+{% elif model_field.type == 'select-multiple-autosuggest' or model_field.type == 'select-multiple-horizontal' %}
+
+{% include 'form/partials/select.html' with multiple=True %}
+
+{% endif %}

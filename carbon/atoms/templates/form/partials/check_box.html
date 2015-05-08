@@ -1,0 +1,27 @@
+
+{% extends 'form/partials/base_field.html' %}
+
+
+{% block value %}{% if field.value or checked %}checked{% endif %}{% endblock %}
+
+{% block field-inner %}
+
+	{% block labels %}
+	    <label for="{{ field.auto_id }}">
+
+	    {% block input %}{{block.super}}{% endblock %}
+
+	    <span>{{model_field.title|safe}}</span>
+
+		</label>
+	    
+	    {% if model_field.secondary_label %}
+	    <span class="secondary-label">{{model_field.secondary_label|safe}}</span>
+	    {% endif %}   
+
+	    {% block messages %}{{block.super}}{% endblock %}
+
+    {% endblock %}  
+
+{% endblock %}
+

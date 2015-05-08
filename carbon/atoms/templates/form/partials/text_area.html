@@ -1,0 +1,25 @@
+{% extends 'form/partials/base_field.html' %}
+
+{% block input %}
+	<textarea 
+	    name="{{ field.name }}" 
+	    id="{{ field.auto_id }}" 
+	    class="{{ field_class }}"
+	    
+	    {% if model_field.placeholder_text %} 
+        placeholder="{{model_field.placeholder_text|striptags|safe}}" 
+        data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
+        {% endif %}
+
+	    {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} 
+
+	>{% spaceless %}
+	{% if not hide_post_value %}
+    {% if override_value and not request.POST %}
+    {{ override_value }}
+    {% else %}
+    {{ field.value|default_if_none:'' }}
+    {% endif %}
+    {% endif %}
+	{% endspaceless %}</textarea>
+{% endblock %}
