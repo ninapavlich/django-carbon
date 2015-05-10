@@ -30,7 +30,8 @@ class Form(ContentMolecule):
 		'submission_content':"",
 		'redirect_url_on_submission':"",
 		'submit_label':"",
-		'extra_css_classes':""
+		'extra_css_classes':"",
+		'submit_template':""
 	}
 
 	POST_TO_FORM_PAGE = 'form-page'
@@ -48,7 +49,7 @@ class Form(ContentMolecule):
 		help_text=help['email_admin_on_submission'])
 	# email_admin_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
 	#     null=True, blank=True, help_text=help['email_admin_on_submission_template'])
-	admin_email = models.EmailField(max_length=255, blank=False, unique=True,
+	admin_email = models.EmailField(max_length=255, blank=False, null=True,
 		help_text=help['admin_email'])
 
 	email_user_on_submission = models.BooleanField(default=True, 
@@ -59,14 +60,29 @@ class Form(ContentMolecule):
 	redirect_url_on_submission = models.CharField(max_length=255, null=True, 
 		blank=True, help_text=help['redirect_url_on_submission'])
 
+	submit_template = models.ForeignKey(settings.TEMPLATE_MODEL, null=True, blank=True,
+		help_text=help['submit_template'], related_name='template_submit_template')   
+
 	submission_content = models.TextField(help_text=help['submission_content'], 
 		null=True, blank=True)
 
 	submit_label = models.CharField(max_length=255, default="Submit",
 		help_text=help['submit_label'])
 
+
+
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
+
+	def get_success_url(self):
+		if self.redirect_url_on_submission:
+			return self.redirect_url_on_submission
+		else:
+			return reverse('form_submitted_view', kwargs = {'path': self.slug }) 
+
+	def handle_successful_submission(self, form, entry):
+		print "TODO -- this is where we handle emailing admins and users"
+		print entry
 
 	def get_all_fields(self):
 		return self.field_model.objects.filter(parent=self).exclude(hide=True).order_by('order')
@@ -93,6 +109,9 @@ class Form(ContentMolecule):
 
 	def get_absolute_url(self):
 		return reverse('form_create_view', kwargs = {'path': self.slug }) 
+
+	def __unicode__(self):
+		return self.title
 
 	class Meta:
 		abstract = True
@@ -192,14 +211,15 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		'default':"Default field value",
 		'extra_css_classes':"",
 		'hide':"Hide field from form without deleting and data entered by users",
-		'icon':'Add icon to the field. Preview icons at http://fontawesome.io/icons/',
-		'prefix':"Inset field with prefix content",
+		'icon_right':'Add icon to the right side of the field. Preview icons at http://fontawesome.io/icons/',
+		'icon_left':'Add icon to the left side of the field. Preview icons at http://fontawesome.io/icons/',
+		'inset_text_right':"Inset field with content on the right",
+		'inset_text_left':"Inset field with content on the left",
 		'choices':"Comma separated options where applicable. If an option "
 			"itself contains commas, surround the option starting with the %s"
 			"character and ending with the %s character." %
 				(settings.FORM_CHOICES_QUOTE, settings.FORM_CHOICES_UNQUOTE)
 	}
-
 
 
 
@@ -210,9 +230,13 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	SELECT_DROPDOWN = 'select-dropdown'
 	SELECT_RADIO_BUTTONS = 'select-radio-buttons'
 	SELECT_BUTTONS = 'select-buttons'
+	SELECT_IMAGE = 'select-image'
 	SELECT_MULTIPLE_CHECKBOXES = 'select-multiple-checkboxes'
 	SELECT_MULTIPLE_AUTOSUGGEST = 'select-multiple-autosuggest'
 	SELECT_MULTIPLE_HORIZONTAL = 'select-multiple-horizontal'
+	SELECT_MULTIPLE_BUTTONS = 'select-multiple-buttons'
+	SELECT_MULTIPLE_IMAGES = 'select-multiple-images'
+	COMMA_SEPARATED_LIST = 'comma-separated-list'
 	FILE = 'file'
 	SECURE_FILE = 'secure-file'
 	DATE = 'date'
@@ -236,9 +260,13 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		(SELECT_DROPDOWN, _("Select with Dropdown")),
 		(SELECT_RADIO_BUTTONS, _("Select with Radio Buttons")),
 		(SELECT_BUTTONS, _("Select with Buttons")),
+		(SELECT_IMAGE, _("Select Image")),
 		(SELECT_MULTIPLE_CHECKBOXES, _("Select Multiple with Checkboxes")),
 		(SELECT_MULTIPLE_AUTOSUGGEST, _("Select Multiple with Autosuggest")),
-		(SELECT_MULTIPLE_HORIZONTAL, _("Select Multiple with Horizontal Lists")),        
+		(SELECT_MULTIPLE_HORIZONTAL, _("Select Multiple with Horizontal Lists")),   
+		(SELECT_MULTIPLE_BUTTONS, _("Select Multiple with Buttons")),
+		(SELECT_MULTIPLE_IMAGES, _("Select Multiple Images")),  
+		(COMMA_SEPARATED_LIST, _("List of Items")),  
 		(FILE, _("File")),
 		(SECURE_FILE, _("Secure File")),
 		(DATE, _("Date")),
@@ -277,10 +305,14 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
 
-	icon = models.CharField(max_length=255, null=True, blank=True, 
-		choices=ICON_CHOICES, help_text=help['icon'])
-	prefix = models.CharField(max_length=255, null=True, blank=True, 
-		help_text=help['prefix'])
+	icon_right = models.CharField(max_length=255, null=True, blank=True, 
+		choices=ICON_CHOICES, help_text=help['icon_right'])
+	icon_left = models.CharField(max_length=255, null=True, blank=True, 
+		choices=ICON_CHOICES, help_text=help['icon_left'])
+	inset_text_right = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['inset_text_right'])
+	inset_text_left = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['inset_text_left'])
 
 	hide = models.BooleanField(default=False, help_text=help['hide'])
 
@@ -317,6 +349,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 			else:
 				return 'text'
 
+
 		elif self.type == FormField.TEXT_AREA:
 			return 'text' #TODO
 
@@ -335,6 +368,9 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.SELECT_BUTTONS:
 			return 'radio'
 
+		elif self.type == FormField.SELECT_IMAGE:
+			return 'radio'
+
 		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
 			return 'checkbox'
 
@@ -343,7 +379,16 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
 			return 'select' #TODO
-	
+
+		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
+			return 'select' #TODO
+
+		elif self.type == FormField.SELECT_MULTIPLE_IMAGES:
+			return 'checkbox'
+
+		elif self.type == FormField.COMMA_SEPARATED_LIST:
+			return 'text'
+		
 		elif self.type == FormField.FILE:
 			return 'file'
 
@@ -358,6 +403,18 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 		elif self.type == FormField.DATE_TIME:
 			return 'text'
+
+		elif self.type == FormField.SCORE:
+			return 'number'
+
+		elif self.type == FormField.RANGE:
+			return 'range'
+
+		elif self.type == FormField.NUMBER_SLIDER:
+			return 'number'
+
+		elif self.type == FormField.PASSWORD:
+			return 'password'
 
 		return 'text'
 
@@ -397,21 +454,32 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.SELECT_BUTTONS:
 			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
+		elif self.type == FormField.SELECT_IMAGE:
+			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
+
 		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
-			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
-			field = forms.MultipleChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
+			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
-	
+		elif self.type == FormField.SELECT_MULTIPLE_BUTTONS:
+			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+
+		elif self.type == FormField.SELECT_MULTIPLE_IMAGES:
+			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+
+		elif self.type == FormField.COMMA_SEPARATED_LIST:
+			field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
+
 		elif self.type == FormField.FILE:
-			field = forms.FileField(label=self.title)
+			field = forms.FileField(widget=ClearableFileInput(model_field=self), label=self.title)
 
 		elif self.type == FormField.SECURE_FILE:
-			field = forms.FileField(label=self.title)
+			field = forms.FileField(widget=ClearableFileInput(model_field=self), label=self.title)
 
 		elif self.type == FormField.DATE:
 			field = forms.DateField(widget=TextInputWidget(model_field=self), label=self.title)
@@ -424,7 +492,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 			
 		else:
 			#DEFAULT:
-			field = forms.EmailField(widget=TextInputWidget(model_field=self), label=self.title)
+			field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
 
 		# is_required = models.BooleanField(default=False, 
 		#     help_text=help['is_required'])    
@@ -449,14 +517,22 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		unique_slugify(self, starting_slug)
 		return self.slug
 
+	def __unicode__(self):
+		return self.title
+
 	class Meta:
 		abstract = True
+
 
 
 class FormEntry(VersionableAtom):
 
 	form = models.ForeignKey('form.Form', null=True, blank=True)
 
+	# def record_entry(self, form):
+	# 	#loop through form data
+
+	# 	#get corres
 
 	def get_absolute_url(self):
 		path = "/%s/%s/" % (settings.FORMS_DOMAIN, self.form.slug)
@@ -465,12 +541,13 @@ class FormEntry(VersionableAtom):
 
 	class Meta:
 		abstract = True
+		verbose_name_plural = "Form Entries"
 
 
 class FieldEntry(VersionableAtom):
 
-	entry = models.ForeignKey('form.FormEntry', null=True, blank=True)
-	field = models.ForeignKey('form.FormField', null=True, blank=True)
+	form_entry = models.ForeignKey('form.FormEntry', null=True, blank=True)
+	form_field = models.ForeignKey('form.FormField', null=True, blank=True)
 	
 	value = models.TextField(null=True, blank=True)
 
@@ -482,3 +559,5 @@ class FieldEntry(VersionableAtom):
 	
 	class Meta:
 		abstract = True
+		verbose_name_plural = "Field Entries"
+		ordering = ['form_field__order']

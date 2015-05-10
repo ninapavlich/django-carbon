@@ -1,4 +1,6 @@
-{% if model_field.type == 'text-field' or model_field.type == 'date' or model_field.type == 'time' or model_field.type == 'date-time' %}
+{% comment %}{{model_field.type}} - {{model_field.title}}{% endcomment %}
+
+{% if model_field.type == 'text-field' or model_field.type == 'date' or model_field.type == 'time' or model_field.type == 'date-time' or model_field.type == 'comma-separated-list' or model_field.type == 'score' or model_field.type == 'range' or model_field.type == 'number-slider' or model_field.type == 'password' %}
 
 {% include 'form/partials/text_field.html' %}
 
@@ -22,8 +24,24 @@
 
 {% include 'form/partials/input_group.html' %}
 
-{% elif model_field.type == 'select-multiple-autosuggest' or model_field.type == 'select-multiple-horizontal' %}
+{% elif model_field.type == 'select-multiple-autosuggest' or model_field.type == 'select-multiple-horizontal' or model_field.type == 'select-multiple-buttons' %}
 
 {% include 'form/partials/select.html' with multiple=True %}
+
+{% elif model_field.type == 'file' %}
+
+{% include 'form/partials/file.html' %}
+
+{% elif model_field.type == 'secure-file' %}
+
+{% include 'form/partials/file.html' with secure=True %}
+
+{% elif model_field.type == 'select-image' %}
+
+{% include 'form/partials/select_image.html' %}
+
+{% elif model_field.type == 'select-multiple-images' %}
+
+{% include 'form/partials/select_image.html' with multiple=True %}
 
 {% endif %}

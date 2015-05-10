@@ -5,6 +5,8 @@ from django.forms.widgets import TextInput as BaseTextInput
 from django.forms.widgets import Textarea as BaseTextarea
 from django.forms.widgets import CheckboxInput as BaseCheckboxInput
 from django.forms.widgets import Select as BaseSelect
+from django.forms.widgets import SelectMultiple as BaseSelectMultiple
+from django.forms.widgets import ClearableFileInput as BaseClearableFileInput
 
 
 from django.template import loader
@@ -99,12 +101,22 @@ class Select(BaseFormInput, BaseSelect):
 
         return self.render_input(final_attrs, context)
 
-# class MultiSelect(BaseFormInput, MultipleChoiceField):
-#     def render(self, field, context=None, attrs=None):
-#         self.bound_field = field
-#         value = field.value()
-#         name = field.html_name
+class SelectMultiple(BaseFormInput, BaseSelectMultiple):
+    def render(self, field, context=None, attrs=None):
+        self.bound_field = field
+        value = field.value()
+        name = field.html_name
 
-#         final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs = self.build_attrs(attrs, name=name)
 
-#         return self.render_input(final_attrs, context)
+        return self.render_input(final_attrs, context)
+
+class ClearableFileInput(BaseFormInput, BaseClearableFileInput):
+    def render(self, field, context=None, attrs=None):
+        self.bound_field = field
+        value = field.value()
+        name = field.html_name
+
+        final_attrs = self.build_attrs(attrs, name=name)
+
+        return self.render_input(final_attrs, context)        

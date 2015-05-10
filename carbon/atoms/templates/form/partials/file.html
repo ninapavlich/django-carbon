@@ -1,0 +1,13 @@
+{% extends 'form/partials/base_field.html' %}
+
+
+{% block field_attributes %}
+{{block.super}}
+
+{% if secure %}
+data-file-path="{{SECURE_MEDIA_URL}}"
+{% else %}
+data-file-path="{{MEDIA_URL}}"
+{% endif %}
+
+{% endblock %}

@@ -27,6 +27,7 @@
         {% with model_field.get_choices as field_choices %}
 
 
+        {% block options %}
         {% for x,y in field_choices %}
         
 		    <option value="{{ x }}" 
@@ -37,6 +38,7 @@
             {% endif %}
             >{{ y|safe }}</option>
 		{% endfor %}
+        {% endblock %}
 
         {% endwith %}
     </select>

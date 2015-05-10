@@ -23,12 +23,14 @@ class FormFieldInline(admin.StackedInline):
         ('secondary_label','placeholder_text',),
         ('help_text','default'),
     )
+
     advanced_properties = (
         'hide',
         'choices',
-        'content',
         'extra_css_classes',
-        ('icon', 'prefix')        
+        ('icon_left', 'icon_right'),
+        ('inset_text_left', 'inset_text_right'),
+        'content',
     )
     validation_options = (
         'is_required',
@@ -46,6 +48,7 @@ class FormFieldInline(admin.StackedInline):
         'equal_to',
         'pattern'
     )
+
 
     fieldsets = (
         ("Basic Properties", {
@@ -68,4 +71,133 @@ class FormFieldInline(admin.StackedInline):
     
 
 class FormAdmin(VersionAdmin, BaseContentAdmin):
-    pass
+    core_fields = (
+        ('title','slug'),
+        ('publication_status'),
+        ('template', 'submit_template'),
+        ('form_action',),
+        ('email_admin_on_submission', 'email_user_on_submission'),
+        ('redirect_url_on_submission',),
+        ('submit_label', 'extra_css_classes'),
+        ('submission_content')
+    )
+    additional_fields = (
+        'content',
+        'synopsis',
+        ('image_preview','image')
+    )
+
+    autocomplete_lookup_fields = {
+        'fk': ('image', 'published_by', 'template', 'submit_template'),
+        'm2m': ()
+    }
+    raw_id_fields = ( 'image', 'published_by', 'template', 'submit_template')
+
+    publication_fields = BaseContentAdmin.publication_fields
+   
+    path_fields = BaseContentAdmin.path_fields
+
+    seo_fields = BaseContentAdmin.seo_fields
+
+    social_fields = BaseContentAdmin.social_fields
+    
+    meta_fields = BaseVersionableAdmin.meta_fields
+    
+
+
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Additional Content", {
+            'fields': additional_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Path", {
+            'fields': path_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Publication", {
+            'fields': publication_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        
+        ("Search Engine Optimization", {
+            'fields': seo_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Social Integration", {
+            'fields': social_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+
+class FormEntryAdmin(VersionAdmin, BaseVersionableAdmin):
+    
+    list_display = ( "form", "pk", "created_date",  "created_by", "admin_note",)
+
+
+    autocomplete_lookup_fields = {
+        'fk': ('form'),
+    }
+    raw_id_fields = ( 'form',)
+
+    core_fields = (
+        ('form'),
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+
+    fieldsets = (
+        ("Form", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+
+class FieldEntryAdmin(VersionAdmin, BaseVersionableAdmin):
+
+    autocomplete_lookup_fields = {
+        'fk': ('form_entry', 'form_field'),
+    }
+    raw_id_fields = ('form_entry', 'form_field',)
+
+    core_fields = (
+        'form_field',
+        ('form_entry',),
+        ('value')
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+
+    fieldsets = (
+        ("Form", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+class FieldEntryInline(TabularInlineOrderable):
+    #model = FieldEntry    
+
+    readonly_fields = ('form_field',)
+    autocomplete_lookup_fields = {
+        'fk': ('form_entry', 'form_field',),
+    }
+    raw_id_fields = ('form_entry', 'form_field',)
+
+    fields = ('form_field', 'value')
+    extra = 0

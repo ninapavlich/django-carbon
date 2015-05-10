@@ -3,16 +3,19 @@ from django.conf import settings
 from django.core.paginator import Paginator, InvalidPage
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseForbidden, HttpResponsePermanentRedirect
-from django.utils.decorators import method_decorator
-from django.utils.translation import ugettext as _
-from django.views.generic.detail import SingleObjectMixin
 from django.template import loader, Context, RequestContext, Template
 from django.template.response import SimpleTemplateResponse
+from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext as _
+from django.views.generic import TemplateView
+from django.views.generic.detail import SingleObjectMixin
+
 
 
 
 from .decorators import admins_skip_cache, users_skip_cache
 
+from carbon.utils.template import get_template_by_pk_or_slug
 
 class NonAdminCachableView(object):
 
@@ -139,6 +142,8 @@ class HasChildrenView(object):
 class AddressibleView(SingleObjectMixin):
     object = None
 
+    def get_template(self):
+        return self.object.template
 
     def post(self, request, *args, **kwargs):
 
@@ -173,7 +178,7 @@ class AddressibleView(SingleObjectMixin):
             response_kwargs.setdefault('content_type', self.content_type)
             return CustomTemplateResponse(
                 request=self.request,
-                template=self.object.template,
+                template=self.get_template(),
                 context=context,
                 **response_kwargs
             )
@@ -216,13 +221,36 @@ class AddressibleView(SingleObjectMixin):
         return obj
 
 
+class DatabaseTemplateView(TemplateView):
+    def get_template(self):
+        return self.template_slug
+
+    def render_to_response(self, context, **response_kwargs):
+        
+        response_kwargs.setdefault('content_type', self.content_type)
+        return CustomTemplateResponse(
+            request=self.request,
+            template=self.get_template(),
+            context=context,
+            **response_kwargs
+        )
+        return super(DatabaseTemplateView, self).render_to_response(context)
+
+
 class CustomTemplateResponse(SimpleTemplateResponse):
     rendering_attrs = SimpleTemplateResponse.rendering_attrs + ['_request', '_current_app']
 
     def __init__(self, request, template, context=None, content_type=None,
             status=None, current_app=None):
 
-        self.template_object = template
+        #Anticipate getting a template object, template PK or template slug
+        is_int = isinstance( template, ( int, long ) )
+        is_string = isinstance( template, basestring ) 
+        if(is_int or is_string):
+            self.template_object = get_template_by_pk_or_slug(template)
+        else:
+            self.template_object = template
+
         self._request = request
         self._current_app = current_app
         super(CustomTemplateResponse, self).__init__(
@@ -230,6 +258,9 @@ class CustomTemplateResponse(SimpleTemplateResponse):
 
     @property
     def rendered_content(self):
+
+
+
         context = self.resolve_context(self.context_data)
         return self.template_object.render(context)
 

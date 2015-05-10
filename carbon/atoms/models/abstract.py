@@ -17,6 +17,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
 from carbon.utils.slugify import unique_slugify
+from carbon.utils.template import get_template_by_pk_or_slug
 
 # -- Level 1
 class VersionableAtom(models.Model):
@@ -434,28 +435,10 @@ class AddressibleAtom(TitleAtom):
     def get_default_template(self):
 
         found_template = None
+
         if hasattr(self, 'default_template') and self.default_template:
             
-            try:
-                app_label = settings.TEMPLATE_MODEL.split('.')[0]
-                object_name = settings.TEMPLATE_MODEL.split('.')[1]
-                model = get_model(app_label, object_name)
-
-                if isinstance( self.default_template, ( int, long ) ):
-                    #try by pk
-                    try:
-                        found_template = model.objects.get(pk=self.default_template)
-                    except:
-                        pass
-
-                if found_template == None:
-                    #try by slug
-                    try:
-                        found_template = model.objects.get(slug=self.default_template)
-                    except:
-                        pass
-            except:
-                pass
+            found_template = get_template_by_pk_or_slug(self.default_template)
 
         return found_template
 
@@ -522,4 +505,5 @@ class AddressibleAtom(TitleAtom):
         if path_has_changed:
             [p.save() for p in self.get_children()]
 
-    
+
+

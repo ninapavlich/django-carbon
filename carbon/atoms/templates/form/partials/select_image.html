@@ -1,0 +1,17 @@
+{% extends 'form/partials/select.html' %}
+{% load form_tags %}
+
+{% block options %}
+{% for x,y in field_choices %}
+
+    <option value="{{ x }}"
+    data-img-src="{{ x }}" 
+    {% if multiple %}
+    {% if x in field.value %}selected{% endif %}
+    {% else %}
+    {% if field.value|tostring == x|tostring %}selected{% endif %}
+    {% endif %}
+    >{{ y|safe }}</option>
+
+{% endfor %}
+{% endblock %}
