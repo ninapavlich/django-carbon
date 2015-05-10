@@ -21,6 +21,23 @@ class FormEntryForm(forms.ModelForm):
 		model = FormEntry
 		fields = ['form']
 
+	# def is_valid(self):
+	# 	form_errors = self.errors
+	# 	print "ENTRY FORM ERRORS: %s"%(form_errors)
+	# 	return self.is_bound and not bool(form_errors)
+
+	# def full_clean(self):
+	# 	print 'self.is_bound? %s'%(self.is_bound)
+	# 	return super(FormEntryForm, self).full_clean()
+
+	# def _clean_fields(self):
+	# 	print 'clean fields.'
+	# 	print 'self.is_bound? %s'%(self.is_bound)
+	# 	for name, field in self.fields.items():
+	# 		print "NAME? %s Field? %s"%(name, field)
+
+	# 	super(FormEntryForm, self)._clean_fields()
+
 	def __init__(self, form, *args, **kwargs):
 		self.form = form
 		super(FormEntryForm, self).__init__(*args, **kwargs)

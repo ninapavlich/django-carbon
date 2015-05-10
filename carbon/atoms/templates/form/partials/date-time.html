@@ -1,0 +1,11 @@
+{% extends 'form/partials/base_field.html' %}
+
+{% block field_attributes %}
+{% if model_field.min_date %} data-min-date="{{model_field.min_date|date:"Y/m/d" }}" {% endif %}
+{% if model_field.max_date %} data-max-date="{{model_field.max_date|date:"Y/m/d" }}" {% endif %}
+{% endblock %}
+
+{% block messages %}
+{{block.super}}
+<noscript><span class="help-text">Date Time Format Here</span></noscript>
+{% endblock %}

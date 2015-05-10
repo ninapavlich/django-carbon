@@ -27,10 +27,13 @@ class CreateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 
 		#ADD REFERNCE TO FORM OBJECT
 		kwargs = super(CreateFormEntryView, self).get_form_kwargs()
-		kwargs = {
-			'form': self.object,
-		}
+		kwargs['form'] = self.object
 		return kwargs
+
+	# def form_invalid(self, form):
+	# 	print "FORM INVALID!"
+	# 	print "How many errors? %s"%(len(form.errors))
+	# 	return self.render_to_response(self.get_context_data(form=form))
 
 # class UpdateFormEntryView(UpdateWithInlinesView):
 #     # model = FormEntry

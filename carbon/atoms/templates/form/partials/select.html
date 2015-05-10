@@ -8,16 +8,16 @@
         type="{{model_field.input_type}}"
         name="{{ field.name }}" 
         id="{{ field.auto_id }}" 
+        class="field-type-{{model_field.type}}"
 
-        {% if extra_attributes %}
-        {{extra_attributes}}
-        {% endif %}
+        {% block field_attributes %}{{block.super}}{% endblock %}
         
         {% if multiple %} multiple{% endif %}
 
         {% if model_field.placeholder_text %} 
         data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
         {% endif %}
+
     >
 
         {% if default_option %}<option value="">{{default_option}}</option>{% endif %}

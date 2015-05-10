@@ -14,6 +14,7 @@
 		type="{% if radio %}radio{% else %}checkbox{% endif %}" 
 		name="{{field.name}}" 
 		id="{{field.name}}_{{x}}" 
+		class="field-type-{{model_field.type}}"
 		value = "{{x}}" 
 		{% if x in field.value or x == field.value %}checked{% endif %} 
 	/>

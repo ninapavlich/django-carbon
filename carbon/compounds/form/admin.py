@@ -26,7 +26,9 @@ class FormFieldInline(admin.StackedInline):
     advanced_properties = (
         'hide',
         'choices',
-        'content',        
+        'content',
+        'extra_css_classes',
+        ('icon', 'prefix')        
     )
     validation_options = (
         'is_required',
@@ -34,10 +36,12 @@ class FormFieldInline(admin.StackedInline):
         ('is_number','is_integer'),
         ('is_digits','is_alphanumeric'),
         ('min_length','max_length'),
+        ('step_interval'),
         ('min_value','max_value'),
         ('min_words','max_words'),
         ('min_check','max_check'),
         ('min_date','max_date'),
+        ('min_time', 'max_time'),
         # ('min_characters','max_characters'),        
         'equal_to',
         'pattern'

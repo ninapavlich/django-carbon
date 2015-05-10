@@ -7,11 +7,17 @@ from django.utils.translation import ugettext_lazy as _
 
 
 from carbon.utils.slugify import unique_slugify
+from carbon.utils.icons import ICON_CHOICES
 
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
 from .widgets import *
+
+# class FormClass(VersionableAtom, TitleAtom):
+# 	class Meta:
+# 		abstract = True
+
 
 class Form(ContentMolecule):
 	field_model = None
@@ -107,16 +113,18 @@ class Validation(models.Model):
 		'max_length':"",
 		'min_value':"",
 		'max_value':"",
-		'pattern':"",
 		'min_check':"",
-		'max_check':"",
-		'equal_to':"Enter form field slug that this field should match",
+		'max_check':"",		
 		'min_date':"",
 		'max_date':"",
 		'min_words':"",
-		'max_words':""
+		'max_words':"",
+		'min_time':"",
+		'max_time':"",
+		'pattern':"",
+		'equal_to':"Enter form field slug that this field should match",
+		'step_interval':"If values is a score, range, or slider, pick the step interval."
 	}
-
 
 
 	is_email = models.BooleanField(default=False, 
@@ -137,28 +145,35 @@ class Validation(models.Model):
 	min_length = models.IntegerField(null=True, blank=True, help_text=help['min_length']) 
 	max_length = models.IntegerField(null=True, blank=True, help_text=help['max_length']) 
 	min_value = models.IntegerField(null=True, blank=True, help_text=help['min_value']) 
-	max_value = models.IntegerField(null=True, blank=True, help_text=help['max_value']) 
-
-	pattern = models.CharField(max_length=255, null=True, blank=True, 
-		help_text=help['pattern'])
-
+	max_value = models.IntegerField(null=True, blank=True, help_text=help['max_value'])
 	min_check = models.IntegerField(null=True, blank=True, help_text=help['min_check']) 
-	max_check = models.IntegerField(null=True, blank=True, help_text=help['max_check']) 
-
-	equal_to = models.CharField(max_length=255, null=True, blank=True, 
-		help_text=help['equal_to'])
-
-
+	max_check = models.IntegerField(null=True, blank=True, help_text=help['max_check'])  
+	
 	#EXTRA
 	min_date = models.DateField(blank=True, null=True, 
 		help_text=help['min_date'])
 	max_date = models.DateField(blank=True, null=True, 
 		help_text=help['max_date'])
+	min_time = models.DateField(blank=True, null=True, 
+		help_text=help['min_time'])
+	max_time = models.DateField(blank=True, null=True, 
+		help_text=help['max_time'])
 	min_words = models.IntegerField(null=True, blank=True, 
 		help_text=help['min_words'])
 	max_words = models.IntegerField(null=True, blank=True, 
 		help_text=help['max_words'])
 
+	step_interval = models.DecimalField(null=True, blank=True, help_text=help['step_interval'],
+		max_digits=9, decimal_places=2)	
+
+	pattern = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['pattern'])
+
+	equal_to = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['equal_to'])
+
+
+	
 
 
 
@@ -177,6 +192,8 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		'default':"Default field value",
 		'extra_css_classes':"",
 		'hide':"Hide field from form without deleting and data entered by users",
+		'icon':'Add icon to the field. Preview icons at http://fontawesome.io/icons/',
+		'prefix':"Inset field with prefix content",
 		'choices':"Comma separated options where applicable. If an option "
 			"itself contains commas, surround the option starting with the %s"
 			"character and ending with the %s character." %
@@ -184,10 +201,12 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	}
 
 
+
+
 	TEXT_FIELD = 'text-field'
 	TEXT_AREA = 'text-area'
 	BOOLEAN_CHECKBOXES = 'boolean-checkboxes'
-	BOOLEAN_BUTTONS = 'boolean-buttons'
+	BOOLEAN_TOGGLE = 'boolean-toggle'
 	SELECT_DROPDOWN = 'select-dropdown'
 	SELECT_RADIO_BUTTONS = 'select-radio-buttons'
 	SELECT_BUTTONS = 'select-buttons'
@@ -199,6 +218,10 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	DATE = 'date'
 	TIME = 'time'
 	DATE_TIME = 'date-time'
+	SCORE = 'score'
+	RANGE = 'range'
+	NUMBER_SLIDER = 'number-slider'
+	PASSWORD = 'password'
 
 	FORM_INSTRUCTIONS = 'form-instructions'
 	FORM_DIVIDER = 'form-divider'
@@ -208,8 +231,8 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	FORM_FIELD_CHOICES = (
 		(TEXT_FIELD, _("Single Line Text Field")),
 		(TEXT_AREA, _("Multiple Lines Text Area")),
-		(BOOLEAN_CHECKBOXES, _("Boolean with Checkbox")),
-		(BOOLEAN_BUTTONS, _("Boolean with Buttons")),
+		(BOOLEAN_CHECKBOXES, _("Single Checkbox")),
+		(BOOLEAN_TOGGLE, _("Toggle")),
 		(SELECT_DROPDOWN, _("Select with Dropdown")),
 		(SELECT_RADIO_BUTTONS, _("Select with Radio Buttons")),
 		(SELECT_BUTTONS, _("Select with Buttons")),
@@ -221,6 +244,10 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		(DATE, _("Date")),
 		(TIME, _("Time")),
 		(DATE_TIME, _("Date and Time")),
+		(SCORE, _("Score")),
+		(RANGE, _("Range")),
+		(NUMBER_SLIDER, _("Number on a Slider")),
+		(PASSWORD, _("Password")),
 		(FORM_INSTRUCTIONS, _("Form Instructions")),
 		(FORM_DIVIDER, _("Form Divider")),
 		(FORM_STEP, _("Form Step"))
@@ -250,6 +277,10 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
 
+	icon = models.CharField(max_length=255, null=True, blank=True, 
+		choices=ICON_CHOICES, help_text=help['icon'])
+	prefix = models.CharField(max_length=255, null=True, blank=True, 
+		help_text=help['prefix'])
 
 	hide = models.BooleanField(default=False, help_text=help['hide'])
 
@@ -292,7 +323,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.BOOLEAN_CHECKBOXES:
 			return 'checkbox'
 
-		elif self.type == FormField.BOOLEAN_BUTTONS:				
+		elif self.type == FormField.BOOLEAN_TOGGLE:				
 			return 'checkbox'
 
 		elif self.type == FormField.SELECT_DROPDOWN:
@@ -328,6 +359,8 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.DATE_TIME:
 			return 'text'
 
+		return 'text'
+
 
 	def get_form_field(self):
 		field = None
@@ -352,7 +385,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.BOOLEAN_CHECKBOXES:
 			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
 
-		elif self.type == FormField.BOOLEAN_BUTTONS:				
+		elif self.type == FormField.BOOLEAN_TOGGLE:				
 			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
 
 		elif self.type == FormField.SELECT_DROPDOWN:
@@ -389,6 +422,9 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		elif self.type == FormField.DATE_TIME:
 			field = forms.DateTimeField(widget=TextInputWidget(model_field=self), label=self.title)
 			
+		else:
+			#DEFAULT:
+			field = forms.EmailField(widget=TextInputWidget(model_field=self), label=self.title)
 
 		# is_required = models.BooleanField(default=False, 
 		#     help_text=help['is_required'])    
@@ -396,13 +432,14 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		#     help_text=help['is_digits'])
 		# is_alphanumeric = models.BooleanField(default=False, 
 		#     help_text=help['is_alphanumeric'])
+	
+		if field:
 
-		field.required = self.is_required    
-		field.secondary_label = self.secondary_label    
-		field.placeholder_text = self.placeholder_text    
-		field.help_text = self.help_text    
-
-		field.field_model = self
+			field.required = self.is_required    
+			field.secondary_label = self.secondary_label    
+			field.placeholder_text = self.placeholder_text    
+			field.help_text = self.help_text    
+			field.field_model = self
 
 	
 		return field

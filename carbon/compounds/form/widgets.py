@@ -1,3 +1,5 @@
+from django.utils.encoding import force_text
+
 from django.forms.utils import flatatt, to_current_timezone
 from django.forms.widgets import TextInput as BaseTextInput
 from django.forms.widgets import Textarea as BaseTextarea
@@ -23,11 +25,15 @@ class BaseFormInput(object):
         else:
             self.attrs = {}
 
-    def render_input(self, context_data):
-        context_data['model_field'] = self.model_field
-        context_data['field'] = self.bound_field
+    def render_input(self, context_data, context=None):
+        if context==None:
+            context = Context(context_data)
 
-        context = Context(context_data)
+
+        context['model_field'] = self.model_field
+        context['field'] = self.bound_field
+
+        
 
         # return DjangoTemplate(self.custom_template).render(final_attrs)
         template = loader.get_template(self.file_template)
@@ -39,7 +45,7 @@ class TextInputWidget(BaseFormInput, BaseTextInput):
     input_type = 'text'
 
 
-    def render(self, field, attrs=None):
+    def render(self, field, context=None, attrs=None):
         self.bound_field = field
 
         value = field.value()
@@ -51,11 +57,11 @@ class TextInputWidget(BaseFormInput, BaseTextInput):
             # Only add the 'value' attribute if a value is non-empty.
             final_attrs['value'] = force_text(self._format_value(value))        
         
-        return self.render_input(final_attrs)
+        return self.render_input(final_attrs, context)
 
 class Textarea(BaseFormInput, BaseTextarea):
 
-    def render(self, field, attrs=None):
+    def render(self, field, context=None, attrs=None):
         self.bound_field = field
         value = field.value()
         name = field.html_name
@@ -63,14 +69,14 @@ class Textarea(BaseFormInput, BaseTextarea):
         if value is None:
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
-        return self.render_input(final_attrs)
+        return self.render_input(final_attrs, context)
 
 class CheckboxInput(BaseFormInput, BaseCheckboxInput):
     
     def check_test(self, v):
         return not (v is False or v is None or v == '')
 
-    def render(self, field, attrs=None):
+    def render(self, field, context=None, attrs=None):
         self.bound_field = field
         value = field.value()
         name = field.html_name
@@ -81,14 +87,24 @@ class CheckboxInput(BaseFormInput, BaseCheckboxInput):
         if not (value is True or value is False or value is None or value == ''):
             # Only add the 'value' attribute if a value is non-empty.
             final_attrs['value'] = force_text(value)
-        return self.render_input(final_attrs)
+        return self.render_input(final_attrs, context)
 
 class Select(BaseFormInput, BaseSelect):
-    def render(self, field, attrs=None):
+    def render(self, field, context=None, attrs=None):
         self.bound_field = field
         value = field.value()
         name = field.html_name
 
         final_attrs = self.build_attrs(attrs, name=name)
 
-        return self.render_input(final_attrs)
+        return self.render_input(final_attrs, context)
+
+class MultiSelect(BaseFormInput, MultipleChoiceField):
+    def render(self, field, context=None, attrs=None):
+        self.bound_field = field
+        value = field.value()
+        name = field.html_name
+
+        final_attrs = self.build_attrs(attrs, name=name)
+
+        return self.render_input(final_attrs, context)

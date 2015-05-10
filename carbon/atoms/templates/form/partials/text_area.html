@@ -4,13 +4,15 @@
 	<textarea 
 	    name="{{ field.name }}" 
 	    id="{{ field.auto_id }}" 
-	    class="{{ field_class }}"
+	    class="field-type-{{model_field.type}}"
 	    
 	    {% if model_field.placeholder_text %} 
         placeholder="{{model_field.placeholder_text|striptags|safe}}" 
         data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
         {% endif %}
 
+        {% if model_field.prefix %}data-prefix="{{model_field.prefix}}" {% endif %}
+        
 	    {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} 
 
 	>{% spaceless %}

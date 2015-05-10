@@ -481,13 +481,13 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
 
     def render(self, save=True):
-        source = '/* %s - v%s */%s'%(self.title, self.version, self.get_source())
-        minified_source = '/* %s - v%s */%s'%(self.title, self.version, self.minify(source))
+        source = u'/* %s - v%s */%s'%(self.title, self.version, self.get_source())
+        minified_source = u'/* %s - v%s */%s'%(self.title, self.version, self.minify(source))
         source_file = ContentFile(source)
         minified_file = ContentFile(minified_source)
         
-        source_name = "%s%s"%(self.slug, self.get_extension())
-        minified_name = "%s.min%s"%(self.slug, self.get_extension())
+        source_name = u"%s%s"%(self.slug, self.get_extension())
+        minified_name = u"%s.min%s"%(self.slug, self.get_extension())
 
         self.file_source.save(source_name, source_file, save=save)
         self.file_minified.save(minified_name, minified_file, save=save)
@@ -502,8 +502,17 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         source = ''
         for child in self.get_children():
             rendered = child.render()
-            # .decode('utf-8')
-            source += u'/* --- %s ---- */%s'%(child.slug.decode("utf-8"), rendered.decode("utf-8"))
+            
+            #Convert rendered content to unicode UTF-8
+            try:
+                rendered_unicode = unicode(rendered, "utf-8")                
+            except:
+                #conversion wont work if its already unicode
+                rendered_unicode = rendered
+            
+            slug_decoded = child.slug.decode("utf-8")
+            rendered_decoded = rendered_unicode
+            source += u'/* --- %s ---- */%s'%(slug_decoded, rendered_decoded)
 
 
         # unicode_src = source.decode('ascii')

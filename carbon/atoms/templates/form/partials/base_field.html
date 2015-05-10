@@ -1,6 +1,16 @@
 {% load i18n %}
 
-<div class="form-field form-field-type-{{model_field.type}} {% if model_field.required %}required{% endif %} {% if field.errors %}invalid{% endif %} {% if field.valid %}valid{% endif %} {% if model_field.extra_classes %}{{model_field.extra_classes}}{% endif %}">
+<div class="{% spaceless %}form-field form-field-type-{{model_field.type}} 
+{% if model_field.required %}required{% endif %} 
+
+{% if request.POST %}
+{% if field.errors %}invalid {% else %}valid {% endif %}
+{% endif %}
+
+{% if model_field.icon %}has-icon {% endif %}
+{% if model_field.extra_css_classes %}{{model_field.extra_css_classes}} {% endif %}
+
+{% endspaceless %}">
     
     {% block field-inner %}
 
@@ -19,10 +29,9 @@
         type="{{model_field.input_type}}"
         name="{{ field.name }}" 
         id="{{ field.auto_id }}" 
-        
-        {% if extra_attributes %}
-        {{extra_attributes}}
-        {% endif %}
+        class="field-type-{{model_field.type}}"
+
+        {% block field_attributes %}{{block.super}}{% endblock %}
 
 
         {% block value %}
@@ -42,8 +51,13 @@
 
         {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} 
         {% if model_field.pattern %}pattern="{{model_field.pattern}}" {% endif %}
+
+        {% if model_field.prefix %}data-prefix="{{model_field.prefix}}" {% endif %}
     />
     {% endblock %}
+
+    {% if model_field.icon %}<span class="icon fa fa-{{model_field.icon}}"></span>{% endif %}
+
 
     {% block messages %}
     {% if field.messages %}
