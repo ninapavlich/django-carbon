@@ -99,12 +99,12 @@ class Select(BaseFormInput, BaseSelect):
 
         return self.render_input(final_attrs, context)
 
-class MultiSelect(BaseFormInput, MultipleChoiceField):
-    def render(self, field, context=None, attrs=None):
-        self.bound_field = field
-        value = field.value()
-        name = field.html_name
+# class MultiSelect(BaseFormInput, MultipleChoiceField):
+#     def render(self, field, context=None, attrs=None):
+#         self.bound_field = field
+#         value = field.value()
+#         name = field.html_name
 
-        final_attrs = self.build_attrs(attrs, name=name)
+#         final_attrs = self.build_attrs(attrs, name=name)
 
-        return self.render_input(final_attrs, context)
+#         return self.render_input(final_attrs, context)
