@@ -188,6 +188,7 @@ class AddressibleView(SingleObjectMixin):
 
     def get_object(self, queryset=None):
 
+
         
         if self.object:
             return self.object

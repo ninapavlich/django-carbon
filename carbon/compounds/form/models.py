@@ -31,7 +31,9 @@ class Form(ContentMolecule):
 		'redirect_url_on_submission':"",
 		'submit_label':"",
 		'extra_css_classes':"",
-		'submit_template':""
+		'submit_template':"",
+		'required_logged_in_user':"",
+		'is_editable':""
 	}
 
 	POST_TO_FORM_PAGE = 'form-page'
@@ -44,6 +46,11 @@ class Form(ContentMolecule):
 	form_action = models.CharField(max_length=255, choices=FORM_ACTION_CHOICES, 
 		default=POST_TO_FORM_PAGE, help_text=help['form_action'])
 
+	required_logged_in_user = models.BooleanField(default=False, 
+		help_text=help['required_logged_in_user'])
+
+	is_editable = models.BooleanField(default=False, 
+		help_text=help['is_editable'])
 
 	email_admin_on_submission = models.BooleanField(default=True, 
 		help_text=help['email_admin_on_submission'])
@@ -74,15 +81,19 @@ class Form(ContentMolecule):
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
 
-	def get_success_url(self):
+	def get_success_url(self, entry=None):
 		if self.redirect_url_on_submission:
 			return self.redirect_url_on_submission
 		else:
-			return reverse('form_submitted_view', kwargs = {'path': self.slug }) 
+			if self.is_editable and entry != None:
+				return entry.get_absolute_url()
+			else:
+				return reverse('form_submitted_view', kwargs = {'path': self.slug }) 
 
-	def handle_successful_submission(self, form, entry):
-		print "TODO -- this is where we handle emailing admins and users"
-		print entry
+	def handle_successful_submission(self, form, entry, created):
+		if created:
+			print "TODO -- this is where we handle emailing admins and users"
+			print entry
 
 	def get_all_fields(self):
 		return self.field_model.objects.filter(parent=self).exclude(hide=True).order_by('order')
@@ -458,19 +469,19 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
-			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
-			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_BUTTONS:
-			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.SELECT_MULTIPLE_IMAGES:
-			field = forms.MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
+			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
 
 		elif self.type == FormField.COMMA_SEPARATED_LIST:
 			field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
@@ -512,6 +523,55 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	
 		return field
 
+	def compress(self, raw_value):
+	#PYTHON -> DATABASE
+		if self.type == FormField.SELECT_MULTIPLE_CHECKBOXES or \
+			self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST or \
+			self.type == FormField.SELECT_MULTIPLE_HORIZONTAL or \
+			self.type == FormField.SELECT_MULTIPLE_BUTTONS or \
+			self.type == FormField.SELECT_MULTIPLE_IMAGES:
+
+			if len(raw_value)==0:
+				value = ''
+			else:
+
+				#SUSS OUT VALUE
+				if(len(raw_value)>0):
+					first_element = raw_value[0]
+					if isinstance(first_element, (list)):
+						raw_value = first_element
+
+				value = ','.join(raw_value)
+				# print 'compress Raw value = %s; value = %s'%(raw_value, value)
+		else:
+			value = raw_value
+		
+		return value
+
+	def decompress(self, raw_value):
+	#DATABASE -> PYTHON
+		if self.type == FormField.SELECT_MULTIPLE_CHECKBOXES or \
+			self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST or \
+			self.type == FormField.SELECT_MULTIPLE_HORIZONTAL or \
+			self.type == FormField.SELECT_MULTIPLE_BUTTONS or \
+			self.type == FormField.SELECT_MULTIPLE_IMAGES:
+
+			if isinstance(raw_value, basestring):
+				if raw_value=='':
+					value = []
+				else:
+					value = raw_value.split(',')
+					# print 'decompress Raw value = %s; value = %s'%(raw_value, value)
+			else:
+				#already formatted
+				value = raw_value
+		else:
+			value = raw_value
+		
+		return value
+
+	
+
 	def generate_slug(self):
 		starting_slug = '%s-%s'%(self.parent.slug, self.title)
 		unique_slugify(self, starting_slug)
@@ -527,17 +587,14 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 class FormEntry(VersionableAtom):
 
-	form = models.ForeignKey('form.Form', null=True, blank=True)
-
-	# def record_entry(self, form):
-	# 	#loop through form data
-
-	# 	#get corres
+	form_schema = models.ForeignKey('form.Form', null=True, blank=True)
 
 	def get_absolute_url(self):
-		path = "/%s/%s/" % (settings.FORMS_DOMAIN, self.form.slug)
-		return reverse_lazy('form_update_view', kwargs = {'path': path, 'pk':self.pk }) 
+		return reverse('form_update_view', kwargs = {'path': self.form_schema.slug, 'pk':self.pk }) 
 
+
+	def get_entries(self):
+		return self.field_entry_model.objects.filter(form_entry=self).order_by('form_field__order')
 
 	class Meta:
 		abstract = True
@@ -552,10 +609,14 @@ class FieldEntry(VersionableAtom):
 	value = models.TextField(null=True, blank=True)
 
 	@property
-	def formatted_value(self):
-		#value converted to format:
-		#TODO
-		return self.value
+	def decompressed_value(self):
+	#DATABASE -> PYTHON
+		return self.form_field.decompress(self.value)
+
+	def get_compressed_value(self, value):
+	#PYTHON -> DATABASE
+		return self.form_field.compress(value)
+		
 	
 	class Meta:
 		abstract = True

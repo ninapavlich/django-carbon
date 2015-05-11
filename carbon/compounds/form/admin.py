@@ -76,11 +76,13 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
         ('publication_status'),
         ('template', 'submit_template'),
         ('form_action',),
+        ('required_logged_in_user','is_editable'),
         ('email_admin_on_submission', 'email_user_on_submission'),
         ('redirect_url_on_submission',),
         ('submit_label', 'extra_css_classes'),
         ('submission_content')
     )
+
     additional_fields = (
         'content',
         'synopsis',
@@ -140,16 +142,16 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 
 class FormEntryAdmin(VersionAdmin, BaseVersionableAdmin):
     
-    list_display = ( "form", "pk", "created_date",  "created_by", "admin_note",)
+    list_display = ( "form_schema", "pk", "created_date",  "created_by", "admin_note",)
 
 
     autocomplete_lookup_fields = {
-        'fk': ('form'),
+        'fk': ('form_schema'),
     }
-    raw_id_fields = ( 'form',)
+    raw_id_fields = ( 'form_schema',)
 
     core_fields = (
-        ('form'),
+        ('form_schema'),
     )
     meta_fields = BaseVersionableAdmin.meta_fields
 
