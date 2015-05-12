@@ -11,7 +11,8 @@
         data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
         {% endif %}
 
-        {% if model_field.prefix %}data-prefix="{{model_field.prefix}}" {% endif %}
+        {% if model_field.inset_text_right %}data-inset-suffix="{{model_field.inset_text_right}}" {% endif %}
+        {% if model_field.inset_text_left %}data-inset-prefix="{{model_field.inset_text_left}}" {% endif %}
         
 	    {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} 
 

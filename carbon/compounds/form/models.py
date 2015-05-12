@@ -33,7 +33,10 @@ class Form(ContentMolecule):
 		'extra_css_classes':"",
 		'submit_template':"",
 		'required_logged_in_user':"",
-		'is_editable':""
+		'is_editable':"",
+		'form_error_message':"",
+		'form_create_message':"",
+		'form_update_message':""
 	}
 
 	POST_TO_FORM_PAGE = 'form-page'
@@ -56,7 +59,7 @@ class Form(ContentMolecule):
 		help_text=help['email_admin_on_submission'])
 	# email_admin_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
 	#     null=True, blank=True, help_text=help['email_admin_on_submission_template'])
-	admin_email = models.EmailField(max_length=255, blank=False, null=True,
+	admin_email = models.EmailField(max_length=255, blank=True, null=True,
 		help_text=help['admin_email'])
 
 	email_user_on_submission = models.BooleanField(default=True, 
@@ -77,6 +80,14 @@ class Form(ContentMolecule):
 		help_text=help['submit_label'])
 
 
+	form_error_message = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['form_error_message'])
+	form_create_message = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['form_create_message'])
+	form_update_message = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['form_update_message'])
+
+
 
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
@@ -93,7 +104,7 @@ class Form(ContentMolecule):
 	def handle_successful_submission(self, form, entry, created):
 		if created:
 			print "TODO -- this is where we handle emailing admins and users"
-			print entry
+			
 
 	def get_all_fields(self):
 		return self.field_model.objects.filter(parent=self).exclude(hide=True).order_by('order')
@@ -226,6 +237,7 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		'icon_left':'Add icon to the left side of the field. Preview icons at http://fontawesome.io/icons/',
 		'inset_text_right':"Inset field with content on the right",
 		'inset_text_left':"Inset field with content on the left",
+		'error_message':"",
 		'choices':"Comma separated options where applicable. If an option "
 			"itself contains commas, surround the option starting with the %s"
 			"character and ending with the %s character." %
@@ -326,6 +338,9 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		help_text=help['inset_text_left'])
 
 	hide = models.BooleanField(default=False, help_text=help['hide'])
+
+	error_message = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['error_message'])
 
 	def get_choices(self):
 		raw_choices = self.choices.split(',')

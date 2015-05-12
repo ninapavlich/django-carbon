@@ -41,7 +41,7 @@ class FormEntryForm(forms.ModelForm):
 
         self.fields['form_schema'].initial = self.form_schema
 
-        self.model_form_fields = self.form_schema.get_input_fields()
+        self.model_form_fields = self.form_schema.get_all_fields()
         
         for model_field in self.model_form_fields:
             form_field = model_field.get_form_field()

@@ -64,13 +64,25 @@ class VersionableAtom(models.Model):
         return '<span %s>&nbsp;</span>'%(style)        
 
     def get_children(self):
-        return []
+        try:
+            children = super(VersionableAtom, self).get_children()
+        except:
+            children = []
+        return children
 
     def get_siblings(self):
-        return []
+        try:
+            siblings = super(VersionableAtom, self).get_siblings()
+        except:
+            siblings = []
+        return siblings
 
     def is_published(self):
-        return True
+        try:
+            published = super(VersionableAtom, self).is_published()
+        except:
+            published = True
+        return published
 
 
     def save(self, *args, **kwargs):

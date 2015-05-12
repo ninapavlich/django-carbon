@@ -20,11 +20,11 @@
 
 {% include 'form/partials/input_group.html' with radio=True %}
 
-{% elif model_field.type == 'select-multiple-checkboxes' %}
+{% elif model_field.type == 'select-multiple-checkboxes' or model_field.type == 'select-multiple-buttons' %}
 
 {% include 'form/partials/input_group.html' %}
 
-{% elif model_field.type == 'select-multiple-autosuggest' or model_field.type == 'select-multiple-horizontal' or model_field.type == 'select-multiple-buttons' %}
+{% elif model_field.type == 'select-multiple-autosuggest' or model_field.type == 'select-multiple-horizontal'  %}
 
 {% include 'form/partials/select.html' with multiple=True %}
 
@@ -43,5 +43,17 @@
 {% elif model_field.type == 'select-multiple-images' %}
 
 {% include 'form/partials/select_image.html' with multiple=True %}
+
+{% elif model_field.type == 'form-instructions' %}
+
+{% include 'form/partials/instructions.html' %}
+
+{% elif model_field.type == 'form-divider' %}
+
+{% include 'form/partials/divider.html' %}
+
+{% elif model_field.type == 'form-step' %}
+
+{% include 'form/partials/step.html' %}
 
 {% endif %}

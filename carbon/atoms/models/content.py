@@ -55,7 +55,7 @@ class PublishableAtom(models.Model):
         blank=True, null=True, help_text=help['expire_on_date'])
 
     def is_published(self):
-
+        
         if self.publication_status == PublishableAtom.PUBLISHED:
 
             if self.publish_on_date and now() < self.publish_on_date:

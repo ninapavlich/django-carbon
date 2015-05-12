@@ -1,13 +1,21 @@
-<form action="{{object.get_form_action}}" method="post" {% if object.has_multipart %}enctype="multipart/form-data"{% endif %}>
+{% load form_tags %}
+<form action="{% if form_entry_object %}{{form_entry_object.get_absolute_url}}{% else %}{{object.get_form_action}}{% endif %}" method="post" {% if object.has_multipart %}enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
     
-    <input  type="hidden" name="{{ form.form.name }}" id="{{ form.form.auto_id }}" value="{{ form.form.value|default_if_none:'' }}" />
+    <input  type="hidden" name="{{ form.form_schema.name }}" id="{{ form.form_schema.auto_id }}" value="{{ form.form_schema.value|default_if_none:'' }}" />
 
     {% for field in form %}
     
-    {{field.as_widget|safe}}
+    {% if field.field.field_model %}
+    
+    {% get_rendered_field field as rendered_field %}
+    {{rendered_field|safe}}
+    
+    {% endif %}
     
     {% endfor %}
 
-    <input type="submit" value="{% firstof form.submit_label 'Submit' %}" />
+    <footer>
+    	<input type="submit" value="{% firstof form.submit_label 'Submit' %}" />
+    </footer>
 </form>

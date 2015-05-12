@@ -9,17 +9,18 @@ from django.template import loader, Context, RequestContext, Template
 from django.template.response import SimpleTemplateResponse
 
 from carbon.atoms.views.abstract import *
+from carbon.atoms.views.content import *
 
 
 
-class FormSubmittedView(AddressibleView, DetailView):
+class FormSubmittedView(PublishableView, AddressibleView, DetailView):
 	
 	def get_template(self):
 		return self.object.submit_template
 
 	
 
-class CreateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
+class CreateFormEntryView(PublishableView, AddressibleView, FormMixin, ProcessFormView):
 	content_type = None
 	form_entry_object = None
 
@@ -33,8 +34,13 @@ class CreateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 	def get_success_url(self):
 		return self.object.get_success_url(self.form_entry_object)
 
+	def form_invalid(self, form):
+		messages.error(self.request, self.object.form_error_message or 'Please correct the errors below.')
+		return self.render_to_response(self.get_context_data(form=form))
+
 	def form_valid(self, form):
-		self.form_entry_object = form.save()		
+		self.form_entry_object = form.save()
+		messages.success(self.request, self.object.form_create_message or 'Your form was created.')        
 		self.object.handle_successful_submission(form, self.form_entry_object, True)
 		return super(CreateFormEntryView, self).form_valid(form)
 
@@ -44,7 +50,7 @@ class CreateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 		return context
 
 
-class UpdateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
+class UpdateFormEntryView(PublishableView, AddressibleView, FormMixin, ProcessFormView):
 	content_type = None
 	form_entry_object = None
 	form_entry_class = None
@@ -59,12 +65,12 @@ class UpdateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 		
 
 		if self.request.method in ('POST', 'PUT'):
-            
+			
 			kwargs.update({
-                'data': self.request.POST,
-                'files': self.request.FILES,
-            })
-            
+				'data': self.request.POST,
+				'files': self.request.FILES,
+			})
+			
 		else:
 			
 			data = {'form_schema':self.object.pk}
@@ -107,10 +113,15 @@ class UpdateFormEntryView(AddressibleView, FormMixin, ProcessFormView):
 	def get_success_url(self):
 		return self.object.get_success_url(self.form_entry_object)
 
+	def form_invalid(self, form):
+		messages.error(self.request, 'Please correct the errors below.')
+		return self.render_to_response(self.get_context_data(form=form))
+
 	def form_valid(self, form):
-		self.form_entry_object = form.save()		
+		self.form_entry_object = form.save()        
+		messages.success(self.request, 'Your form was updated.')
 		self.object.handle_successful_submission(form, self.form_entry_object, False)
-		return super(UpdateFormEntryView, self).form_valid(form)		
+		return super(UpdateFormEntryView, self).form_valid(form)        
 
 	def get_context_data(self, **kwargs):
 		context = super(UpdateFormEntryView, self).get_context_data(**kwargs)

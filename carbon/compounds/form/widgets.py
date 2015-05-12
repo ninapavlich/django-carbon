@@ -165,7 +165,7 @@ class MultipleChoiceField(forms.MultipleChoiceField):
 
 	def prepare_value(self, value):
 		#suss out the field value
-		if(len(value)>0):
+		if value and (len(value)>0):
 			first_element = value[0]
 			if isinstance(first_element, (list)):
 				value = first_element
