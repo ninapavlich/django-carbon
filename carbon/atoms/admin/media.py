@@ -114,6 +114,22 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
         return ''
     preview.allow_tags = True
 
+    def tag_list(self, obj):
+        
+        output = ''
+        all_tags = obj.tags.all()
+        if len(all_tags) > 1:
+            output += '<span>Tags: </span>'
+
+        elif len(all_tags) > 0:
+            output += '<span>Tag: </span>'
+
+        for tag in all_tags:
+            output += ('<a href="?tags__id__exact=%s">%s</a> '%(tag.pk, tag.title))
+        return output
+
+    tag_list.allow_tags = True
+
     def image_variants(self, obj):
 
         if obj.image:
@@ -128,7 +144,7 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-        "preview", "image_variants"
+        "preview", "image_variants", "tag_list"
     )
     
     core_fields = (
@@ -156,7 +172,7 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
         })
     )
 
-    list_display = ('title','preview','image_width', 'image_height', 'display_size', 'size')
+    list_display = ('title','preview','image_width', 'image_height', 'display_size', 'tag_list')
     list_display_links = ('title', 'preview')
 
 

@@ -44,14 +44,29 @@
     }
     #result_list tr td.field-image_width,
     #result_list tr td.field-image_height,
-    #result_list tr td.field-display_size,
-    #result_list tr td.field-size{
-        width:25%;
+    #result_list tr td.field-display_size{
+        width:33%;
         float:left;
 
         -webkit-box-sizing: border-box;
         -moz-box-sizing: border-box;
         box-sizing: border-box;
+    }
+    #result_list tr td.field-tag_list{
+        clear:both;
+
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    #result_list tr td.field-tag_list a{
+        display:inline-block;
+    }
+    #result_list tr td.field-tag_list a:after{
+        content:',';
+    }
+    #result_list tr td.field-tag_list a:last-child:after{
+        content:'';
     }
     #result_list tr td.action-checkbox{
         position: absolute;
