@@ -110,7 +110,8 @@ class RichContentAtom(models.Model):
         'clean_filename_on_upload':"Clean the filename on upload",
         'allow_overwrite':"Allow file to write over an existing file if the name \
             is the same. If not, we'll automatically add a numerical suffix to \
-            ensure file doesn't override existing files."
+            ensure file doesn't override existing files.",
+        'size':'File size in bytes'
     }
     
     credit = models.CharField(_("Credit"), max_length=255, blank=True,
@@ -125,7 +126,7 @@ class RichContentAtom(models.Model):
         help_text=help['allow_overwrite'] )
 
     
-    size = models.BigIntegerField(null=True, blank=True, help_text='File size in bytes')
+    size = models.BigIntegerField(null=True, blank=True, help_text=help['size'])
     display_size = models.CharField(_("Display Size"), max_length=255, blank=True, null=True)  
 
     
@@ -311,13 +312,15 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
     variants = ('thumbnail',)
 
 class ImageMolecule( BaseImageMolecule ):
-
+    help = {
+        'image':"To ensure a precise color replication in image variants, make sure an sRGB color profile has been assigned to each image.",
+    }
 
 
     try:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'))
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'), help_text=help['image'])
     except:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True, help_text=help['image'])
 
 
 
@@ -327,11 +330,14 @@ class ImageMolecule( BaseImageMolecule ):
 
 
 class SecureImageMolecule( BaseImageMolecule ):
+    help = {
+        'image':"To ensure a precise color replication in image variants, make sure an sRGB color profile has been assigned to each image.",
+    }
 
     try:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'))
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'), help_text=help['image'])
     except:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True)
+        image = models.ImageField(upload_to=title_file_name, blank=True, null=True, help_text=help['image'])
 
     class Meta:
         abstract = True
