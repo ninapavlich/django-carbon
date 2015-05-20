@@ -204,6 +204,11 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
             return self.alt
         return self.title
 
+    @property
+    def get_format(self):
+        if self.use_png:
+            return 'PNG'
+        return 'JPEG'
     
     @property
     def image_url(self):
