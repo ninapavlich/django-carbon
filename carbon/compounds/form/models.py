@@ -2,6 +2,7 @@ from django import forms
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
@@ -24,9 +25,13 @@ class Form(ContentMolecule):
 	help = {
 		'form_action': "Current publication status",
 		'admin_email':"",
+		'email_admin_override':"Leave blank to use default email address (%s)"%(settings.DEFAULT_FROM_EMAIL),
 		'email_admin_on_submission':"",
 		'email_admin_on_submission_template':"",
+		'email_admin_on_submission_category':"",
+		'email_user_field_slug':"Enter the slug of the field that should be used to determine the user's email address",
 		'email_user_on_submission_template':"",
+		'email_user_on_submission_category':"",
 		'submission_content':"",
 		'redirect_url_on_submission':"",
 		'submit_label':"",
@@ -55,17 +60,31 @@ class Form(ContentMolecule):
 	is_editable = models.BooleanField(default=False, 
 		help_text=help['is_editable'])
 
+
+	email_admin_override = models.CharField(null=True, blank=True, 
+		max_length=255,help_text=help['email_admin_override'])
 	email_admin_on_submission = models.BooleanField(default=True, 
 		help_text=help['email_admin_on_submission'])
-	# email_admin_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
-	#     null=True, blank=True, help_text=help['email_admin_on_submission_template'])
+	email_admin_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
+	    null=True, blank=True, help_text=help['email_admin_on_submission_template'],
+	   related_name='email_admin_on_submission_template')
 	admin_email = models.EmailField(max_length=255, blank=True, null=True,
 		help_text=help['admin_email'])
+	email_admin_on_submission_category = models.ForeignKey(settings.EMAIL_CATEGORY_MODEL, 
+	    null=True, blank=True, help_text=help['email_admin_on_submission_category'],
+	    related_name='email_admin_on_submission_category')
 
+
+	email_user_field_slug = models.CharField(null=True, blank=True, 
+		max_length=255,help_text=help['email_user_field_slug'])
 	email_user_on_submission = models.BooleanField(default=True, 
 		help_text=help['email_admin_on_submission'])
-	# email_user_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
-	#     null=True, blank=True, help_text=help['email_user_on_submission_template'])
+	email_user_on_submission_template = models.ForeignKey(settings.EMAIL_TEMPLATE_MODEL, 
+	    null=True, blank=True, help_text=help['email_user_on_submission_template'],
+	    related_name='email_user_on_submission_template')
+	email_user_on_submission_category = models.ForeignKey(settings.EMAIL_CATEGORY_MODEL, 
+	    null=True, blank=True, help_text=help['email_user_on_submission_category'],
+	    related_name='email_user_on_submission_category')
 
 	redirect_url_on_submission = models.CharField(max_length=255, null=True, 
 		blank=True, help_text=help['redirect_url_on_submission'])
@@ -103,8 +122,33 @@ class Form(ContentMolecule):
 
 	def handle_successful_submission(self, form, entry, created):
 		if created:
-			print "TODO -- this is where we handle emailing admins and users"
 			
+			context = {'fields':self.get_all_fields()}
+
+			if self.email_admin_on_submission:
+				if not self.email_admin_on_submission_template:
+					raise ImproperlyConfigured( "Form is set to email admin on submission, but email admin template not specified" )
+
+				if not self.email_admin_on_submission_category:
+					raise ImproperlyConfigured( "Form is set to email admin on submission, but email admin category not specified" )
+
+				self.email_admin_on_submission_template.send_email_message(settings.DEFAULT_FROM_EMAIL, 
+					self.email_admin_on_submission_category, context)
+			
+			if self.email_user_on_submission:
+				user_email_field = self.get_email_recipient_field()
+				if user_email_field==None:
+					raise ImproperlyConfigured( "User recipient field not found" )
+				
+				if not self.email_admin_on_submission_template:
+					raise ImproperlyConfigured( "Form is set to email user on submission, but email user template not specified" )
+
+				if not self.email_user_on_submission_category:
+					raise ImproperlyConfigured( "Form is set to email user on submission, but email user category not specified" )
+
+				self.email_user_on_submission_template.send_email_message(user_email_field, 
+						self.email_user_on_submission_category, context)
+
 
 	def get_all_fields(self):
 		return self.field_model.objects.filter(parent=self).exclude(hide=True).order_by('order')
@@ -115,6 +159,24 @@ class Form(ContentMolecule):
 			Q(type=FormField.FORM_DIVIDER) |
 			Q(type=FormField.FORM_STEP)
 		).order_by('order')
+
+	def get_email_recipient_field(self):
+		#TODO -- allow admin to specify which field is the email field
+
+		if self.email_user_field_slug:
+			fields = self.get_all_fields()
+			email_fields = fields.filter(slug=self.email_user_field_slug)
+			if len(email_fields) > 0:
+				return email_fields[0]
+		
+
+		email_fields = self.field_model.objects.filter(parent=self).exclude(hide=True).filter(
+			is_email=True
+		).order_by('order')
+		if len(email_fields) > 0:
+			return email_fields[0]
+		
+		return None
 
 	def has_multipart(self):
 		fields = self.get_all_fields().filter(

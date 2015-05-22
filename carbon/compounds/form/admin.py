@@ -78,7 +78,10 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 		('template', 'submit_template'),
 		('form_action',),
 		('required_logged_in_user','is_editable'),
-		('email_admin_on_submission', 'email_user_on_submission'),
+		('email_admin_on_submission','email_admin_override'),
+		('email_admin_on_submission_template', 'email_admin_on_submission_category'),
+		('email_user_on_submission','email_user_field_slug'),
+		('email_user_on_submission_template','email_user_on_submission_category'),
 		('redirect_url_on_submission',),
 		('submit_label', 'extra_css_classes'),
 		('form_create_message'),
@@ -94,10 +97,14 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 	)
 
 	autocomplete_lookup_fields = {
-		'fk': ('image', 'published_by', 'template', 'submit_template'),
+		'fk': ('image', 'published_by', 'template', 'submit_template', 
+			'email_admin_on_submission_template', 'email_user_on_submission_template',
+			'email_admin_on_submission_category', 'email_user_on_submission_category'),
 		'm2m': ()
 	}
-	raw_id_fields = ( 'image', 'published_by', 'template', 'submit_template')
+	raw_id_fields = ( 'image', 'published_by', 'template', 'submit_template', 
+		'email_admin_on_submission_template', 'email_user_on_submission_template',
+		'email_admin_on_submission_category', 'email_user_on_submission_category')
 
 	publication_fields = BaseContentAdmin.publication_fields
    
