@@ -132,6 +132,8 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 	rendered_body = models.TextField(_('Rendered Body'), blank=True, null=True)
 
 	viewed = models.BooleanField(default=False,)
+	viewed_from_email = models.BooleanField(default=False,)
+	viewed_online = models.BooleanField(default=False,)
 	view_count = models.PositiveIntegerField('View Count', default=0, null = True, blank=True)
 	first_viewed_date = models.DateTimeField ( _("First Viewed Date"), blank=True, null=True )
 	last_viewed_date = models.DateTimeField ( _("Last Viewed Date"), blank=True, null=True )
@@ -169,7 +171,7 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 		settings, created = EmailNotificationCategory.objects.get_or_create(category=self.category,recipient_email=self.recipient_email)
 		return settings
 
-	def record_view(self):
+	def record_view(self, from_email=True, from_online=False):
 		if not self.first_viewed_date:
 			self.first_viewed_date = datetime.datetime.now()
 		
@@ -177,6 +179,12 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 
 		self.view_count += 1
 		self.viewed = True
+
+		if from_email:
+			self.viewed_from_email = True
+
+		if from_online:
+			self.viewed_online = True
 
 		self.save()
 

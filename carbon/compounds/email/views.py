@@ -71,25 +71,40 @@ class EmailRecordView( DetailView):
     slug_field = 'access_key'
 
     def render_to_response(self, context, **response_kwargs):  
-        if is_from_any_site(self.request) == False:
 
+        sites = Site.objects.all()
+        from_any_internal_site = is_request_from_any_internal_site(self.request, sites)
+        if from_any_internal_site == False:
             self.object.record_view()
-        else:
-            print 'no record -- its from the same domain'
-
+        
         return output_spaceball_image()
 
-def is_from_any_site(request):
-    sites = Site.objects.all()
+def is_request_from_any_internal_site(request, sites):
     for site in sites:
-        if is_from_site(request, site) == True:
+        if request_originated_from_site(request, site) == True:
             return True
     return False
 
-def is_from_site(request, site):
-    if "HTTP_REFERER" in request.META and site.domain in request.META['HTTP_REFERER']:
-        return True
+def is_request_from_any_online_view(request, sites, receipt):
+    for site in sites:
+        if request_originated_from_online_view(request, site, receipt) == True:
+            return True
+    return False    
+
+def request_originated_from_site(request, site):
+    if "HTTP_REFERER" in request.META:
+        referer = request.META['HTTP_REFERER']
+        if site.domain in referer:
+            return True
     return False
+
+def request_originated_from_online_view(request, site, receipt):
+    if request_originated_from_site(request, site):
+        online_url = receipt.get_rendered_url()
+        referer = request.META['HTTP_REFERER']
+        if online_url in referer:
+            return True
+    return False    
 
 def output_spaceball_image():
 

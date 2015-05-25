@@ -91,9 +91,11 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
         ('recipient_email','category'),
         
     )
+    
     stats_fields = (
         ('access_key'),
         ('viewed','view_count'),
+        ('viewed_from_email','viewed_online'),
         ('first_viewed_date','last_viewed_date')
     )
     rendered_fields = (
@@ -120,9 +122,11 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
-    list_display = ('recipient_email','category','rendered_subject','viewed','view_count','first_viewed_date')
+    list_display = ('recipient_email','category','rendered_subject','viewed',
+        'view_count','first_viewed_date')
     list_filter = ('recipient_email','category','viewed')
-    readonly_fields = BaseVersionableAdmin.readonly_fields + ('rendered_body','rendered_subject','rendered_html_iframe',)
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('access_key',
+        'rendered_body','rendered_subject','rendered_html_iframe',)
 
 
 
