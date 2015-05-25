@@ -110,19 +110,20 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
     list_filter = ('recipient_email','category','viewed')
 
 
-class EmailNotificationSettingsAdmin(VersionAdmin, BaseVersionableTitleAdmin):
+
+
+class EmailCategorySubscriptionSettingsAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     prepopulated_fields = {"slug": ("title",)}
 
     autocomplete_lookup_fields = {
-        'fk': ('category',),
+        'fk': ('category','parent',),
         'm2m': ()
     }
-    raw_id_fields = ('category',)
+    raw_id_fields = ('category','parent',)
 
     core_fields = (
-        ('category'),
-        ('recipient_email'),
+        ('parent','category'),
         'status'
     )
     meta_fields = BaseVersionableAdmin.meta_fields
@@ -138,7 +139,43 @@ class EmailNotificationSettingsAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         })
     )
 
+
+class EmailCategorySubscriptionSettingsInline(admin.TabularInline):
+    #model = EmailCategorySubscriptionSettings  
+    fk_name = 'parent'
+
+    fields = ('category','title','status')
+    
+    extra = 0
+
+class UserSubscriptionSettingsAdmin(VersionAdmin, BaseVersionableAdmin):
+
+    
+
+    core_fields = (
+        ('recipient_email',),
+        'access_key'
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+    fieldsets = (
+        ("Category", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+    # inlines = [EmailCategorySubscriptionSettingsInline]
+
+
+
+
 # admin.site.register(EmailTemplate, EmailTemplateAdmin)
 # admin.site.register(EmailCategory, EmailCategoryAdmin)
 # admin.site.register(EmailReceipt, EmailReceiptAdmin)
-# admin.site.register(EmailNotificationSettings, EmailNotificationSettingsAdmin)
+# admin.site.register(EmailCategorySubscriptionSettings, EmailCategorySubscriptionSettingsAdmin)
+# admin.site.register(UserSubscriptionSettings, UserSubscriptionSettingsAdmin)

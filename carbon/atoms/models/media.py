@@ -30,23 +30,97 @@ from .content import HasImageAtom
 #             k.key = settings.MEDIA_DIRECTORY + self.private_file
 #             k.set_acl('private')
 
-def title_file_name( instance, filename ):
-    """Generate File Name"""
+def is_incremented_file(original, updated):
+    """
+    Return True if files are incremented versions of eachother: avatar.png, avatar-1.png, avatar-436.png
+    """
+    try:
+        original_path_pieces = original.split(".")
+        updated_path_pieces = updated.split(".")
 
-    subfolder = (instance.__class__.__name__).lower()
+        original_path_start = original_path_pieces[0].split("-")
+        updated_path_start = updated_path_pieces[0].split("-")
+        # print 'original_path_start: %s updated_path_start: %s'%(original_path_start, updated_path_start)
 
-    file, extension = os.path.splitext( filename )    
+        are_same_start_path = original_path_start[0] == updated_path_start[0]
+        # print 'are_same_start_path? %s == %s? %s'%(original_path_start[0], updated_path_start[0], are_same_start_path)
+        if are_same_start_path==False:
+            return False
+
+        original_is_integer = True if len(original_path_start)==1 else isinstance( int(original_path_start[1]), int )
+        updated_is_integer = True if len(updated_path_start)==1 else isinstance( int(updated_path_start[1]), int )
+        increments_are_integers = original_is_integer and updated_is_integer
+
+        # print 'increments_are_integers? %s , %s? %s'%(original_is_integer, updated_is_integer, increments_are_integers)
+        if increments_are_integers==False:
+            return False
+
+        return True
+
+    except:
+        return False
+
+def _media_file_name( instance, filename, file_attribute_name, folder, model_name ):
+    
+    file, extension = os.path.splitext( filename )
+    media_file = getattr(instance, file_attribute_name)
+
     if instance.clean_filename_on_upload:
-        filename     = "%s%s"%(slugify(filename[:245]), extension)
+        
+        filename     = "%s%s"%(slugify(file[:245]), extension)
         filename     = filename.lower()
 
-    full_path = '/'.join( [ subfolder, filename ] )
+    full_path = '/'.join( [ folder, filename ] )
+    exists = media_file.storage.exists(full_path)
 
-    if instance.allow_overwrite==True:
-        if instance.file.storage.exists(full_path):
-            instance.file.storage.delete(full_path)
-        
+    #If we are changing the image, delete the previous image:
+    if instance.pk:
+        media_model = get_model(model_name.split('.')[0], model_name.split('.')[1])
+        current_instance = media_model.objects.get(pk=instance.pk)
+        current_path = str(current_instance.image)
+
+        if full_path != current_path:
+            if is_incremented_file(full_path, current_path) == False:
+                # print 'Delete previous media: %s'%(current_path)
+                current_media_file = getattr(current_instance, file_attribute_name)
+                current_media_file.storage.delete(current_path)
+
+    
+    #Handle case if file of the same name already exists
+    if exists:
+        if instance.allow_overwrite==True:
+            # print 'Delete media with same name: %s'%(full_path)
+            media_file.storage.delete(full_path)
+        else:
+            counter = 1
+            starting_path = full_path
+            while exists == True:
+                counter += 1
+                full_path = starting_path.replace(extension, '-%s%s'%(counter, extension))
+                exists = media_file.storage.exists(full_path)
+            # print 'Increment filename to get unique: %s'%(full_path)
+
+    
+
+    return full_path        
+
+
+def image_file_name( instance, filename ):
+    
+    subfolder = (instance.__class__.__name__).lower()
+    full_path = _media_file_name(instance, filename, 'image', subfolder, settings.IMAGE_MODEL)
     return full_path
+
+def media_file_name( instance, filename ):
+    
+    subfolder = (instance.__class__.__name__).lower()
+    full_path = _media_file_name(instance, filename, 'file', subfolder, settings.IMAGE_MODEL)
+    return full_path    
+
+def title_file_name( instance, filename ):
+    
+    return image_file_name(instance, filename)
+
 
 def clean_path(path):
     file, extension = os.path.splitext( path )
@@ -98,6 +172,7 @@ def get_storage(type):
 
 
 
+
 class RichContentAtom(models.Model):
     """
     This class requires a title, a file, an image, and an admin_note
@@ -107,7 +182,8 @@ class RichContentAtom(models.Model):
     help = {
         'credit': "Credit",
         'caption': "Caption",
-        'clean_filename_on_upload':"Clean the filename on upload",
+        'clean_filename_on_upload':"This removes spaces, special characters, and \
+            capitalization from the file name for more consistent naming.",
         'allow_overwrite':"Allow file to write over an existing file if the name \
             is the same. If not, we'll automatically add a numerical suffix to \
             ensure file doesn't override existing files.",
@@ -122,7 +198,7 @@ class RichContentAtom(models.Model):
         _("Clean filename on upload"), default = True, 
         help_text=help['clean_filename_on_upload'] )
     allow_overwrite = models.BooleanField( 
-        _("Allow Overwrite"), default = False, 
+        _("Allow Overwrite"), default = True, 
         help_text=help['allow_overwrite'] )
 
     
@@ -318,9 +394,9 @@ class ImageMolecule( BaseImageMolecule ):
 
 
     try:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseImage'), help_text=help['image'])
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True,storage=get_storage('BaseImage'), help_text=help['image'])
     except:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True, help_text=help['image'])
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True, help_text=help['image'])
 
 
 
@@ -335,9 +411,9 @@ class SecureImageMolecule( BaseImageMolecule ):
     }
 
     try:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'), help_text=help['image'])
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'), help_text=help['image'])
     except:
-        image = models.ImageField(upload_to=title_file_name, blank=True, null=True, help_text=help['image'])
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True, help_text=help['image'])
 
     class Meta:
         abstract = True
@@ -350,9 +426,9 @@ class MediaMolecule( ImageMolecule ):
         abstract = True
 
     try:
-        file = models.FileField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseMedia'))
+        file = models.FileField(upload_to=media_file_name, blank=True, null=True,storage=get_storage('BaseMedia'))
     except:
-        file = models.FileField(upload_to=title_file_name, blank=True, null=True)
+        file = models.FileField(upload_to=media_file_name, blank=True, null=True)
 
 class SecureMediaMolecule( SecureImageMolecule ):
 
@@ -361,9 +437,9 @@ class SecureMediaMolecule( SecureImageMolecule ):
         abstract = True
 
     try:
-        file = models.FileField(upload_to=title_file_name, blank=True, null=True,storage=get_storage('BaseSecureMedia'))
+        file = models.FileField(upload_to=media_file_name, blank=True, null=True,storage=get_storage('BaseSecureMedia'))
     except:
-        file = models.FileField(upload_to=title_file_name, blank=True, null=True)       
+        file = models.FileField(upload_to=media_file_name, blank=True, null=True)       
 
 
 try:
