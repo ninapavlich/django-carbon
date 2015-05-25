@@ -122,13 +122,12 @@ class EmailCategory(VersionableAtom, TitleAtom, HierarchicalAtom):
 		verbose_name_plural = 'Email categories'
 
 
-class EmailReceipt(VersionableAtom):
+class EmailReceipt(VersionableAtom, AccessKeyAtom):
 
 	recipient_email = models.CharField(_("Recipient Email"), max_length = 255)
 	rendered_subject = models.TextField(_('Rendered Subject'), blank=True, null=True)    
 	rendered_body = models.TextField(_('Rendered Body'), blank=True, null=True)
 
-	access_key = models.CharField(_("key"), max_length=50, blank=True, null=True, unique=True)
 	viewed = models.BooleanField(default=False,)
 	view_count = models.PositiveIntegerField('View Count', default=0, null = True, blank=True)
 	first_viewed_date = models.DateTimeField ( _("First Viewed Date"), blank=True, null=True )
@@ -136,17 +135,20 @@ class EmailReceipt(VersionableAtom):
 
 	category = models.ForeignKey('email.EmailCategory')
 
-	def save(self, *args, **kwargs):
-		
-		if not self.access_key:
-			self.access_key = uuid.uuid1().hex 
-		super(EmailReceipt, self).save(*args, **kwargs)
 
 	def get_record_url(self):
 		try:
 			return reverse('email_record_view', kwargs = {'access_key': self.access_key }) 
 		except:
 			return None
+
+	def get_rendered_url(self):
+		if self.category.can_be_viewed_online:
+			try:
+				return reverse('email_rendered_view', kwargs = {'access_key': self.access_key })
+			except:
+				return None
+		return None
 
 	def get_view_online_url(self):
 		if self.category.can_be_viewed_online:
@@ -155,6 +157,9 @@ class EmailReceipt(VersionableAtom):
 			except:
 				return None
 		return None
+
+	def get_absolute_url(self):
+		return self.get_view_online_url()
 
 	@property
 	def notification_settings(self):
@@ -198,7 +203,7 @@ class UserSubscriptionSettings(VersionableAtom, AccessKeyAtom):
 
 	def get_absolute_url(self):
 		try:
-			return reverse('email_user_subscription_settings', kwargs = {'access_key': self.access_key })
+			return reverse('email_settings_view', kwargs = {'access_key': self.access_key })
 		except:
 			return None
 

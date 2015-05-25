@@ -4,13 +4,42 @@ try:
 except ImportError:
     import Image
 
-from django.db.models.loading import get_model
 from django.conf import settings
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.db.models.loading import get_model
+from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseForbidden
+from django.views.generic import DetailView, ListView
+from django.db.models.loading import get_model
+
+from carbon.atoms.views.abstract import *
 
 from .models import *
+
+
+class EmailOnlineView(CustomResponseView, DetailView):
+    slug_url_kwarg = 'access_key'
+    slug_field = 'access_key'
+
+class EmailRenderedView(DetailView):
+    slug_url_kwarg = 'access_key'
+    slug_field = 'access_key'
+
+    def render_to_response(self, context, **response_kwargs):
+            
+        return HttpResponse(self.object.rendered_body, content_type="text/html")
+
+
+class EmailSettingsView(CustomResponseView, DetailView):
+    slug_url_kwarg = 'access_key'
+    slug_field = 'access_key'
+    
+    
+class EmailRecordView(CustomResponseView, DetailView):
+    slug_url_kwarg = 'access_key'
+    slug_field = 'access_key'
+    pass
+
 
 
 def output_receipt_image():

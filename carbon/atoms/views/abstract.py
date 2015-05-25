@@ -1,6 +1,8 @@
 from django.conf import settings
 
 from django.core.paginator import Paginator, InvalidPage
+from django.core.exceptions import ImproperlyConfigured
+from django.db.models.loading import get_model
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseForbidden, HttpResponsePermanentRedirect
 from django.template import loader, Context, RequestContext, Template
@@ -139,6 +141,8 @@ class HasChildrenView(object):
 
         return context
 
+
+
 class AddressibleView(SingleObjectMixin):
     object = None
 
@@ -222,8 +226,38 @@ class AddressibleView(SingleObjectMixin):
         return obj
 
 
+
+class CustomResponseView(object):
+
+    #OVER
+    def get_template(self):
+        if not self.template_slug:
+            raise ImproperlyConfigured( "template_slug not defined.")
+
+        app_label = settings.TEMPLATE_MODEL.split('.')[0]
+        object_name = settings.TEMPLATE_MODEL.split('.')[1]
+        model = get_model(app_label, object_name)
+
+        return model.objects.get(slug=self.template_slug)
+
+    def render_to_response(self, context, **response_kwargs):
+            
+        response_kwargs.setdefault('content_type', self.content_type)
+        return CustomTemplateResponse(
+            request=self.request,
+            template=self.get_template(),
+            context=context,
+            **response_kwargs
+        )
+
+        return super(CustomResponseView, self).render_to_response(context)
+
+
 class DatabaseTemplateView(TemplateView):
     def get_template(self):
+        if not self.template_slug:
+            raise ImproperlyConfigured( "template_slug not defined.")
+            
         return self.template_slug
 
     def render_to_response(self, context, **response_kwargs):

@@ -130,11 +130,12 @@ class Form(ContentMolecule):
 			field_entry_hash = {}
 			field_entries = entry.get_entries()
 			for field_entry in field_entries:
-				field_entry_hash[field_entry.form_field.slug] = field_entry.value
+				field_entry_hash[field_entry.form_field.slug] = field_entry
 
 			#POPULATE KEY/VALUE PAIR:
 			for field in input_fields:
-				object = {'title':field.title,'value':field_entry_hash[field.slug].value,'entry':field_entry_hash[field.slug], 'field':field}
+				field_entry = field_entry_hash[field.slug]
+				object = {'title':field.title,'value':field_entry.value,'entry':field_entry, 'field':field}
 				fields.append(object)
 				fields_dict[field.slug] = object
 
@@ -718,7 +719,8 @@ class FormEntry(VersionableAtom):
 		#POPULATE KEY/VALUE PAIR:
 		fields = []
 		for field in input_fields:
-			object = {'title':field.title,'value':field_entry_hash[field.slug].value,'entry':field_entry_hash[field.slug], 'field':field}
+			field_entry = field_entry_hash[field.slug]
+			object = {'title':field.title,'value':field_entry.value,'entry':field_entry, 'field':field}
 			fields.append(object)
 
 		return fields

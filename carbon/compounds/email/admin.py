@@ -76,6 +76,11 @@ list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in','can_u
 
 class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
 
+    def rendered_html(self, obj):
+        url = obj.get_rendered_url()
+        return '<iframe src="%s" style="width: 1000px; height: 800px" ></iframe>'%( url )
+    rendered_html.allow_tags = True
+
     autocomplete_lookup_fields = {
         'fk': ('category'),
         'm2m': ()
