@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from carbon.atoms.models.abstract import VersionableAtom
+from carbon.atoms.models.abstract import VersionableAtom, TitleAtom, OrderedItemAtom
 from carbon.atoms.models.access import AccessAtom
 from carbon.atoms.models.user import UserMolecule, StreetAddressMolecule, UserProfileMolecule
 
@@ -20,6 +20,26 @@ class Address(StreetAddressMolecule):
 
     class Meta:
         abstract = True
+
+
+
+class UserGroup(VersionableAtom, TitleAtom, OrderedItemAtom):
+
+    class Meta:
+        abstract = True
+
+
+class UserGroupMember(VersionableAtom, OrderedItemAtom):
+
+    class Meta:
+        abstract = True
+
+    # YOU MUST IMPLEMENT THIS:
+    # group = models.ForeignKey('account.UserGroup', 
+    #     blank=True, null=True)
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, 
+        blank=True, null=True)
 
 
 class Organization(VersionableAtom):

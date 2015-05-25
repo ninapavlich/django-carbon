@@ -5,7 +5,10 @@ from django.utils.translation import ugettext_lazy as _
 from .forms import *
 # from .models import User, Organization
 
+from reversion.admin import VersionAdmin
+from django_inline_wrestler.admin import TabularInlineOrderable
 
+from carbon.atoms.admin.content import BaseVersionableAdmin, BaseVersionableTitleAdmin
 
 
 
@@ -13,12 +16,16 @@ class UserAdmin(ContribUserAdmin):
     def preview(self, obj):
         if obj.image:
             try:
-                return "<img src='%s' alt='%s preview'/>"%(obj.thumbnail.url, obj.title)
+                return "<img src='%s' alt='%s preview'/>"%(obj.image.thumbnail_url, obj.image.title)
             except:
                 return ""
         return ''
     preview.allow_tags = True
 
+    autocomplete_lookup_fields = {
+        'fk': ['image',],
+    }
+    raw_id_fields = ('image',)
 
     form = UserChangeForm
     add_form = UserCreationForm
@@ -56,6 +63,55 @@ class UserAdmin(ContribUserAdmin):
     readonly_fields = ContribUserAdmin.readonly_fields + ('preview',)
     #'last_login','date_joined', 'impersonate_user'
 
+
+
+
+class UserGroupAdmin(VersionAdmin, BaseVersionableTitleAdmin):
+    list_display = ('title', 'order')
+    list_editable = ('order',)
+
+
+class UserGroupMemberInGroupAdmin(TabularInlineOrderable):
+    #model = UserGroupMember
+
+    def edit_member_link(self, obj):
+        if obj.user:
+            try:
+                return "<a href='%s'>Edit User></a>"%(obj.user.edit_item_url)
+            except:
+                return ""
+        return ''
+    edit_member_link.allow_tags = True
+
+    fk_name = 'group'
+    autocomplete_lookup_fields = {
+        'fk': ['user',],
+    }
+    raw_id_fields = ('user',)
+    fields = ('order','user','edit_member_link')
+    extra = 0
+    readonly_fields = ('edit_member_link',)
+
+class UserGroupMemberInUserAdmin(admin.TabularInline):
+    #model = UserGroupMember
+
+    def all_members_link(self, obj):
+        if obj.group:
+            try:
+                return "<a href='%s'>See All Members ></a>"%(obj.group.edit_item_url)
+            except:
+                return ""
+        return ''
+    all_members_link.allow_tags = True
+
+    fk_name = 'user'
+    autocomplete_lookup_fields = {
+        'fk': ['group',],
+    }
+    raw_id_fields = ('group',)
+    fields = ('order','group','all_members_link',)
+    extra = 0    
+    readonly_fields = ('order','all_members_link')
 
 
 class OrganizationAdmin(admin.ModelAdmin):

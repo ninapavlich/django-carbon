@@ -1,6 +1,8 @@
 import re
 import uuid
 import datetime
+import smtplib
+import traceback
 
 from django.db import models
 from django.db.models.loading import get_model
@@ -88,7 +90,11 @@ class EmailTemplate(VersionableAtom, TitleAtom):
 		receipt.rendered(subject, message_html)
 
 		# -- Send Message
-		_send( recipient_email, subject, message, unicode( message_html ) )
+		try:
+			_send( recipient_email, subject, message, unicode( message_html ) )
+		except smtplib.SMTPException:
+			print "WARNING: ERROR SENDING EMAIL MESSAGE"
+			receipt.record_error( traceback.format_exc() )
 
 	class Meta:
 		abstract = True
@@ -140,6 +146,8 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 
 	category = models.ForeignKey('email.EmailCategory')
 
+	sending_error = models.BooleanField(default=False,)
+	sending_error_message = models.TextField(blank=True, null=True)
 
 	def get_record_url(self):
 		try:
@@ -186,6 +194,11 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 		if from_online:
 			self.viewed_online = True
 
+		self.save()
+
+	def record_error(self, messsage):
+		self.sending_error = True
+		self.sending_error_message = messsage
 		self.save()
 
 	def rendered(self, subject, message):
