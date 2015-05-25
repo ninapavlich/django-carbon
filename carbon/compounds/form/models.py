@@ -123,7 +123,32 @@ class Form(ContentMolecule):
 	def handle_successful_submission(self, form, entry, created):
 		if created:
 			
-			context = {'fields':self.get_all_fields()}
+			input_fields = self.get_input_fields()
+			fields = []
+			fields_dict = {}
+
+			field_entry_hash = {}
+			field_entries = entry.get_entries()
+			for field_entry in field_entries:
+				field_entry_hash[field_entry.form_field.slug] = field_entry.value
+
+			print 'ENTYR HASH: %s'%(field_entry_hash)
+
+			#POPULATE KEY/VALUE PAIR:
+			for field in input_fields:
+				
+				object = {'title':field.title,'value':field_entry_hash[field.slug]}
+				fields.append(object)
+				fields_dict[field.slug] = object
+
+			context = {
+				'input_fields':input_fields,
+				'all_fields':self.get_all_fields(),
+				'submitted_fields':fields,
+				'submitted_fields_dict':fields_dict,
+				'entry':entry,
+				'form':self
+			}
 
 			if self.email_admin_on_submission:
 				if not self.email_admin_on_submission_template:

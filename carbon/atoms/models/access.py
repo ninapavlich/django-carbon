@@ -29,10 +29,13 @@ class AccessKeyAtom(models.Model):
 
 	access_key = models.CharField(_("key"), max_length=50, blank=True, null=True, unique=True)
 
-	def save(self):
+	def save(self, *args, **kwargs):
+
 		if not self.access_key:
-			self.access_key = uuid.uuid1().hex            
-		super(AccessKeyAtom, self).save()  
+			self.access_key = uuid.uuid1().hex 
+
+		super(AccessKeyAtom, self).save(*args, **kwargs)
+		
 
 	class Meta:
 		abstract = True

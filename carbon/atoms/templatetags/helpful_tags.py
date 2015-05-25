@@ -15,6 +15,18 @@ register = Library()
 
 
 #HELPER FUNCTIONS:
+
+@register.assignment_tag
+def getAttribute(the_object, attribute_name):
+    # Try to fetch from the object, and if it's not found return None.
+    # print 'get %s from %s'%(attribute_name, the_object)
+
+    try:
+        attr = the_object[attribute_name]
+    except:
+        attr = getattr(the_object, attribute_name, None)
+    return attr
+
 @register.simple_tag(takes_context=True)
 def url_add_query(context, **kwargs):
     request = context.get('request')

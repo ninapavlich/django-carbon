@@ -53,7 +53,8 @@ class EmailCategoryAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         ('edit_parent','parent',),
         ('title','slug'),
         'can_be_viewed_online',
-        'requires_explicit_opt_in'
+        'requires_explicit_opt_in',
+        'can_unsubscribe'
     )
     meta_fields = BaseVersionableAdmin.meta_fields
     fieldsets = (
@@ -68,9 +69,9 @@ class EmailCategoryAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         })
     )
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('edit_parent',)
-    list_display = ('parent', 'title', 'can_be_viewed_online', 'requires_explicit_opt_in')
+    list_display = ('parent', 'title', 'can_be_viewed_online', 'requires_explicit_opt_in','can_unsubscribe')
     list_display_links = ('parent','title')
-    list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in')
+list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in','can_unsubscribe')
 
 
 class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
@@ -143,6 +144,11 @@ class EmailCategorySubscriptionSettingsAdmin(VersionAdmin, BaseVersionableTitleA
 class EmailCategorySubscriptionSettingsInline(admin.TabularInline):
     #model = EmailCategorySubscriptionSettings  
     fk_name = 'parent'
+    autocomplete_lookup_fields = {
+        'fk': ('category',),
+        'm2m': ()
+    }
+    raw_id_fields = ('category',)
 
     fields = ('category','title','status')
     
@@ -168,6 +174,8 @@ class UserSubscriptionSettingsAdmin(VersionAdmin, BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     )
+    list_display = ('recipient_email',)
+    list_filter = ('recipient_email',)
 
     # inlines = [EmailCategorySubscriptionSettingsInline]
 
