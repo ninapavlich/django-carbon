@@ -132,12 +132,9 @@ class Form(ContentMolecule):
 			for field_entry in field_entries:
 				field_entry_hash[field_entry.form_field.slug] = field_entry.value
 
-			print 'ENTYR HASH: %s'%(field_entry_hash)
-
 			#POPULATE KEY/VALUE PAIR:
 			for field in input_fields:
-				
-				object = {'title':field.title,'value':field_entry_hash[field.slug]}
+				object = {'title':field.title,'value':field_entry_hash[field.slug].value,'entry':field_entry_hash[field.slug], 'field':field}
 				fields.append(object)
 				fields_dict[field.slug] = object
 
@@ -691,8 +688,40 @@ class FormEntry(VersionableAtom):
 
 	form_schema = models.ForeignKey('form.Form', null=True, blank=True)
 
+	NEW = 'new'
+	READ = 'read'
+	REPLIED = 'replied'
+	ARCHIVED = 'archived'
+	FORM_ENTRY_STATUS_CHOICES = (
+		(NEW, _("New")),
+		(READ, _("Read")),
+		(REPLIED, _("Replied")),
+		(ARCHIVED, _("Archived")),
+	)
+
+	status = models.CharField(choices=FORM_ENTRY_STATUS_CHOICES, 
+		default=NEW, max_length = 255)
+
+	tags = models.ManyToManyField('form.FormEntryTag', blank=True, null=True)
+
 	def get_absolute_url(self):
 		return reverse('form_update_view', kwargs = {'path': self.form_schema.slug, 'pk':self.pk }) 
+
+	def get_fields_with_entries(self):
+		field_entry_hash = {}
+		field_entries = self.get_entries()
+		for field_entry in field_entries:
+			field_entry_hash[field_entry.form_field.slug] = field_entry
+
+		input_fields = self.form_schema.get_input_fields()
+
+		#POPULATE KEY/VALUE PAIR:
+		fields = []
+		for field in input_fields:
+			object = {'title':field.title,'value':field_entry_hash[field.slug].value,'entry':field_entry_hash[field.slug], 'field':field}
+			fields.append(object)
+
+		return fields
 
 
 	def get_entries(self):
@@ -724,3 +753,21 @@ class FieldEntry(VersionableAtom):
 		abstract = True
 		verbose_name_plural = "Field Entries"
 		ordering = ['form_field__order']
+
+
+class FormEntryStatus(CategoryMolecule):
+    publish_by_default = True
+    # default_template = 'media_tag'
+    # item_classes = [Image, Media, SecureImage, SecureMedia]
+    
+    class Meta:
+        abstract = True
+
+class FormEntryTag(TagMolecule):
+    publish_by_default = True
+    # default_template = 'media_tag'
+    # item_classes = [Image, Media, SecureImage, SecureMedia]
+    
+    class Meta:
+        abstract = True        
+

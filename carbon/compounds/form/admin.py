@@ -11,6 +11,13 @@ from .models import *
 
 from django_inline_wrestler.admin import TabularInlineOrderable
 
+
+class FormEntryStatusAdmin(BaseTagAdmin):
+	pass
+
+class FormEntryTagAdmin(BaseTagAdmin):
+	pass
+
 class FormFieldInline(admin.StackedInline):
 	#model = FormField
 	# form = FormFieldInlineAdminForm
@@ -153,16 +160,19 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 
 class FormEntryAdmin(VersionAdmin, BaseVersionableAdmin):
 	
-	list_display = ( "form_schema", "pk", "created_date",  "created_by", "admin_note",)
-	list_filter = ("created_by", "modified_by", "form_schema", "created_date")
+	list_display = ( "form_schema", "pk", "created_date",  "created_by", "admin_note",'status',)
+	list_filter = ("created_by", "modified_by", "form_schema", "created_date", 'status', 'tags')
 
 	autocomplete_lookup_fields = {
-		'fk': ('form_schema'),
+		'fk': ('form_schema',),
+		'm2m': ('tags',)
 	}
-	raw_id_fields = ( 'form_schema',)
+	raw_id_fields = ( 'form_schema','tags')
 
 	core_fields = (
 		('form_schema'),
+		('status'),
+		('tags')
 	)
 	meta_fields = BaseVersionableAdmin.meta_fields
 
@@ -173,10 +183,11 @@ class FormEntryAdmin(VersionAdmin, BaseVersionableAdmin):
 		}),
 		("Meta", {
 			'fields': meta_fields,
-			'classes': ( 'grp-collapse grp-closed', )
+			'classes': ( 'grp-collapse grp-open', )
 		})
 	)
 
+	
 
 class FieldEntryAdmin(VersionAdmin, BaseVersionableAdmin):
 
@@ -203,14 +214,14 @@ class FieldEntryAdmin(VersionAdmin, BaseVersionableAdmin):
 		})
 	)
 
-class FieldEntryInline(TabularInlineOrderable):
+
+
+class FieldEntryInline(admin.TabularInline):
 	#model = FieldEntry    
 
-	readonly_fields = ('form_field',)
-	autocomplete_lookup_fields = {
-		'fk': ('form_entry', 'form_field',),
-	}
-	raw_id_fields = ('form_entry', 'form_field',)
+	
 
+
+	readonly_fields = ('form_field',)
 	fields = ('form_field', 'value')
 	extra = 0
