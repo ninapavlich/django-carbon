@@ -299,7 +299,7 @@ class AddressibleAtom(TitleAtom):
     
 
     uuid = models.CharField(_('UUID'), max_length=255, blank=True, 
-        unique=True, db_index=True, help_text=help['uuid'])
+        help_text=help['uuid'])
 
 
     order = models.IntegerField(default=0, help_text=help['order']) 

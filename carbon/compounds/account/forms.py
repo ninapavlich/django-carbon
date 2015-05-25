@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.http import urlsafe_base64_encode
 
 
-
+from ckeditorfiles.widgets import CKEditorWidget
 
 # -----------------------------------------------------------------------------
 # -- Admin/Registration Account Maintenance Forms
@@ -26,6 +26,8 @@ class UserChangeForm(forms.ModelForm):
     is_superuser = forms.BooleanField(required=False, label=_('User is a Super User'),
         help_text=_("User can access all areas of the CMS without having to "
         "have permissions assigned."))
+
+    about = forms.CharField(widget=CKEditorWidget(config=settings.CKEDITOR_CONFIGS['user_about_ckeditor']), required=False)
 
 
     
@@ -173,3 +175,8 @@ class UserCreationForm(forms.ModelForm):
 #         return self.cleaned_data['email']
    
 
+
+class UserGroupAdminForm(forms.ModelForm):
+   
+    content = forms.CharField(widget=CKEditorWidget(config=settings.CKEDITOR_CONFIGS['usergroup_content_ckeditor']), required=False)
+    synopsis = forms.CharField(widget=CKEditorWidget(config=settings.CKEDITOR_CONFIGS['usergroup_synopsis_ckeditor']), required=False)

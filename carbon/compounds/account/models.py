@@ -3,8 +3,10 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from carbon.atoms.models.abstract import VersionableAtom, TitleAtom, OrderedItemAtom
+from carbon.atoms.models.content import ContentMolecule
 from carbon.atoms.models.access import AccessAtom
-from carbon.atoms.models.user import UserMolecule, StreetAddressMolecule, UserProfileMolecule
+from carbon.atoms.models.user import UserMolecule, StreetAddressMolecule, \
+    UserProfileMolecule, SocialContactLinkMolecule
 
 from .manager import UserManager
 
@@ -21,18 +23,23 @@ class Address(StreetAddressMolecule):
     class Meta:
         abstract = True
 
+class UserGroup(ContentMolecule):
 
-
-class UserGroup(VersionableAtom, TitleAtom, OrderedItemAtom):
+    def get_members(self):
+        if not self.member_class:
+            raise NotImplementedError('Class should specify an member_class')
+        
+        return self.member_class.objects.filter(group=self).order_by('order')
 
     class Meta:
         abstract = True
-
+        ordering = ['order']
 
 class UserGroupMember(VersionableAtom, OrderedItemAtom):
 
     class Meta:
         abstract = True
+        ordering = ['order']
 
     # YOU MUST IMPLEMENT THIS:
     # group = models.ForeignKey('account.UserGroup', 
@@ -42,7 +49,7 @@ class UserGroupMember(VersionableAtom, OrderedItemAtom):
         blank=True, null=True)
 
 
-class Organization(VersionableAtom):
+class Organization(ContentMolecule):
 
     class Meta:
         abstract = True
@@ -70,3 +77,7 @@ class OrganizationMember(VersionableAtom, AccessAtom):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True)
+
+class SocialContactLink(SocialContactLinkMolecule):
+    class Meta:
+        abstract = True

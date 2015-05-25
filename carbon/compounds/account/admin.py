@@ -37,14 +37,15 @@ class UserAdmin(ContribUserAdmin):
     )
 
     fieldsets = (
-        ('Name', { 
+        ('User', { 
             'fields': (
                 ("first_name","last_name"),
                 ('email','date_of_birth'),
                 'password',
                 'about',
                 ('preview','image')
-            )
+            ),
+            'classes': ( 'grp-collapse grp-open', )
         }),
         (_('CMS Permissions'), {
             'fields': (
@@ -52,11 +53,13 @@ class UserAdmin(ContribUserAdmin):
                 
                 'is_superuser',
                 ('groups')
-            )
+            ),
+            'classes': ( 'grp-collapse grp-closed', )
         }),
     )
 
-    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
+    list_display = ('preview','email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
+    list_display_links = ('preview','email','first_name','last_name')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
@@ -69,6 +72,27 @@ class UserAdmin(ContribUserAdmin):
 class UserGroupAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     list_display = ('title', 'order')
     list_editable = ('order',)
+
+    form = UserGroupAdminForm
+
+    core_fields = (
+        ('title','slug'),
+        ('synopsis'),
+        ('content')
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+    search_fields = ('title','admin_note', 'synopsis', 'content')
 
 
 class UserGroupMemberInGroupAdmin(TabularInlineOrderable):
@@ -118,6 +142,11 @@ class OrganizationAdmin(admin.ModelAdmin):
     pass
     
 
+class SocialContactLinkInline(TabularInlineOrderable):
+    # model = SocialContactLink
+    fk_name = 'user'    
+    fields = ('order','title','url','icon')
+    extra = 0
 
 # admin.site.register(Organization, OrganizationAdmin)    
 # admin.site.register(User, UserAdmin)

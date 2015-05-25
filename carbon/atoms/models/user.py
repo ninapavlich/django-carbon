@@ -9,6 +9,8 @@ from .abstract import *
 from .access import *
 from .content import HasImageAtom
 
+from carbon.utils.icons import ICON_CHOICES
+
 
 class PersonAtom(models.Model):
 
@@ -28,17 +30,26 @@ class PersonAtom(models.Model):
 
 class StreetAddressAtom(models.Model):
 
-    street_1 = models.CharField(_('Street 1'), max_length=30, blank=True)
-    street_2 = models.CharField(_('Street_2'), max_length=30, blank=True)
-    city = models.CharField(_('City'), max_length=30, blank=True)
-    state = models.CharField(_('State'), max_length=30, blank=True)
-    zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True)   
+    street_1 = models.CharField(_('Street 1'), max_length=30, blank=True, null=True)
+    street_2 = models.CharField(_('Street_2'), max_length=30, blank=True, null=True)
+    city = models.CharField(_('City'), max_length=30, blank=True, null=True)
+    state = models.CharField(_('State'), max_length=30, blank=True, null=True)
+    zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True, null=True)   
 
-    latitude = models.CharField(_('Latitude'), max_length=30, blank=True)   
-    longitude = models.CharField(_('Longitude'), max_length=30, blank=True)    
+    latitude = models.CharField(_('Latitude'), max_length=30, blank=True, null=True)   
+    longitude = models.CharField(_('Longitude'), max_length=30, blank=True, null=True)    
     
     class Meta:
         abstract = True     
+
+
+class PhoneContactAtom(models.Model):
+    class Meta:
+        abstract = True 
+
+    home_phone = models.CharField(_('Home Phone'), max_length=255, blank=True, null=True) 
+    work_phone = models.CharField(_('Work Phone'), max_length=255, blank=True, null=True) 
+    cell_phone = models.CharField(_('Cell Phone'), max_length=255, blank=True, null=True)
 
 
 
@@ -101,4 +112,14 @@ class UserProfileMolecule(UserMolecule, HasImageAtom):
     class Meta:
         abstract = True
 
+class SocialContactLinkMolecule( VersionableAtom, TitleAtom, OrderedItemAtom ):
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, 
+        blank=True, null=True)
+    url = models.CharField(_("URL"), max_length=255, blank = True, 
+        null = True)
+    icon = models.CharField(max_length=255, null=True, blank=True, choices=ICON_CHOICES, 
+        help_text='Preview icons at http://fontawesome.io/icons/',)  
+    
+    class Meta:
+        abstract = True
