@@ -15,6 +15,7 @@ from django.template import Context, Template
 from django.utils.html import conditional_escape, format_html
 
 
+
 class BaseFormInput(object):
 	has_custom_render = True
 	model_field = None

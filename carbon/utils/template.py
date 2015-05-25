@@ -6,6 +6,7 @@ import re
 
 from django.conf import settings
 from django.db.models.loading import get_model
+from django.template.loaders.app_directories import app_template_dirs
 
 def get_page_templates_raw(ignore_templates = None):
 
@@ -41,6 +42,16 @@ def get_page_templates(ignore_templates = None):
 
     return output
 
+
+def get_all_templates():
+   
+    template_files = []
+    for template_dir in (settings.TEMPLATE_DIRS + app_template_dirs):
+        for dir, dirnames, filenames in os.walk(template_dir):
+            for filename in filenames:
+                template_files.append(os.path.join(dir, filename))
+
+    return template_files
 
 def get_template_by_pk_or_slug(template_pk_or_slug):
 

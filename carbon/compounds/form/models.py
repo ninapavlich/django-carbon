@@ -14,6 +14,8 @@ from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
 from .widgets import *
+from .utils import *
+
 
 # class FormClass(VersionableAtom, TitleAtom):
 # 	class Meta:
@@ -194,7 +196,7 @@ class Form(ContentMolecule):
 		
 
 		email_fields = self.field_model.objects.filter(parent=self).exclude(hide=True).filter(
-			is_email=True
+			type=FormField.EMAIL_FIELD
 		).order_by('order')
 		if len(email_fields) > 0:
 			return email_fields[0]
@@ -228,13 +230,9 @@ class Form(ContentMolecule):
 class Validation(models.Model):
 	#Maps to http://parsleyjs.org/doc/index.html#psly-validators-overview
 	help = {
-		'is_email': "",
 		'is_required':"",
-		'is_number':"",
-		'is_integer':"",
 		'is_digits':"",
 		'is_alphanumeric':"",
-		'is_url':"",
 		'min_length':"",
 		'max_length':"",
 		'min_value':"",
@@ -253,20 +251,14 @@ class Validation(models.Model):
 	}
 
 
-	is_email = models.BooleanField(default=False, 
-		help_text=help['is_email'])
+	
 	is_required = models.BooleanField(default=False, 
 		help_text=help['is_required'])
-	is_number = models.BooleanField(default=False, 
-		help_text=help['is_number'])
-	is_integer = models.BooleanField(default=False, 
-		help_text=help['is_integer'])
 	is_digits = models.BooleanField(default=False, 
 		help_text=help['is_digits'])
 	is_alphanumeric = models.BooleanField(default=False, 
 		help_text=help['is_alphanumeric'])
-	is_url = models.BooleanField(default=False, 
-		help_text=help['is_url'])
+
 
 	min_length = models.IntegerField(null=True, blank=True, help_text=help['min_length']) 
 	max_length = models.IntegerField(null=True, blank=True, help_text=help['max_length']) 
@@ -332,6 +324,10 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 
 	TEXT_FIELD = 'text-field'
+	EMAIL_FIELD = 'email-field'
+	URL_FIELD = 'url-field'
+	INTEGER_FIELD = 'integer-field'
+	NUMBER_FIELD = 'number-field'
 	TEXT_AREA = 'text-area'
 	BOOLEAN_CHECKBOXES = 'boolean-checkboxes'
 	BOOLEAN_TOGGLE = 'boolean-toggle'
@@ -358,10 +354,15 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 	FORM_INSTRUCTIONS = 'form-instructions'
 	FORM_DIVIDER = 'form-divider'
 	FORM_STEP = 'form-step'
+	HIDDEN_FIELD = 'hidden-field'
 
 		
 	FORM_FIELD_CHOICES = (
 		(TEXT_FIELD, _("Single Line Text Field")),
+		(EMAIL_FIELD, _("Email Field")),
+		(URL_FIELD, _("URL Field")),
+		(INTEGER_FIELD, _("Integer Field")),
+		(NUMBER_FIELD, _("Number Field")),
 		(TEXT_AREA, _("Multiple Lines Text Area")),
 		(BOOLEAN_CHECKBOXES, _("Single Checkbox")),
 		(BOOLEAN_TOGGLE, _("Toggle")),
@@ -434,194 +435,10 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 	@property
 	def input_type(self):
-
-		if self.type == FormField.TEXT_FIELD:
-			# search
-			# email
-			# url
-			# tel
-			# number
-			# range
-			# date
-			# month
-			# week
-			# time
-			# datetime
-			# datetime-local
-			# color
-			if self.is_email:
-				return 'email'
-			elif self.is_url:
-				return 'url'
-			elif self.is_integer:
-				return 'number'
-			elif self.is_number:
-				return 'number'
-			else:
-				return 'text'
-
-
-		elif self.type == FormField.TEXT_AREA:
-			return 'text' #TODO
-
-		elif self.type == FormField.BOOLEAN_CHECKBOXES:
-			return 'checkbox'
-
-		elif self.type == FormField.BOOLEAN_TOGGLE:				
-			return 'checkbox'
-
-		elif self.type == FormField.SELECT_DROPDOWN:
-			return 'select'
-
-		elif self.type == FormField.SELECT_RADIO_BUTTONS:
-			return 'radio'
-
-		elif self.type == FormField.SELECT_BUTTONS:
-			return 'radio'
-
-		elif self.type == FormField.SELECT_IMAGE:
-			return 'radio'
-
-		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			return 'checkbox'
-
-		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
-			return 'select' #TODO
-
-		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
-			return 'select' #TODO
-
-		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			return 'select' #TODO
-
-		elif self.type == FormField.SELECT_MULTIPLE_IMAGES:
-			return 'checkbox'
-
-		elif self.type == FormField.COMMA_SEPARATED_LIST:
-			return 'text'
-		
-		elif self.type == FormField.FILE:
-			return 'file'
-
-		elif self.type == FormField.SECURE_FILE:
-			return 'file'
-
-		elif self.type == FormField.DATE:
-			return 'text'
-
-		elif self.type == FormField.TIME:
-			return 'text'
-
-		elif self.type == FormField.DATE_TIME:
-			return 'text'
-
-		elif self.type == FormField.SCORE:
-			return 'number'
-
-		elif self.type == FormField.RANGE:
-			return 'range'
-
-		elif self.type == FormField.NUMBER_SLIDER:
-			return 'number'
-
-		elif self.type == FormField.PASSWORD:
-			return 'password'
-
-		return 'text'
-
+		return get_form_field_input_type_by_type(self.type)
 
 	def get_form_field(self):
-		field = None
-
-		if self.type == FormField.TEXT_FIELD:
-
-			if self.is_email:
-				field = forms.EmailField(widget=TextInputWidget(model_field=self), label=self.title)
-			elif self.is_url:
-				field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
-			elif self.is_integer:
-				field = forms.IntegerField(widget=TextInputWidget(model_field=self), label=self.title)
-			elif self.is_number:
-				field = forms.DecimalField(widget=TextInputWidget(model_field=self), label=self.title)
-			else:
-				field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
-
-
-		elif self.type == FormField.TEXT_AREA:
-			field = forms.CharField(widget=Textarea(model_field=self), label=self.title)
-
-		elif self.type == FormField.BOOLEAN_CHECKBOXES:
-			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
-
-		elif self.type == FormField.BOOLEAN_TOGGLE:				
-			field = forms.BooleanField(widget=CheckboxInput(model_field=self), label=self.title)
-
-		elif self.type == FormField.SELECT_DROPDOWN:
-			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_RADIO_BUTTONS:
-			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_BUTTONS:
-			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_IMAGE:
-			field = forms.ChoiceField(widget=Select(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_MULTIPLE_AUTOSUGGEST:
-			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_MULTIPLE_HORIZONTAL:
-			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_MULTIPLE_BUTTONS:
-			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.SELECT_MULTIPLE_IMAGES:
-			field = MultipleChoiceField(widget=SelectMultiple(model_field=self), label=self.title, choices=self.get_choices())
-
-		elif self.type == FormField.COMMA_SEPARATED_LIST:
-			field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
-
-		elif self.type == FormField.FILE:
-			field = forms.FileField(widget=ClearableFileInput(model_field=self), label=self.title)
-
-		elif self.type == FormField.SECURE_FILE:
-			field = forms.FileField(widget=ClearableFileInput(model_field=self), label=self.title)
-
-		elif self.type == FormField.DATE:
-			field = forms.DateField(widget=TextInputWidget(model_field=self), label=self.title)
-
-		elif self.type == FormField.TIME:
-			field = forms.TimeField(widget=TextInputWidget(model_field=self), label=self.title)
-
-		elif self.type == FormField.DATE_TIME:
-			field = forms.DateTimeField(widget=TextInputWidget(model_field=self), label=self.title)
-			
-		else:
-			#DEFAULT:
-			field = forms.CharField(widget=TextInputWidget(model_field=self), label=self.title)
-
-		# is_required = models.BooleanField(default=False, 
-		#     help_text=help['is_required'])    
-		# is_digits = models.BooleanField(default=False, 
-		#     help_text=help['is_digits'])
-		# is_alphanumeric = models.BooleanField(default=False, 
-		#     help_text=help['is_alphanumeric'])
-	
-		if field:
-
-			field.required = self.is_required    
-			field.secondary_label = self.secondary_label    
-			field.placeholder_text = self.placeholder_text    
-			field.help_text = self.help_text    
-			field.field_model = self
-
-	
-		return field
+		return get_form_field_by_type(self.type, self, self.title, self.get_choices())
 
 	def compress(self, raw_value):
 	#PYTHON -> DATABASE

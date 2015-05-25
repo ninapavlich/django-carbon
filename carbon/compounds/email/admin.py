@@ -76,10 +76,10 @@ list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in','can_u
 
 class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
 
-    def rendered_html(self, obj):
+    def rendered_html_iframe(self, obj):
         url = obj.get_rendered_url()
-        return '<iframe src="%s" style="width: 1000px; height: 800px" ></iframe>'%( url )
-    rendered_html.allow_tags = True
+        return '<iframe src="%s" style="width: 700px; height: 800px" ></iframe>'%( url )
+    rendered_html_iframe.allow_tags = True
 
     autocomplete_lookup_fields = {
         'fk': ('category'),
@@ -89,13 +89,17 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
 
     core_fields = (
         ('recipient_email','category'),
-        ('rendered_subject'),
-        ('rendered_body'),
+        
     )
     stats_fields = (
         ('access_key'),
         ('viewed','view_count'),
         ('first_viewed_date','last_viewed_date')
+    )
+    rendered_fields = (
+        ('rendered_subject'),
+        ('rendered_html_iframe'),        
+        ('rendered_body'),
     )
     meta_fields = BaseVersionableAdmin.meta_fields
     fieldsets = (
@@ -107,6 +111,10 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
             'fields': stats_fields,
             'classes': ( 'grp-collapse grp-open', )
         }),
+        ("Rendered", {
+            'fields': rendered_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
         ("Meta", {
             'fields': meta_fields,
             'classes': ( 'grp-collapse grp-closed', )
@@ -114,7 +122,7 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
     )
     list_display = ('recipient_email','category','rendered_subject','viewed','view_count','first_viewed_date')
     list_filter = ('recipient_email','category','viewed')
-
+    readonly_fields = BaseVersionableAdmin.readonly_fields + ('rendered_body','rendered_subject','rendered_html_iframe',)
 
 
 

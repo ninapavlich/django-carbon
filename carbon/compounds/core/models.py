@@ -35,7 +35,7 @@ import sass
 # import scss
 
 from carbon.utils.slugify import unique_slugify
-from carbon.utils.template import get_page_templates, get_page_templates_raw
+from carbon.utils.template import get_page_templates, get_page_templates_raw, get_all_templates
 
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
@@ -376,9 +376,10 @@ class Template(VersionableAtom, TitleAtom):
 
     def render(self, context):
 
-        file_templates = get_page_templates_raw()
-
-        
+        # file_templates = get_all_templates()
+        # for template in file_templates:
+        #     context[template] = DjangoTemplate('testing124')
+       
         #Add DB Templates
         all_templates = self.__class__.objects.all()
         for template in all_templates:

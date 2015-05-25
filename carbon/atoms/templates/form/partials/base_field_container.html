@@ -56,4 +56,8 @@
 
 {% include 'form/partials/step.html' %}
 
+{% elif model_field.type == 'hidden-field' %}
+
+{% include 'form/partials/hidden.html' %}
+
 {% endif %}

@@ -1,5 +1,6 @@
 import re
 import uuid
+import datetime
 
 from django.db import models
 from django.db.models.loading import get_model
@@ -97,13 +98,15 @@ class EmailCategory(VersionableAtom, TitleAtom, HierarchicalAtom):
 	help = {
 		'can_be_viewed_online':"Allow recipients to view this online. DO NOT ENABLE if you are sending any kind of private data in this email category.",
 		'requires_explicit_opt_in':"Sending these emails require user to explicitely opt-in to category.",
-		'can_unsubscribe': "If these emails are transactional, then subscribe/unsubscribe functionality is not needed"
+		'can_unsubscribe': "If these emails are transactional, then subscribe/unsubscribe functionality is not needed",
+		# 'can_change_frequency': "If these emails be received at a different freququency",
 	}
 
 	can_be_viewed_online = models.BooleanField(default=False, help_text=help['can_be_viewed_online'])
 
 	requires_explicit_opt_in = models.BooleanField(default=False, help_text=help['requires_explicit_opt_in'])
 	can_unsubscribe = models.BooleanField(default=True, help_text=help['can_unsubscribe'])
+	# can_change_frequency = models.BooleanField(default=True, help_text=help['can_change_frequency'])
 
 
 	def can_view_online(self):
@@ -168,9 +171,9 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 
 	def record_view(self):
 		if not self.first_viewed_date:
-			self.first_viewed_date = datetime.now()
+			self.first_viewed_date = datetime.datetime.now()
 		
-		self.last_viewed_date = datetime.now()
+		self.last_viewed_date = datetime.datetime.now()
 
 		self.view_count += 1
 		self.viewed = True

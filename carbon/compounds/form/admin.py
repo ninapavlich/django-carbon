@@ -42,8 +42,6 @@ class FormFieldInline(admin.StackedInline):
 	)
 	validation_options = (
 		'is_required',
-		('is_email','is_url'),
-		('is_number','is_integer'),
 		('is_digits','is_alphanumeric'),
 		('min_length','max_length'),
 		('step_interval'),
