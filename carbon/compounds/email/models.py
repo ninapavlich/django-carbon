@@ -156,12 +156,10 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 			return None
 
 	def get_rendered_url(self):
-		if self.category.can_be_viewed_online:
-			try:
-				return reverse('email_rendered_view', kwargs = {'access_key': self.access_key })
-			except:
-				return None
-		return None
+		try:
+			return reverse('email_rendered_view', kwargs = {'access_key': self.access_key })
+		except:
+			return None
 
 	def get_view_online_url(self):
 		if self.category.can_be_viewed_online:
