@@ -6,7 +6,7 @@ from functools import wraps
 from django.conf import settings
 from django.utils.decorators import decorator_from_middleware_with_args, available_attrs
 from django.views.decorators.cache import cache_page
-
+from django.contrib.messages.api import get_messages
 
 
 def user_cache_test(test_func, cache_duration=settings.CACHE_DURATION):
@@ -20,7 +20,10 @@ def user_cache_test(test_func, cache_duration=settings.CACHE_DURATION):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
 
-            if test_func(request.user):
+            #Don't cache pages that have unique messages
+            messages = get_messages(request)
+            if len(messages) > 0 or test_func(request.user):
+
                 return view_func(request, *args, **kwargs)
 
             else:
