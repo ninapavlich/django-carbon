@@ -114,7 +114,7 @@ class Form(ContentMolecule):
 		help_text=help['extra_css_classes'])
 
 	def get_success_url(self, entry=None):
-		if self.redirect_url_on_submission:
+		if self.redirect_url_on_submission and self.required_logged_in_user: #TEMP -- messages not working for non logged in users...
 			return self.redirect_url_on_submission
 		else:
 			if self.is_editable and entry != None:
