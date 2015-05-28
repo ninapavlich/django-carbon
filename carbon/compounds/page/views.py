@@ -15,15 +15,35 @@ from .forms import *
 
 class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
 
-    # model = Page
-    pass
-    
+	# model = Page
+	pass
+	
+
 
 
 
 class PageTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, DetailView):
 
-    # model = PageTag
-    pass
+	# model = PageTag
+	pass
 
-        
+		
+class PageBlockView(object):
+
+	def get_context_data(self, **kwargs):
+		
+		print 'GET PAGE BLOCK CONTEXT!'
+		ctx = super(PageBlockView, self).get_context_data(**kwargs)
+
+		#PAGE CONTENT BLOCKS
+		pageblocks = self.get_page_content_blocks()
+		for pageblock in pageblocks:
+			ctx[pageblock.slug] = pageblock
+
+		ctx['page_blocks'] = pageblocks
+	   
+		return ctx
+
+	def get_page_content_blocks(self):
+
+		return self.object.get_page_content_blocks()

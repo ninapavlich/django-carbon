@@ -125,8 +125,8 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
         })
     )
     list_display = ('recipient_email','category','rendered_subject','sending_error','viewed',
-        'view_count','first_viewed_date')
-    list_filter = ('recipient_email','category','viewed', 'sending_error')
+        'view_count','created_date','first_viewed_date')
+    list_filter = ('recipient_email','category','viewed', 'sending_error', )
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('access_key',
         'rendered_body','rendered_subject','rendered_html_iframe',
         'sending_error','sending_error_message')

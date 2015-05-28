@@ -57,3 +57,48 @@ class PageTag(TagMolecule):
     class Meta:
         abstract = True
        
+class PageContentBlock(VersionableAtom, OrderedItemAtom, TitleAtom, ContentAtom, PublishableAtom):
+    
+    publish_by_default = True
+
+    parent = models.ForeignKey('page.Page')
+
+    def get_siblings(self, published=True):
+        siblings = self.__class__.objects.filter(parent=self.parent)
+
+        if published:
+            return [child for child in siblings if child.is_published()]
+        else:
+            return siblings
+
+    def verify_title_and_slug(self):
+        siblings = self.get_siblings(False)
+
+        if not self.title:
+            self.title = '%s %s'%(self._meta.verbose_name.title(), len(siblings)+1)
+
+        if not self.slug or not self.pk:
+            self.slug = self.generate_slug()
+
+    def generate_slug(self):
+        
+        siblings = self.get_siblings(False)
+        # -- Make sure slug is unique
+        if self.slug:
+            raw_slug = self.slug
+        else:
+            raw_slug = self.title
+
+        raw_slug = raw_slug.lower()
+        
+        unique_slugify(self, raw_slug, 'slug', siblings, "_")
+
+        return self.slug
+
+    class Meta:
+        verbose_name = 'Page Block'
+        verbose_name_plural = 'Page Blocks'
+        ordering = ['order']
+        abstract = True
+    
+    

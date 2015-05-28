@@ -68,6 +68,44 @@ class PageAdmin(VersionAdmin, HierarchicalContentAdmin):
 
     # list_display = ( "parent", "admin_hierarchy", "hierarchy", "path",  "title", "publication_status",)
 
+class PageContentBlockInline(admin.StackedInline):
+
+    form = PageContentBlockAdminForm
+    sortable_field_name = "order"
+    extra = 0
+    
+    classes = ('grp-collapse grp-open',)
+    inline_classes = ('grp-collapse grp-open',)
+
+    meta_fields = BaseVersionableAdmin.meta_fields
+
+    
+    core_fields = (
+        ('order','title','slug'),
+        ('content',),
+    )
+    additional_fields = (
+        ('synopsis'),
+        ('publication_status'),
+        ('publish_on_date', 'expire_on_date')
+    )
+
+    fieldsets = (
+        ("Content", {
+            'fields': core_fields
+        }),
+        ("Additional Properties", {
+            'fields': additional_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        }),
+    )
+
+    readonly_fields = BaseVersionableAdmin.readonly_fields
+
 
 class PageTagAdmin(BaseTagAdmin):
     pass
