@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib import messages
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
@@ -47,10 +48,18 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         ('source','minified'),
         ('file_source', 'file_minified'),
     )
+    info_fields = (
+        'version',
+        'error_source_content',
+    )
     meta_fields = BaseVersionableTitleAdmin.meta_fields
     fieldsets = (
         ("Main Body", {
             'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Info", {
+            'fields': info_fields,
             'classes': ( 'grp-collapse grp-open', )
         }),
         
@@ -60,6 +69,23 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         })
     ) 
     #readonly_fields = BaseVersionableTitleAdmin.readonly_fields + ('file_source','file_minified')
+
+    readonly_fields = (
+        "version", "created_date", "created_by", "modified_date", "modified_by",
+        "error_source_content"
+    ) 
+
+    def save_model(self, request, obj, form, change):        
+        # before_version = obj.version
+
+        super(BaseFrontendPackageAdmin, self).save_model(request, obj, form, change)
+
+        # new_item = self.model.objects.get(pk=obj.pk)
+        # if new_item.error_source_content:
+        #     messages.add_message(request, messages.ERROR, 'There was an error generating the package. Please review the Error Source Content field for more info.')
+
+        # elif new_item.version == before_version:
+        #     messages.add_message(request, messages.INFO, 'No file updates detected')
 
 class CSSPackageAdmin(BaseFrontendPackageAdmin):
     pass
@@ -97,6 +123,9 @@ class BaseFrontendResourceAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         })
     ) 
     readonly_fields = BaseVersionableTitleAdmin.readonly_fields + ('edit_parent',)
+
+
+    
 
 class CSSResourceAdmin(BaseFrontendResourceAdmin):
     form = CSSResourceAdminForm

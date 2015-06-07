@@ -130,7 +130,7 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
             legacy_domain = None
             legacy_domain_ssl = None
         
-        print legacy_domain
+        # print legacy_domain
 
         if legacy_domain or legacy_domain_ssl:
              # try:
@@ -168,7 +168,7 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
                             except:
                                 page_title == "Untitled %s"%(url)
                                 
-                            print "%s (%s)"%(url, page_title)
+                            # print "%s (%s)"%(url, page_title)
                             legacy_link = cls.create_legacy_url(url, page_title)
                             
 
@@ -454,6 +454,9 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     source = models.BooleanField(default=True, help_text=help['source'])
     minified = models.BooleanField(default=True, help_text=help['minified'])
     
+    file_source_content = models.TextField(null=True, blank=True)
+    error_source_content = models.TextField(null=True, blank=True)
+
     file_source = models.FileField(upload_to=title_file_name, blank=True, null=True, storage=get_storage())
     file_minified = models.FileField(upload_to=title_file_name, blank=True, null=True, storage=get_storage())
 
@@ -482,17 +485,42 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
 
     def render(self, save=True):
-        source = u'/* %s - v%s */%s'%(self.title, self.version, self.get_source())
-        minified_source = u'/* %s - v%s */%s'%(self.title, self.version, self.minify(source))
-        source_file = ContentFile(source)
-        minified_file = ContentFile(minified_source)
-        
-        source_name = u"%s%s"%(self.slug, self.get_extension())
-        minified_name = u"%s.min%s"%(self.slug, self.get_extension())
+        source, success, error = self.get_source()
 
-        self.file_source.save(source_name, source_file, save=save)
-        self.file_minified.save(minified_name, minified_file, save=save)
+        if success:
+            self.error_source_content = None
+            minified_source = self.minify(source)
 
+            is_different = self.file_source_content != minified_source
+
+            if is_different:
+                print 'is different than source, update files.'
+
+                self.file_source_content = minified_source
+                
+                #Only increment version number on success, and if different
+                self.version = self.version+1
+
+                source = u'/* %s - v%s */%s'%(self.title, self.version, source)
+                minified_source = u'/* %s - v%s */%s'%(self.title, self.version, minified_source)
+                source_file = ContentFile(source)
+                minified_file = ContentFile(minified_source)
+                
+                source_name = u"%s%s"%(self.slug, self.get_extension())
+                minified_name = u"%s.min%s"%(self.slug, self.get_extension())
+
+                self.file_source.save(source_name, source_file, save=save)
+                self.file_minified.save(minified_name, minified_file, save=save)
+            # else:
+            #     print 'success but not different'
+        else:
+            # print 'error, dont save'
+            self.error_source_content = error
+
+
+    def increment_version_number(self):
+        #Ignore default increment
+        pass
 
     def minify(self, source):
         #Override in subclass
@@ -501,8 +529,14 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     def get_source(self):
         #return concatenated source files
         source = ''
+        all_success = True
+        all_errors = ''
         for child in self.get_children():
-            rendered = child.render()
+            rendered, success, error = child.render()
+            if not success:
+                all_success = False
+                all_errors += "Error in item %s:\n%s\n\n"%(child, error)
+                
             
             #Convert rendered content to unicode UTF-8
             try:
@@ -519,7 +553,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         # unicode_src = source.decode('ascii')
         # utf8_src = unicode_src.encode('utf-8')
 
-        return source
+        return (source, all_success, all_errors)
 
     class Meta:
         abstract = True
@@ -603,13 +637,15 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
     def render(self):
         source = self.get_source()
-        compiled = self.compile(source)
-        return compiled
+        compiled, success, error = self.compile(source)
+        return (compiled, success, error)
     
 
     def compile(self, source):
         #OVERRIDE IN SUBCLASS
-        return source
+        success = True
+        error = None
+        return (source, success, error)
         
 
     def get_source(self):
@@ -731,14 +767,16 @@ class CSSResource(BaseFrontendResource):
         return self.compiler
 
     def compile(self, source):
+        success = True
+        error = None
         if self.compiler == CSSResource.COMPILER_CSS:
-            return source
+            return (source, success, error)
 
         if self.compiler == CSSResource.COMPILER_SCSS or \
             self.compiler == CSSResource.COMPILER_SASS:
 
             if self.is_partial() or self.is_source_package():
-                return ''
+                return ('', success, error)
             else:
             
                 try:
@@ -756,16 +794,18 @@ class CSSResource(BaseFrontendResource):
                     # compiled = _scss.compile(source)
 
                     compiled = sass.compile(string=source,include_paths=self.get_src_directories())
-                    return compiled
+                    return (compiled, success, error)
 
                 except Exception, err:
-                    error_message = 'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
-                    print error_message
-                    return error_message
+                    error = 'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
+                    print error
+                    success = False
+                    return (error, success, error)
+                    
 
         #TODO -- add other compilation versions
 
-        return source
+        return (source, success, error)
 
     # def replaceSCSSImports( self, css ):
     #     #matches = re.search("^@import.*", css)
@@ -821,12 +861,14 @@ class JSResource(BaseFrontendResource):
         return self.compiler
 
     def compile(self, source):
+        success = True
+        error = None
         if self.compiler == JSResource.COMPILER_JS:
-            return source
+            return (source, success, error)
 
         #TODO -- add other compilation versions
 
-        return source
+        return (source, success, error)
 
     class Meta:
         abstract = True
