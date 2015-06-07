@@ -71,7 +71,7 @@ class EmailCategoryAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('edit_parent',)
     list_display = ('parent', 'title', 'can_be_viewed_online', 'requires_explicit_opt_in','can_unsubscribe')
     list_display_links = ('parent','title')
-list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in','can_unsubscribe')
+    list_filter = ('parent','can_be_viewed_online','requires_explicit_opt_in','can_unsubscribe')
 
 
 class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):

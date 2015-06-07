@@ -230,15 +230,13 @@ class UserSubscriptionSettings(VersionableAtom, AccessKeyAtom):
 			return None
 
 	def get_settings(self, category=None):
-		settings_model = get_model_by_label(settings.EMAIL_CATEGORY_SUBSCRIPTION_MODEL)
-
+		
 		if category:
-
-			category_settings, created = settings_model.objects.get_or_create(parent=self,category=category)
+			category_settings, created = EmailCategorySubscriptionSettings.objects.get_or_create(parent=self,category=category)
 			return category_settings
 			
 		else:
-			return settings_model.objects.filter(parent=self)
+			return EmailCategorySubscriptionSettings.objects.filter(parent=self)
 
 	class Meta:
 		abstract = True

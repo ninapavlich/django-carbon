@@ -13,7 +13,7 @@ from django.db.models.loading import get_model
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.views.generic import DetailView, ListView
-
+from django.utils.decorators import method_decorator
 
 from carbon.atoms.views.abstract import *
 

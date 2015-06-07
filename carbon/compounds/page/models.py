@@ -61,7 +61,7 @@ class PageContentBlock(VersionableAtom, OrderedItemAtom, TitleAtom, ContentAtom,
     
     publish_by_default = True
 
-    parent = models.ForeignKey('page.Page')
+    parent = models.ForeignKey('page.Page', related_name="page_blocks")
 
     def get_siblings(self, published=True):
         siblings = self.__class__.objects.filter(parent=self.parent)

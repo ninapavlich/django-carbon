@@ -7,6 +7,7 @@ from django.template.loaders.filesystem import Loader as FileSystemLoader
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.utils.functional import cached_property
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -369,16 +370,8 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
     class Meta:
         abstract = True
 
-    def get_children(self):
-        if not self.item_class and not self.item_classes:
-            raise NotImplementedError('Class should specify an item_class or item_classes value')
-        
-        if self.item_classes:
-            [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
-        else:
-            return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
-
-    def get_children(self):
+    @cached_property
+    def children(self):
         items = self.get_items()
         output = []
         for child in items:
@@ -389,6 +382,18 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
                     output.append(child)
 
         return output
+
+    # def get_children(self):
+    #     if not self.item_class and not self.item_classes:
+    #         raise NotImplementedError('Class should specify an item_class or item_classes value')
+        
+    #     if self.item_classes:
+    #         [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
+    #     else:
+    #         return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
+
+    def get_children(self):
+        return self.children
 
     def get_next_item(self, item):
         children = self.get_children()
@@ -414,9 +419,10 @@ class TagMolecule(ContentMolecule):
     tag_property_name = 'tags'
 
     class Meta:
-        abstract = True      
+        abstract = True    
 
-    def get_children(self):
+    @cached_property
+    def children(self):  
         if not self.item_class and not self.item_classes:
             raise NotImplementedError('Class should specify an item_class or item_classes value')
         
@@ -424,6 +430,9 @@ class TagMolecule(ContentMolecule):
             [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
         else:
             return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
+
+    def get_children(self):
+        return self.children        
 
     def get_next_item(self, item):
         children = self.get_children()

@@ -1,8 +1,6 @@
 from django.utils import timezone
 from django.contrib import messages
 
-from django.core.cache import cache
-
 from ..data.csv import ModelToCSV
 
 #ADMIN VIEWS 

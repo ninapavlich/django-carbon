@@ -12,6 +12,7 @@ from django.utils.module_loading import import_by_path
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 
 import boto
 from boto.s3.connection import S3Connection, Bucket, Key
@@ -281,31 +282,31 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
             return self.alt
         return self.title
 
-    @property
+    @cached_property
     def get_format(self):
         if self.use_png:
             return 'PNG'
         return 'JPEG'
     
-    @property
+    @cached_property
     def image_url(self):
         try:
             return self.image.url
         except:
             return None
 
-    @property
+    @cached_property
     def file(self):
         return self.image  
 
-    @property
+    @cached_property
     def thumbnail(self):
         if self.use_png:
             return self.thumbnail_png  
         else:
             return self.thumbnail_jpg
 
-    @property
+    @cached_property
     def thumbnail_url(self):
         try:
             return self.thumbnail.url

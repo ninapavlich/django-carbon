@@ -93,7 +93,7 @@ class BlogArticle(ContentMolecule):
         if self.category:
             return "%s%s/" % (self.category.path, self.slug)
         else:
-            return "/%s%s/" % (settings.BLOG_ARTICLE_DOMAIN, self.slug)
+            return "/%s/" % self.slug
 
     def get_absolute_url(self):
         if self.is_external:

@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.db.models.loading import get_model
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from django.core.exceptions import ImproperlyConfigured
 
 from ..models import *
 
@@ -11,22 +12,32 @@ register = Library()
 
 
 @register.assignment_tag()
-def get_link_descendants(slug):
+def get_link_descendants(slug=None, item=None):
     """
     This tag gets the children and (if they're there) grandchildren of a link item.
     """
+    if slug is None and item is None:
+        raise ImproperlyConfigured("Either slug or item must be defined")
+        
+
 
     output = []
     app_label = settings.MENU_MODEL.split('.')[0]
     object_name = settings.MENU_MODEL.split('.')[1]
     model = get_model(app_label, object_name)
-    try:
-        item = model.objects.get(slug=slug)
-    except:
-        item = None
+    
+    if not item:
+        try:
+            item = model.objects.get(slug=slug)
+        except:
+            item = None
 
-    children = model.objects.filter(parent__slug=slug).order_by('order')
-    children = [child for child in children if child.is_published()]
+    if slug:
+        children = model.objects.filter(parent__slug=slug).order_by('order')
+    elif item:
+        children = model.objects.filter(parent=item).order_by('order')
+
+    children = [child for child in item.children.all() if child.is_published()]
 
     descendants = {
         'item':item,
@@ -35,7 +46,7 @@ def get_link_descendants(slug):
     for child in children:
         output.append({
             'item':child,
-            'children':get_link_descendants(child.slug)
+            'children':get_link_descendants(None, child)
         })
 
     return descendants

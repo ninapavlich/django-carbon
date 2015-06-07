@@ -217,7 +217,7 @@ class AddressibleView(SingleObjectMixin):
 
         try:
 
-            obj = queryset.filter(path=path)[0]
+            obj = queryset.filter(path=path).select_related('template').get()
 
         except:
             raise Http404(_("No %(verbose_name)s found matching the query") %

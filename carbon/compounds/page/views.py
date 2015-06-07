@@ -32,7 +32,6 @@ class PageBlockView(object):
 
 	def get_context_data(self, **kwargs):
 		
-		print 'GET PAGE BLOCK CONTEXT!'
 		ctx = super(PageBlockView, self).get_context_data(**kwargs)
 
 		#PAGE CONTENT BLOCKS

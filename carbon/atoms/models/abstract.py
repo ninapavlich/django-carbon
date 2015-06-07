@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 
 
 from django.contrib.contenttypes import generic
@@ -63,19 +64,29 @@ class VersionableAtom(models.Model):
                 return '<span %s>&nbsp;</span>'%(style)
         return '<span %s>&nbsp;</span>'%(style)        
 
-    def get_children(self):
+    @cached_property
+    def children(self):
         try:
             children = super(VersionableAtom, self).get_children()
         except:
             children = []
         return children
 
-    def get_siblings(self):
+
+    def get_children(self):
+        return self.children
+
+
+    @cached_property
+    def siblings(self):
         try:
             siblings = super(VersionableAtom, self).get_siblings()
         except:
             siblings = []
         return siblings
+
+    def get_siblings(self):
+        self.siblings
 
     def is_published(self):
         try:
@@ -101,17 +112,34 @@ class HierarchicalAtom(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True,
         related_name="children", on_delete=models.SET_NULL)
 
+    @cached_property
+    def children(self):
+        return self.__class__.objects.filter(parent=self).order_by('order')
+
     def get_children(self, require_published=True):
-        all_children = self.__class__.objects.filter(parent=self).order_by('order')
+        all_children = self.children
         if require_published:
             return [child for child in all_children if child.is_published()]
         return all_children
 
-    def get_siblings(self, require_published=True):
+    @cached_property
+    def published_siblings(self):
         if self.parent:
-            return self.parent.get_children(require_published)
+            return self.parent.get_children(True)
+        return []
+
+    @cached_property
+    def siblings(self):
+        if self.parent:
+            return self.parent.get_children()
+        return []
+
+    def get_siblings(self, require_published=True):
+        if require_published:
+            return self.published_siblings
         else:
-            return []
+            return self.siblings
+        
 
     def get_next_sibling(self, siblings=None, require_published=True):
         if siblings == None:
