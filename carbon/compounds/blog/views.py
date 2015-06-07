@@ -54,7 +54,7 @@ class BlogCategoryView(NonAdminCachableView, PublishableView, AddressibleView, H
     # model = BlogCategory
     pass
 
-class BlogRollView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, BaseBlogListView):
+class BlogListView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, BaseBlogListView):
 
     # model = Page
 

@@ -65,7 +65,7 @@ class VersionableAtom(models.Model):
         return '<span %s>&nbsp;</span>'%(style)        
 
     @cached_property
-    def children(self):
+    def abstract_children(self):
         try:
             children = super(VersionableAtom, self).get_children()
         except:
@@ -74,7 +74,7 @@ class VersionableAtom(models.Model):
 
 
     def get_children(self):
-        return self.children
+        return self.abstract_children
 
 
     @cached_property
@@ -113,11 +113,12 @@ class HierarchicalAtom(models.Model):
         related_name="children", on_delete=models.SET_NULL)
 
     @cached_property
-    def children(self):
-        return self.__class__.objects.filter(parent=self).order_by('order')
+    def hierarchical_children(self):
+        all_children = self.__class__.objects.filter(parent=self).order_by('order')
+        return [child for child in all_children]
 
     def get_children(self, require_published=True):
-        all_children = self.children
+        all_children = self.hierarchical_children
         if require_published:
             return [child for child in all_children if child.is_published()]
         return all_children

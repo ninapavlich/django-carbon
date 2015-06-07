@@ -371,7 +371,7 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
         abstract = True
 
     @cached_property
-    def children(self):
+    def category_children(self):
         items = self.get_items()
         output = []
         for child in items:
@@ -393,7 +393,7 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
     #         return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
     def get_children(self):
-        return self.children
+        return self.category_children
 
     def get_next_item(self, item):
         children = self.get_children()
@@ -422,7 +422,7 @@ class TagMolecule(ContentMolecule):
         abstract = True    
 
     @cached_property
-    def children(self):  
+    def tag_children(self):  
         if not self.item_class and not self.item_classes:
             raise NotImplementedError('Class should specify an item_class or item_classes value')
         
@@ -432,7 +432,7 @@ class TagMolecule(ContentMolecule):
             return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
 
     def get_children(self):
-        return self.children        
+        return self.tag_children        
 
     def get_next_item(self, item):
         children = self.get_children()
