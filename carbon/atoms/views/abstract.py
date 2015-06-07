@@ -146,6 +146,8 @@ class HasChildrenView(object):
 class AddressibleView(SingleObjectMixin):
     object = None
 
+    
+
     def get_template(self):
         return self.object.template
 
@@ -189,6 +191,8 @@ class AddressibleView(SingleObjectMixin):
 
         return super(AddressibleView, self).render_to_response(context)
 
+    def get_object_query(self, queryset, path):
+        return queryset.filter(path=path).select_related('template').get()
 
     def get_object(self, queryset=None):
 
@@ -216,9 +220,7 @@ class AddressibleView(SingleObjectMixin):
         #     search_path = path.replace(self.model.url_domain, '')
 
         try:
-
-            obj = queryset.filter(path=path).select_related('template').get()
-
+            obj = self.get_object_query(queryset, path)
         except:
             raise Http404(_("No %(verbose_name)s found matching the query") %
                     {'verbose_name': queryset.model._meta.verbose_name})

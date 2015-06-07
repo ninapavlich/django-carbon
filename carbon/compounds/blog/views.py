@@ -38,8 +38,11 @@ class BaseBlogListView(DetailView):
 
 class BlogArticleDetailView(NonAdminCachableView, PublishableView, AddressibleView, BaseBlogDeatilView):
 
+
     # model = BlogArticle
-    pass
+    def get_object_query(self, queryset, path):
+        return queryset.filter(path=path).select_related('template', 'category').prefetch_related('tags', 'related').get()
+
     
 class BlogTagView(NonAdminCachableView, PublishableView, AddressibleView, HasChildrenView, BaseBlogListView):
 
