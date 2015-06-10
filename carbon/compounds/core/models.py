@@ -560,6 +560,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
     def save(self, *args, **kwargs):
 
+
         self.render(False)
 
         super(BaseFrontendPackage, self).save(*args, **kwargs)
@@ -713,7 +714,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
     
 
     def save(self, *args, **kwargs):
-
+        print 'SAVE!!'
+        
         source_has_changed = False
         if self.pk is not None:
             original = self.__class__.objects.get(pk=self.pk)
@@ -726,7 +728,9 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
         super(BaseFrontendResource, self).save(*args, **kwargs)
 
+
         if source_has_changed and self.parent:
+            print 'source_has_changed. udpate parent.'
             #Re-save parent
             self.parent.save()
 

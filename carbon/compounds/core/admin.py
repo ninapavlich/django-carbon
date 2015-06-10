@@ -134,6 +134,10 @@ class JSResourceAdmin(BaseFrontendResourceAdmin):
     form = JSResourceAdminForm
 
 class BaseFrontendResourceInline(admin.StackedInline):
+
+    def edit_item(self, obj):
+        return "<a href='%s' target='_blank'>Edit Item ></a>"%(obj.edit_item_url)
+    edit_item.allow_tags = True
     #fields = ('order','title', 'compiler','file_source_url','edit_item',)
     readonly_fields = BaseVersionableTitleAdmin.readonly_fields + ('edit_item',)
     ordering = ("order",)
