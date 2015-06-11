@@ -494,8 +494,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             is_different = self.file_source_content != minified_source
 
             if is_different:
-                print 'is different than source, update files.'
-
+                
                 self.file_source_content = minified_source
                 
                 #Only increment version number on success, and if different
@@ -714,7 +713,6 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
     
 
     def save(self, *args, **kwargs):
-        print 'SAVE!!'
         
         source_has_changed = False
         if self.pk is not None:
@@ -730,7 +728,6 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
 
         if source_has_changed and self.parent:
-            print 'source_has_changed. udpate parent.'
             #Re-save parent
             self.parent.save()
 
