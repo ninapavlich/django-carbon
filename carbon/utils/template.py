@@ -6,7 +6,16 @@ import re
 
 from django.conf import settings
 from django.db.models.loading import get_model
-from django.template.loaders.app_directories import app_template_dirs
+
+try:
+    # Django >= 1.8
+    from django.template.loaders.app_directories import get_app_template_dirs
+    app_template_dirs = get_app_template_dirs('templates')
+except AttributeError:
+    # Django <= 1.7
+    from django.template.loaders.app_directories import app_template_dirs
+    
+
 
 def get_page_templates_raw(ignore_templates = None):
 

@@ -520,7 +520,7 @@ class FormEntry(VersionableAtom):
 	status = models.CharField(choices=FORM_ENTRY_STATUS_CHOICES, 
 		default=NEW, max_length = 255)
 
-	tags = models.ManyToManyField('form.FormEntryTag', blank=True, null=True)
+	tags = models.ManyToManyField('form.FormEntryTag', blank=True)
 
 	def get_absolute_url(self):
 		return reverse('form_update_view', kwargs = {'path': self.form_schema.slug, 'pk':self.pk }) 

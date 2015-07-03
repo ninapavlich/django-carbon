@@ -38,7 +38,7 @@ class Image(ImageMolecule):
     # width_1200_fill = ImageSpecField( source='image', format='PNG',
     #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, null=True, related_name='%(app_label)s_%(class)s_tags')
+    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
@@ -48,7 +48,7 @@ class Image(ImageMolecule):
 
 class Media(MediaMolecule):
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, null=True, related_name='%(app_label)s_%(class)s_tags')
+    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
@@ -68,7 +68,7 @@ class SecureImage(SecureImageMolecule):
     # width_1200_fill = ImageSpecField( source='image', format='PNG',
     #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, null=True, related_name='%(app_label)s_%(class)s_tags')
+    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
@@ -76,7 +76,7 @@ class SecureImage(SecureImageMolecule):
 
 class SecureMedia(SecureMediaMolecule):
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, null=True, related_name='%(app_label)s_%(class)s_tags')
+    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
