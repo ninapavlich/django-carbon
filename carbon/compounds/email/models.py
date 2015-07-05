@@ -174,7 +174,8 @@ class EmailReceipt(VersionableAtom, AccessKeyAtom):
 
 	@property
 	def notification_settings(self):
-		settings, created = EmailNotificationCategory.objects.get_or_create(category=self.category,recipient_email=self.recipient_email)
+		model = get_model_by_label(settings.EMAIL_NOTIFICATION_CATEGORY_MODEL)
+		settings, created = model.objects.get_or_create(category=self.category,recipient_email=self.recipient_email)
 		return settings
 
 	def record_view(self, from_email=True, from_online=False):
@@ -230,13 +231,14 @@ class UserSubscriptionSettings(VersionableAtom, AccessKeyAtom):
 			return None
 
 	def get_settings(self, category=None):
-		
+		model = get_model_by_label(settings.EMAIL_CATEGORY_SUBSCRIPTION_MODEL)
+
 		if category:
-			category_settings, created = EmailCategorySubscriptionSettings.objects.get_or_create(parent=self,category=category)
+			category_settings, created = model.objects.get_or_create(parent=self,category=category)
 			return category_settings
 			
 		else:
-			return EmailCategorySubscriptionSettings.objects.filter(parent=self)
+			return model.objects.filter(parent=self)
 
 	class Meta:
 		abstract = True

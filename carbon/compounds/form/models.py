@@ -536,9 +536,10 @@ class FormEntry(VersionableAtom):
 		#POPULATE KEY/VALUE PAIR:
 		fields = []
 		for field in input_fields:
-			field_entry = field_entry_hash[field.slug]
-			object = {'title':field.title,'value':field_entry.value,'entry':field_entry, 'field':field}
-			fields.append(object)
+			if field.slug in field_entry_hash:
+				field_entry = field_entry_hash[field.slug]
+				object = {'title':field.title,'value':field_entry.value,'entry':field_entry, 'field':field}
+				fields.append(object)
 
 		return fields
 
