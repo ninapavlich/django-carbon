@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, \
 	HttpResponseForbidden, HttpResponsePermanentRedirect
 from django.template import loader, Context, RequestContext, Template
 from django.template.response import SimpleTemplateResponse
+from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
@@ -31,19 +32,45 @@ class NonUserCachableView(object):
 	def dispatch(self, *args, **kwargs):
 		return super(NonUserCachableView, self).dispatch(*args, **kwargs)  
 
-class DBTemplateResponseMixin(object):
+class ObjectTemplateResponseMixin(object):
+
+	template_name = None
+	template_engine = None
+	response_class = TemplateResponse
+	content_type = None
 	
 	def get_template_names(self):
-		print '---- DBTemplateResponseMixin.get_template_names ---- '
 		if self.object and self.object.template:
 			return [self.object.template.slug]
 
 		elif self.template_name is None:
 			raise ImproperlyConfigured(
-				"DBTemplateResponseMixin requires either a definition of "
+				"ObjectTemplateResponseMixin requires either a definition of "
 				"'template_name' or an object with a .template instance'")
 		else:
 			return [self.template_name]
+
+	def render_to_response(self, context, **response_kwargs):
+			
+		response_kwargs.setdefault('content_type', self.content_type)
+		template_names = self.get_template_names()
+		return self.response_class(
+			request=self.request,
+			template=template_names,
+			context=context,
+			using=self.template_engine,
+			**response_kwargs
+		)
+
+
+# class CustomTemplateResponseMixin(object):
+
+# 	def get_template_names(self):
+# 		if not self.template_slug:
+# 			raise ImproperlyConfigured( "template_slug not defined.")
+		
+# 		return [self.template_slug]
+
 
 
 class HasChildrenView(object):
@@ -79,7 +106,7 @@ class HasChildrenView(object):
 			})
 
 	def get_paginator(self, queryset, per_page, orphans=0,
-					  allow_empty_first_page=True, **kwargs):
+						allow_empty_first_page=True, **kwargs):
 		"""
 		Return an instance of the paginator for this view.
 		"""
@@ -114,7 +141,7 @@ class HasChildrenView(object):
 			self.object_list = children
 			self.children = children
 		except:
-		   self.object_list = None 
+			 self.object_list = None 
 
 		self.siblings = self.get_siblings()
 		self.next, self.previous = self.get_next_previous(self.siblings)
@@ -132,7 +159,7 @@ class HasChildrenView(object):
 			self.object_list = children
 			self.children = children
 		except:
-		   self.object_list = None 
+			 self.object_list = None 
 
 		self.siblings = self.get_siblings()
 		self.next, self.previous = self.get_next_previous(self.siblings)
@@ -158,7 +185,7 @@ class HasChildrenView(object):
 
 
 
-class AddressibleView(DBTemplateResponseMixin, SingleObjectMixin):
+class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
 	object = None
 
 	
@@ -226,64 +253,4 @@ class AddressibleView(DBTemplateResponseMixin, SingleObjectMixin):
 			raise Http404(_("No %(verbose_name)s found matching the query") %
 					{'verbose_name': queryset.model._meta.verbose_name})
 
-		return obj
-
-
-
-class CustomResponseView(object):
-
-	#OVER
-	def get_template(self):
-		if not self.template_slug:
-			raise ImproperlyConfigured( "template_slug not defined.")
-
-		app_label = settings.TEMPLATE_MODEL.split('.')[0]
-		object_name = settings.TEMPLATE_MODEL.split('.')[1]
-		model = get_model(app_label, object_name)
-
-		return model.objects.get(slug=self.template_slug)
-
-	def render_to_response(self, context, **response_kwargs):
-		print ' --- CustomResponseView.render_to_response --- '
-		response_kwargs.setdefault('content_type', self.content_type)
-		return CustomTemplateResponse(
-			request=self.request,
-			template=self.get_template(),
-			context=context,
-			**response_kwargs
-		)
-
-		return super(CustomResponseView, self).render_to_response(context)
-
-
-
-
-class CustomTemplateResponse(SimpleTemplateResponse):
-	rendering_attrs = SimpleTemplateResponse.rendering_attrs + ['_request', '_current_app']
-
-	def __init__(self, request, template, context=None, content_type=None,
-			status=None, current_app=None):
-
-		#Anticipate getting a template object, template PK or template slug
-		is_int = isinstance( template, ( int, long ) )
-		is_string = isinstance( template, basestring ) 
-		if(is_int or is_string):
-			self.template_object = get_template_by_pk_or_slug(template)
-		else:
-			self.template_object = template
-
-		self._request = request
-		self._current_app = current_app
-		super(CustomTemplateResponse, self).__init__(
-			template, context, content_type, status)
-
-	@property
-	def rendered_content(self):
-		
-		context = self._resolve_context(self.context_data)
-		return self.template_object.render(context)
-
-	# def resolve_context(self, context):
-	#     if isinstance(context, Context):
-	#         return context
-	#     return RequestContext(self._request, context, current_app=self._current_app)        
+		return obj 

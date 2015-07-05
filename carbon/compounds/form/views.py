@@ -13,14 +13,14 @@ from carbon.atoms.views.content import *
 
 
 
-class FormSubmittedView(PublishableView, AddressibleView, DetailView):
+class FormSubmittedView(AddressibleView, PublishableView, DetailView):
 	
 	def get_template(self):
 		return self.object.submit_template
 
 	
 
-class CreateFormEntryView(PublishableView, AddressibleView, FormMixin, ProcessFormView):
+class CreateFormEntryView(AddressibleView, PublishableView, FormMixin, ProcessFormView):
 	content_type = None
 	form_entry_object = None
 

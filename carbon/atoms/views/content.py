@@ -7,29 +7,63 @@ from django.views.generic.detail import SingleObjectMixin
 
 class PublishableView(SingleObjectMixin):
 
+    def is_published(self):
+        if not self.object:
+            self.object = self.get_object()
+        if not self.object:
+            return False
 
-
-    def render_to_response(self, context, **response_kwargs):
-        print ' --- PublishableView.render_to_response --- '
         if self.object.is_published() == False:
-
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
             if is_super_user==False:
+                return False
+        else:
+            return True
 
-                raise Http404(_("No %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.object._meta.verbose_name})
 
-        return super(PublishableView, self).render_to_response(context)
+    def get(self, request, *args, **kwargs):
+        if self.is_published() == False:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                        {'verbose_name': self.model._meta.verbose_name})
+
+        return super(PublishableView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        if self.is_published() == False:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                        {'verbose_name': self.model._meta.verbose_name})
+
+        return super(PublishableView, self).post(request, *args, **kwargs)
+
 
 
 class ModerationView(SingleObjectMixin):
 
-    def render_to_response(self, context, **response_kwargs):
-        print ' --- ModerationView.render_to_response --- '
+    def is_moderated(self):
+        if not self.object:
+            self.object = self.get_object()
+        if not self.object:
+            return False
         if self.object.is_moderated() == False:
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
             if is_super_user==False:
-                raise Http404(_("No %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.object._meta.verbose_name})
+                return False
+        else:
+            return True
 
-        return super(ModerationView, self).render_to_response(context)
+
+    def get(self, request, *args, **kwargs):
+        if self.is_moderated() == False:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                        {'verbose_name': self.model._meta.verbose_name})
+
+        return super(ModerationView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        if self.is_moderated() == False:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                        {'verbose_name': self.model._meta.verbose_name})
+
+        return super(ModerationView, self).post(request, *args, **kwargs)

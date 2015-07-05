@@ -24,7 +24,7 @@ from .forms import *
 def user_is_admin(user):
 	return user.is_staff
 
-class EmailOnlineView(CustomResponseView, DetailView):
+class EmailOnlineView(DetailView):
 	slug_url_kwarg = 'access_key'
 	slug_field = 'access_key'
 
@@ -42,7 +42,7 @@ class EmailRenderedView(DetailView):
 		return HttpResponse(self.object.rendered_body, content_type="text/html")
 
 
-class EmailSettingsView(CustomResponseView, DetailView):
+class EmailSettingsView(DetailView):
 	slug_url_kwarg = 'access_key'
 	slug_field = 'access_key'
 	
