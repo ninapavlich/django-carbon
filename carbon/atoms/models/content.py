@@ -254,14 +254,22 @@ class HasImageAtom(models.Model):
         blank=True, null=True, related_name='%(app_label)s_%(class)s_images',
         help_text=help['image'], on_delete=models.SET_NULL)
 
+    @cached_property
+    def image_preview_url(self):
+        if self.image:
+            return self.image.thumbnail.url
+        return None
+
     def image_preview(self):
         if self.image:
             try:
-                return "<img src='%s' alt='%s' />"%(self.image.thumbnail.url, self.image.alt)
+                url = self.image_preview_url
+                return "<img src='%s' alt='%s' />"%(url, self.image.alt)
             except:
                 return "Error displaying image"
         else:
             return "-- No image --"
+    image_preview.allow_tags = True     
 
     class Meta:
         abstract = True        

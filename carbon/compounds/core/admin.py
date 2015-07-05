@@ -37,7 +37,8 @@ class TemplateAdmin(VersionAdmin, BaseVersionableAdmin):
         })
     )    
 
-    search_fields = ('title','admin_note', 'custom_template')
+    search_fields = ('title', 'slug', 'admin_note', 'custom_template')
+    list_display = ('title', 'slug')
 
 
 class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):

@@ -381,9 +381,6 @@ class Template(VersionableAtom, TitleAtom):
 
     def save(self, *args, **kwargs):
 
-        if self.slug:
-            self.slug = self.slug.replace("-", "_")
-
         #Clear html template if custom content is defined
         if self.custom_template != None and self.custom_template != '':
             self.file_template = None

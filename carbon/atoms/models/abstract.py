@@ -55,14 +55,14 @@ class VersionableAtom(models.Model):
 
     def edit_item(self):
         style="style='width:278px;display:block;'"
-        if self.pk:
-            
+        if self.pk:            
             try:
                 url = self.edit_item_url
                 return '<a href="%s" %s>Edit Item &gt;</a>'%(url, style)
             except:
                 return '<span %s>&nbsp;</span>'%(style)
-        return '<span %s>&nbsp;</span>'%(style)        
+        return '<span %s>&nbsp;</span>'%(style)   
+    edit_item.allow_tags = True     
 
     @cached_property
     def abstract_children(self):
@@ -197,18 +197,24 @@ class HierarchicalAtom(models.Model):
         
         return previous_item
 
+    @property
+    def edit_parent_url(self):
+        if self.parent:
+            object_type = type(self.parent).__name__
+            return reverse('admin:%s_%s_change' %(self.parent._meta.app_label,  self.parent._meta.model_name),  args=[self.parent.id] )
+        return None
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"
         if self.parent:
             
             try:
-                object_type = type(self.parent).__name__
-                url = reverse('admin:%s_%s_change' %(self.parent._meta.app_label,  self.parent._meta.model_name),  args=[self.parent.id] )
+                url = self.edit_parent_url
                 return '<a href="%s" %s>&lt; Edit Parent</a>'%(url, style)
             except:
                 return '<span %s>&nbsp;</span>'%(style)
         return '<span %s>&nbsp;</span>'%(style)
+    edit_parent.allow_tags = True
 
     def get_hierarchy(self):
         if self.parent:
@@ -483,17 +489,26 @@ class AddressibleAtom(TitleAtom):
 
         return found_template
 
+    @property
+    def edit_template_url(self):
+        if self.template:
+            object_type = type(self.template).__name__
+            return reverse('admin:%s_%s_change' %(self.template._meta.app_label,  self.template._meta.model_name),  args=[self.template.id] )
+        return None
+
     def edit_template(self):
         style="style='width:278px;display:block;'"
         if self.template:
             
             try:
-                object_type = type(self.parent).__name__
-                url = reverse('admin:%s_%s_change' %(self.template._meta.app_label,  self.template._meta.model_name),  args=[self.template.id] )
+                url = self.edit_template_url
                 return '<a href="%s" %s>Edit Template &gt;</a>'%(url, style)
             except:
                 return '<span %s>&nbsp;</span>'%(style)
         return '<span %s>&nbsp;</span>'%(style)
+    edit_template.allow_tags = True
+   
+    
     
 
     def save(self, *args, **kwargs):
