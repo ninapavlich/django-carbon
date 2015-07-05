@@ -10,7 +10,7 @@ class PublishableView(SingleObjectMixin):
 
 
     def render_to_response(self, context, **response_kwargs):
-
+        print ' --- PublishableView.render_to_response --- '
         if self.object.is_published() == False:
 
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
@@ -25,7 +25,7 @@ class PublishableView(SingleObjectMixin):
 class ModerationView(SingleObjectMixin):
 
     def render_to_response(self, context, **response_kwargs):
-
+        print ' --- ModerationView.render_to_response --- '
         if self.object.is_moderated() == False:
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
             if is_super_user==False:

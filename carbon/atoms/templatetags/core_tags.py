@@ -1,4 +1,3 @@
-from django.db.models import get_model
 from django.template import Library
 from django.core.urlresolvers import reverse
 from django.db.models.loading import get_model

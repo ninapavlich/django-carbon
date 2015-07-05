@@ -376,22 +376,25 @@ class Template(VersionableAtom, TitleAtom):
 
     def render(self, context):
 
-        # file_templates = get_all_templates()
-        # for template in file_templates:
-        #     context[template] = DjangoTemplate('testing124')
+        # # file_templates = get_all_templates()
+        # # for template in file_templates:
+        # #     context[template] = DjangoTemplate('testing124')
        
-        #Add DB Templates
-        all_templates = self.__class__.objects.all()
-        for template in all_templates:
-            key = 'template_%s'%(template.slug)
-            context[key] = DjangoTemplate(template.get_content())
+        # #Add DB Templates
+        # all_templates = self.__class__.objects.all()
+        # for template in all_templates:
+        #     key = 'template_%s'%(template.slug)
+        #     content = template.get_content()
+        #     context[key] = DjangoTemplate(content)
 
-        if self.custom_template:
-            return DjangoTemplate(self.custom_template).render(context)
-        else:
-            template = loader.get_template(self.file_template)
-            return template.render(context)
+        # if self.custom_template:
+        #     return DjangoTemplate(self.custom_template).render(context)
+        # else:
+        #     template = loader.get_template(self.file_template)
+        #     return template.render(context)
 
+        return DjangoTemplate(self.get_content()).render(context)
+        
     def generate_slug(self):
         unique_slugify(self, self.title, 'slug', None, '_')
         return self.slug

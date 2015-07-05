@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
-from django.db.models import get_model
+from django.db.models.loading import get_model
 
 
 class LegacyURLMiddleware(object):

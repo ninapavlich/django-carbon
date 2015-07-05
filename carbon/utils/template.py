@@ -83,6 +83,16 @@ def get_template_by_pk_or_slug(template_pk_or_slug):
                 found_template = model.objects.get(slug=template_pk_or_slug)
             except:
                 pass
+
+        #TRY WITH DB PREFIX
+        prefix = 'template_'
+        if found_template == None:
+            #try by slug
+            unprefixed_slug = template_pk_or_slug.replace(prefix, '')
+            try:
+                found_template = model.objects.get(slug=unprefixed_slug)
+            except:
+                pass
     except:
         pass
 
