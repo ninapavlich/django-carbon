@@ -468,7 +468,12 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
         if success:
             self.error_source_content = None
-            minified_source = self.minify(source)
+
+            try:
+                minified_source = self.minify(source)
+            except Exception, err:
+                self.error_source_content = 'Error minifying %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
+                minified_source = self.file_source_content
 
             is_different = self.file_source_content != minified_source
 
