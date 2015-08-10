@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.utils.deconstruct import deconstructible
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
@@ -161,13 +161,13 @@ def displaybytes(bytes):
 
 def get_storage(type):
     if type=='BaseImage':
-        storage = import_by_path(settings.IMAGE_STORAGE)()
+        storage = import_string(settings.IMAGE_STORAGE)()
     elif type=='BaseMedia':
-        storage = import_by_path(settings.MEDIA_STORAGE)()
+        storage = import_string(settings.MEDIA_STORAGE)()
     elif type=='BaseSecureImage':
-        storage = import_by_path(settings.SECURE_IMAGE_STORAGE)()
+        storage = import_string(settings.SECURE_IMAGE_STORAGE)()
     elif type=='BaseSecureMedia':
-        storage = import_by_path(settings.SECURE_MEDIA_STORAGE)()
+        storage = import_string(settings.SECURE_MEDIA_STORAGE)()
 
     return storage
 

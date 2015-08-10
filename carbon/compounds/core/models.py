@@ -20,7 +20,7 @@ from django.core.files.base import ContentFile
 from django.template import Template as DjangoTemplate
 from django.template import loader
 from django.template.loaders.filesystem import Loader as FileSystemLoader
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
 from django.utils.text import slugify
 from django.utils.text import Truncator
 from django.utils.timezone import now
@@ -417,7 +417,7 @@ def title_file_name( instance, filename ):
 
 
 def get_storage():
-    storage = import_by_path(settings.MEDIA_STORAGE)()
+    storage = import_string(settings.MEDIA_STORAGE)()
     return storage
 
 class BaseFrontendPackage(VersionableAtom, TitleAtom):

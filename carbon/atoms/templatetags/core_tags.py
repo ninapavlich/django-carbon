@@ -36,7 +36,7 @@ def get_link_descendants(slug=None, item=None):
     elif item:
         children = model.objects.filter(parent=item).order_by('order')
 
-    children = [child for child in item.children.all() if child.is_published()]
+    children = [] if item is None else [child for child in item.children.all() if child.is_published()]
 
     descendants = {
         'item':item,
