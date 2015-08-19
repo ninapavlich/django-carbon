@@ -25,7 +25,7 @@ from django.utils.text import slugify
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.generic import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 #CSS/JS libs

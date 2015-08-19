@@ -2,11 +2,14 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.db.models.loading import get_model
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import TemplateView
-
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 
 from .models import *

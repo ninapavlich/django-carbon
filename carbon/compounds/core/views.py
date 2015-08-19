@@ -6,7 +6,11 @@ from django.utils.translation import ugettext as _
 from django.views.generic import DetailView
 from django.views.generic.base import RedirectView
 
-from django.db.models.loading import get_model
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *

@@ -3,7 +3,6 @@ import traceback
 import sys
 
 from django.db import models
-from django.db.models.loading import get_model
 from django.db.models.query import QuerySet
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -12,10 +11,13 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
 from django.utils.functional import cached_property
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_template_by_pk_or_slug
@@ -236,6 +238,8 @@ class HierarchicalAtom(models.Model):
         abstract = True
 
 # # -- Level 1b
+# from django.contrib.contenttypes import generic
+# from django.contrib.contenttypes.models import ContentType
 # class Flat(models.Model):
 
 #     def get_parent_model():

@@ -9,11 +9,15 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
-from django.db.models.loading import get_model
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.views.generic import DetailView, ListView
 from django.utils.decorators import method_decorator
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 from carbon.atoms.views.abstract import *
 

@@ -5,10 +5,7 @@ import smtplib
 import traceback
 
 from django.db import models
-from django.db.models.loading import get_model
 from django.conf import settings
-from django.contrib.contenttypes.generic import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail, EmailMultiAlternatives
@@ -16,7 +13,11 @@ from django.core.urlresolvers import reverse_lazy
 from django.template import Context
 from django.template import Template as DjangoTemplate
 from django.utils.translation import ugettext_lazy as _
-
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 from carbon.atoms.models.abstract import VersionableAtom
 from carbon.atoms.models.access import AccessKeyAtom

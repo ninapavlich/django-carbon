@@ -1,6 +1,10 @@
 from django.views.generic import DetailView, ListView
-from django.db.models.loading import get_model
 from django.conf import settings
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *

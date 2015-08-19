@@ -2,7 +2,6 @@ from django.conf import settings
 
 from django.core.paginator import Paginator, InvalidPage
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.loading import get_model
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
 	HttpResponseForbidden, HttpResponsePermanentRedirect
 from django.template import loader, Context, RequestContext, Template
@@ -12,7 +11,11 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
-
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 
 

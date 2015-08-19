@@ -5,7 +5,11 @@ import fnmatch
 import re
 
 from django.conf import settings
-from django.db.models.loading import get_model
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except:
+    from django.db.models.loading import get_model
 
 try:
     # Django >= 1.8
