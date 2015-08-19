@@ -89,7 +89,17 @@ def _media_file_name( instance, filename, file_attribute_name, folder, model_nam
     
     #Handle case if file of the same name already exists
     if exists:
-        if instance.allow_overwrite==True:
+
+        #If another object in this model is using that path, then don't allow this instance to overrride it
+        kwargs = {
+            file_attribute_name:full_path
+        }
+        path_sharing_objects = media_model.objects.filter(**kwargs)
+        path_sharing_objects_that_arent_this = [object for object in path_sharing_objects if object != instance]
+        exists_in_separate_object = len(path_sharing_objects_that_arent_this) > 0
+        
+
+        if exists_in_separate_object==False and instance.allow_overwrite==True:
             # print 'Delete media with same name: %s'%(full_path)
             media_file.storage.delete(full_path)
         else:
@@ -447,7 +457,7 @@ try:
     image_model = settings.IMAGE_MODEL
     @receiver(pre_delete, sender=image_model, dispatch_uid='image_delete_signal')
     def remove_image_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_image_file_from_s3(sender, instance, using)
+        base_remove_image_file_from_s3(sender, instance, using, settings.IMAGE_MODEL)
 except:
     pass
 
@@ -455,17 +465,23 @@ try:
     secure_image_model = settings.SECURE_IMAGE_MODEL
     @receiver(pre_delete, sender=secure_image_model, dispatch_uid='secure_image_delete_signal')
     def remove_secure_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_image_file_from_s3(sender, instance, using)    
+        base_remove_image_file_from_s3(sender, instance, using, settings.SECURE_IMAGE_MODEL)    
 except:
     pass
 
-def base_remove_image_file_from_s3(sender, instance, using, **kwargs):
+def base_remove_image_file_from_s3(sender, instance, using, model_name, **kwargs):
     try:
         delete_file_on_delete = settings.IMAGE_MODEL_DELETE_FILE_ON_DELETE
     except:
         delete_file_on_delete = False
 
-    if delete_file_on_delete:
+    model = get_model(model_name.split('.')[0], model_name.split('.')[1])
+    path_sharing_objects = model.objects.filter(image=instance.image)
+    path_sharing_objects_that_arent_this = [object for object in path_sharing_objects if object != instance]
+    exists_in_separate_object = len(path_sharing_objects_that_arent_this) > 0
+    
+
+    if exists_in_separate_object==False and delete_file_on_delete:
 
         #Figure out what bucket to delete
         delete_bucket = None
@@ -498,7 +514,7 @@ try:
     document_model = settings.DOCUMENT_MODEL
     @receiver(pre_delete, sender=document_model, dispatch_uid='document_delete_signal')
     def remove_document_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_document_file_from_s3(sender, instance, using)
+        base_remove_document_file_from_s3(sender, instance, using, settings.DOCUMENT_MODEL)
 except:
     pass
 
@@ -506,17 +522,22 @@ try:
     secure_document_model = settings.SECURE_DOCUMENT_MODEL
     @receiver(pre_delete, sender=secure_document_model, dispatch_uid='secure_document_delete_signal')
     def remove_secure_file_from_s3document_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_document_file_from_s3(sender, instance, using)
+        base_remove_document_file_from_s3(sender, instance, using, settings.SECURE_DOCUMENT_MODEL)
 except:
     pass
 
-def base_remove_document_file_from_s3(sender, instance, using, **kwargs):
+def base_remove_document_file_from_s3(sender, instance, using, model_name, **kwargs):
     try:
         delete_file_on_delete = settings.DOCUMENT_MODEL_DELETE_FILE_ON_DELETE
     except:
         delete_file_on_delete = False
 
-    if delete_file_on_delete:
+    model = get_model(model_name.split('.')[0], model_name.split('.')[1])
+    path_sharing_objects = model.objects.filter(media_file=instance.media_file)
+    path_sharing_objects_that_arent_this = [object for object in path_sharing_objects if object != instance]
+    exists_in_separate_object = len(path_sharing_objects_that_arent_this) > 0
+
+    if exists_in_separate_object==False and delete_file_on_delete:
         try:
             instance.media_file.delete(save=False)  
         except:
