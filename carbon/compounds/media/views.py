@@ -11,8 +11,10 @@ try:
 except:
     from django.db.models.loading import get_model
 
+from django_batch_uploader.views import AdminBatchUploadView
 
 from .models import *
+from .forms import *
 
 class BasePickerView(ListView):
     
@@ -49,16 +51,44 @@ class ImagePickerView(BasePickerView):
 
 
 
+class ImageBatchView(AdminBatchUploadView):      
 
-class ImageBatchView(TemplateView):      
-    template_name = 'admin/media/batch/images.html'  
+    # model = Image
 
-class SecureImageBatchView(TemplateView):      
-    template_name = 'admin/media/batch/secureimages.html'  
+    #Media file name
+    media_file_name = 'image'
 
-class DocumentBatchView(TemplateView):      
-    template_name = 'admin/media/batch/documents.html'  
+    #Which fields can be applied in bulk?
+    default_fields = ['credit', 'tags']
 
-class SecureDocumentBatchView(TemplateView):      
-    template_name = 'admin/media/batch/securedocuments.html'  
+    #Which fields can be applied individually?
+    detail_fields = ['title', 'alt', 'caption', 'use_png']
+
+    default_values = {}
+
+class SecureImageBatchView(ImageBatchView):      
+    
+    # model = SecureImage
+    pass
+
+
+class DocumentBatchView(AdminBatchUploadView):      
+    
+    # model = Document
+
+    #Media file name
+    media_file_name = 'file'
+
+    #Which fields can be applied in bulk?
+    default_fields = ['credit', 'tags']
+
+    #Which fields can be applied individually?
+    detail_fields = ['title',  'caption']
+
+    default_values = {}
+
+class SecureDocumentBatchView(DocumentBatchView):      
+    
+    # model = SecureDocument
+    pass
 

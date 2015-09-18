@@ -74,9 +74,10 @@ def _media_file_name( instance, filename, file_attribute_name, folder, model_nam
     full_path = '/'.join( [ folder, filename ] )
     exists = media_file.storage.exists(full_path)
 
+    media_model = get_model(model_name.split('.')[0], model_name.split('.')[1])
+    
     #If we are changing the image, delete the previous image:
     if instance.pk:
-        media_model = get_model(model_name.split('.')[0], model_name.split('.')[1])
         current_instance = media_model.objects.get(pk=instance.pk)
         current_path = str(current_instance.image)
 

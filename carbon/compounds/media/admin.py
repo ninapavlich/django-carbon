@@ -4,42 +4,42 @@ from carbon.atoms.admin.media import *
 # from .models import *
 
 
+from django_batch_uploader.admin import BaseBatchUploadAdmin
+
 class MediaTagAdmin(BaseTagAdmin):
     pass
 
-class ImageAdmin(BaseImageAdmin):
+class ImageAdmin(BaseImageAdmin, BaseBatchUploadAdmin):
 
     
     extra_urls = [
         {'url':reverse_lazy('admin_image_batch_view'), 'title':'Batch Upload Images'}
     ]
-    batch_response = batch_upload_image_response
-
+    
     
 
 
-class SecureImageAdmin(BaseImageAdmin):
+class SecureImageAdmin(BaseImageAdmin, BaseBatchUploadAdmin):
 
     extra_urls = [
         {'url':reverse_lazy('admin_secureimage_batch_view'), 'title':'Batch Upload Secure Images'}
     ]
-    batch_response = batch_upload_image_response
+    
 
 
 
-class MediaAdmin(BaseMediaAdmin):
+class MediaAdmin(BaseBatchUploadAdmin, BaseMediaAdmin):
 
     extra_urls = [
         {'url':reverse_lazy('admin_document_batch_view'), 'title':'Batch Upload Media'}
     ]
-    batch_response = batch_upload_media_response
+    
 
-class SecureMediaAdmin(BaseMediaAdmin):
+class SecureMediaAdmin(BaseMediaAdmin, BaseBatchUploadAdmin):
     
     extra_urls = [
         {'url':reverse_lazy('admin_securedocument_batch_view'), 'title':'Batch Upload Secure Media'}
     ]
-    batch_response = batch_upload_media_response
 
 
 

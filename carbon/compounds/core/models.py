@@ -375,7 +375,7 @@ class Template(VersionableAtom, TitleAtom):
         return ''
         
     def generate_slug(self):
-        unique_slugify(self, self.title, 'slug', None, '_')
+        unique_slugify(self, self.title, 'slug', None)
         return self.slug
 
 
