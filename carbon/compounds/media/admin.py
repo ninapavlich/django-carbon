@@ -1,3 +1,5 @@
+from django.core.urlresolvers import reverse_lazy
+
 from carbon.atoms.admin.taxonomy import *
 from carbon.atoms.admin.media import *
 

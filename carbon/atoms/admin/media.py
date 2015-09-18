@@ -27,6 +27,18 @@ class BaseMedia(object):
     list_filter = ('tags', "created_by", "modified_by", )
     change_list_template = "admin/media/change_list.html"
 
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        response = super(BaseMedia, self).changelist_view(request, extra_context)
+    
+        try:
+            context_data = response.context_data
+            context_data['extra_urls'] = self.extra_urls
+        except:
+            pass 
+        
+        return response
+
 
 
 class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
