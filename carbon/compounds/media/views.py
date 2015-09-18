@@ -14,7 +14,6 @@ except:
 from django_batch_uploader.views import AdminBatchUploadView
 
 from .models import *
-from .forms import *
 
 class BasePickerView(ListView):
     
