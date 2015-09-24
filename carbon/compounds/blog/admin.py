@@ -112,8 +112,8 @@ class BlogCommentVoteFlagInline(admin.TabularInline):
 class BlogCommentAdmin(VersionAdmin, BaseContentAdmin):
     
 
-    list_display = ( "title", "user", "article", "in_response_to")
-    list_display_links = ( "article",)
+    list_display = ( "pk", "title", "user", "article", "in_response_to", "moderation_status", "is_deleted", "created_date")
+    list_display_links = ( "pk", "title", )
     list_filter = ("moderation_status", "user",)
 
     readonly_fields = (

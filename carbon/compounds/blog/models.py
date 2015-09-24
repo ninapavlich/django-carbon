@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.generic import GenericForeignKey
@@ -113,6 +115,7 @@ class BlogArticle(ContentMolecule):
 class BlogComment(UserInputMolecule):
     class Meta:
         abstract = True
+        ordering = ['created_date']
 
     article = models.ForeignKey('blog.BlogArticle')
     in_response_to = models.ForeignKey('self', blank=True, null=True)
@@ -120,16 +123,29 @@ class BlogComment(UserInputMolecule):
     is_deleted = models.BooleanField(default=False)
 
     @cached_property
+    def level(self):
+        if not self.in_response_to:
+            return 1
+        else:
+            return self.in_response_to.level+1
+
+    @cached_property
     def is_draft(self):
         return self.moderation_status == ModerationAtom.SUBMITTED
 
     @cached_property
     def is_published(self):
-        return self.moderation_status == ModerationAtom.PUBLISHED
+        return (self.moderation_status == ModerationAtom.PUBLISHED or self.moderation_status == ModerationAtom.APPROVED)
+
+    @cached_property
+    def is_visible(self):
+        return self.is_published and self.is_flagged==False and self.is_rejected==False and self.is_deleted==False
 
     @cached_property
     def is_flagged(self):
-        
+        #if this has been manually approved, then its not flagged
+        if self.moderation_status == ModerationAtom.APPROVED:
+            return False
         max_flags = 1 if not hasattr(settings, 'BLOG_MAX_FLAGS') else settings.BLOG_MAX_FLAGS
         return len(self.get_flags()) >= max_flags
 
@@ -140,17 +156,25 @@ class BlogComment(UserInputMolecule):
     def downvote(self, user):
         self.vote(user, UpvoteDownvoteFlagMolecule.DOWNVOTE)
 
-    def get_downvotes(self):
+    @cached_property
+    def downvotes(self):
         return self.get_votes(UpvoteDownvoteFlagMolecule.DOWNVOTE)
+
+    def get_downvotes_total(self):
+        return len(self.downvotes)
 
     def upvote(self, user):
         self.vote(user, UpvoteDownvoteFlagMolecule.UPVOTE)
 
-    def get_upvotes(self):
+    @cached_property
+    def upvotes(self):
         return self.get_votes(UpvoteDownvoteFlagMolecule.UPVOTE)
 
+    def get_upvotes_total(self):
+        return len(self.upvotes)
+
     def get_vote_total(self):
-        return self.get_upvotes() - self.get_downvotes()
+        return self.get_upvotes_total() - self.get_downvotes_total()
 
 
     def vote(self, user, type):
@@ -173,7 +197,32 @@ class BlogComment(UserInputMolecule):
         flag_model = get_model(settings.BLOG_COMMENT_FLAG_MODEL.split('.')[0], settings.BLOG_COMMENT_FLAG_MODEL.split('.')[1])
         return flag_model.objects.filter(comment=self)
 
-    
+    @property
+    def can_update(self):
+
+        max_age_minutes = 60 if not hasattr(settings, 'BLOG_COMMENT_ALLOW_EDIT_MAX_AGE_MINUTES') else settings.BLOG_COMMENT_ALLOW_EDIT_MAX_AGE_MINUTES
+        if max_age_minutes == 0:
+            return False
+
+        #TODO: wonder if i should use modified_date or created_date here...
+        comment_age = timezone.now() - self.created_date
+        comment_age_minutes = (comment_age.days * (24*60)) + (comment_age.seconds/60)
+
+        return comment_age_minutes <= max_age_minutes
+
+    def attempt_to_update(self, new_content):
+        
+        if self.can_update:
+            self.content = new_content
+            self.save()
+            return True
+
+        return False
+
+    @property
+    def can_reply(self):
+        max_reply_levels = 2 if not hasattr(settings, 'BLOG_COMMENT_MAX_REPLY_LEVELS') else settings.BLOG_COMMENT_MAX_REPLY_LEVELS
+        return self.level < max_reply_levels
 
     def generate_title(self):
         words = 12 if not hasattr(settings, 'BLOG_COMMENT_AUTO_TITLE_LENGTH') else settings.BLOG_COMMENT_AUTO_TITLE_LENGTH
@@ -201,18 +250,34 @@ class BlogComment(UserInputMolecule):
                 self.moderation_status = ModerationAtom.PUBLISHED
             super(BlogComment, self).save(*args, **kwargs)
 
+    @classmethod
+    def _build_comment_tree(cls, article, level=0, list=None, branch=None):
+        if not list:
+            list = []
+
+        if branch:
+            list.append(branch)
+        comment_children = cls.objects.filter(article=article,in_response_to=branch)
+        for child in comment_children:
+            list = cls._build_comment_tree(article, level+1, list, child)
+        return list
+
+
 
     @classmethod
     def get_comments_for_article(cls,article, include_drafts=False, include_rejected=True):
-        comments = cls.objects.filter(article=article)
+        tree = cls._build_comment_tree(article)
 
         if include_drafts==False:
-            comments = comments.exclude(moderation_status=ModerationAtom.SUBMITTED)
+            tree = [item for item in tree if item.moderation_status!=ModerationAtom.SUBMITTED]
+            # comments = comments.exclude(moderation_status=ModerationAtom.SUBMITTED)
 
         if include_rejected==False:
-            comments = comments.exclude(moderation_status=ModerationAtom.REJECTED)
+            tree = [item for item in tree if item.moderation_status!=ModerationAtom.REJECTED]
+            # comments = comments.exclude(moderation_status=ModerationAtom.REJECTED)
 
-        return comments
+
+        return tree
 
 class BlogCommentVote(UpvoteDownvoteFlagMolecule):
     class Meta:

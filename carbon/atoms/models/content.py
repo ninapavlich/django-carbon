@@ -322,12 +322,14 @@ class ModerationAtom(models.Model):
     }
 
     SUBMITTED = 10
-    PUBLISHED = 100
     REJECTED = 50
+    PUBLISHED = 100    
+    APPROVED = 150
     MODERATION_STATUS_CHOICES = (
         (SUBMITTED, _("Submitted by User")),
         (PUBLISHED, _("Published")),
         (REJECTED, _("Rejected by Moderator")),
+        (APPROVED, _("Approved by Moderator")),
     )
 
     moderation_status = models.IntegerField(choices=MODERATION_STATUS_CHOICES, 

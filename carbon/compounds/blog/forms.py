@@ -1,7 +1,10 @@
 from django import forms
 from django.conf import settings
 from django.contrib import messages
+from django.template import Context, Template
 from django.utils.translation import ugettext_lazy as _
+from django.template.defaultfilters import slugify
+from django.core.context_processors import csrf
 
 from ckeditorfiles.widgets import CKEditorWidget
 
@@ -35,9 +38,8 @@ class BlogCommentForm(forms.Form):
 
     comment_action = forms.ChoiceField(required=True,choices=BLOG_COMMENT_ACTION_CHOICES, widget=forms.HiddenInput())
     content = forms.CharField(required=False, widget=forms.Textarea())
-    reply_to_comment = forms.ModelChoiceField(queryset=blog_comment_model.objects.all(), required=False)
-        # , widget=forms.HiddenInput())
     article = forms.ModelChoiceField(queryset=blog_article_model.objects.all(), required=False, widget=forms.HiddenInput())
+    reply = forms.ModelChoiceField(queryset=blog_comment_model.objects.all(), required=False, widget=forms.HiddenInput())
     
     def __init__( self, request, *args, **kwargs ):
         super( BlogCommentForm, self ).__init__( *args, **kwargs )
@@ -57,6 +59,8 @@ class BlogCommentForm(forms.Form):
         comment_action = self.data['comment_action']
         comment_content = self.cleaned_data['content']
         
+        # raise forms.ValidationError(_("This is a validation test"))
+
         if comment_action == BlogCommentForm.ACTION_SUBMIT:
             if not comment_content:
                 raise forms.ValidationError(_("Please enter a comment"))
@@ -72,14 +76,17 @@ class BlogCommentForm(forms.Form):
         return comment_content
 
 
-    def clean_reply_to_comment(self):
+    def clean_reply(self):
         
         comment_action = self.data['comment_action']
-        comment_reply_to_comment = self.cleaned_data['reply_to_comment']
+        comment_reply_to_comment = self.cleaned_data['reply']
         
         if comment_action == BlogCommentForm.ACTION_REPLY:
             if not comment_reply_to_comment:
                 raise forms.ValidationError(_("Please enter a comment to reply to"))
+
+            if not comment_reply_to_comment.can_reply:
+                raise forms.ValidationError(_("You cannot reply to this comment"))  
 
         elif comment_action == BlogCommentForm.ACTION_UPDATE:
             if not comment_reply_to_comment:
@@ -159,26 +166,174 @@ class BlogCommentForm(forms.Form):
         return comment
 
     def reply_to_comment(self):
-        print "TODO: Reply to comment"
+        
+        comment = blog_comment_model(
+            user = self.request.user,
+            content=self.cleaned_data['content'],
+            article=self.cleaned_data['article'],
+            in_response_to=self.cleaned_data['reply']
+        )
+        comment.save()
+
+        messages.success(self.request, _("Your reply has been submitted"))
+
+        return comment
 
     def update_comment(self):
-        print "TODO: edit comment"
+        current_comment = self.cleaned_data['reply']
+        updated = current_comment.attempt_to_update(self.cleaned_data['content'])
+        if updated:
+            messages.success(self.request, _("Your comment has been updated"))
+        else:
+            messages.success(self.request, _("Your comment can no longer be updated"))
+
+        return current_comment
 
     def delete_comment(self):
-        print "TODO: delete"
+        reply = self.cleaned_data['reply']
+        reply.is_deleted = True
+        reply.save()
+        messages.success(self.request, _("Your comment has been deleted"))
+        return reply
 
 
     def upvote_comment(self):
-        print "TODO: upvote"
+        comment = self.cleaned_data['reply']
+        comment.upvote(self.request.user)
+
+        messages.success(self.request, _("Thanks for the feedback! This comment has been up-voted."))
 
     def downvote_comment(self):
-        print "TODO: downvote"
+        comment = self.cleaned_data['reply']
+        comment.downvote(self.request.user)
+
+        messages.success(self.request, _("Thanks for the feedback! This comment has been down-voted."))
 
     def flag_comment(self):
-        print "TODO: flag"
+        comment = self.cleaned_data['reply']
+        comment.flag(self.request.user)
+
+        messages.success(self.request, _("Thanks for the feedback! This comment has been flagged to be moderated."))
+
+    @classmethod
+    def create_submit_form(cls, context, form_template, article):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_SUBMIT, article, None )      
+
+    @classmethod
+    def create_reply_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_REPLY, comment.article, comment)
+
+    @classmethod
+    def create_update_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_UPDATE, comment.article, comment)
+
+    @classmethod
+    def create_delete_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_DELETE, comment.article, comment)
+
+    @classmethod
+    def create_flag_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_FLAG, comment.article, comment)
+
+    @classmethod
+    def create_upvote_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_UPVOTE, comment.article, comment)
+
+    @classmethod
+    def create_downvote_form(cls, context, form_template, comment):
+        return cls._create_comment_form(context, form_template, BlogCommentForm.ACTION_DOWNVOTE, comment.article, comment)
+
+    @classmethod
+    def _create_comment_form(cls, context, form_template, method, article, comment=None):
+        request = context['request']
+
+        content_ediable_actions = [
+            BlogCommentForm.ACTION_SUBMIT,
+            BlogCommentForm.ACTION_UPDATE,
+            BlogCommentForm.ACTION_REPLY
+        ]
+        if method in content_ediable_actions:
+            widgets = {'content':forms.Textarea()}    
+        else:
+            widgets = {'content':forms.HiddenInput()}
+
+        initial_values = {}
+        initial_values['comment_action'] = method
+        initial_values['article'] = article
+        initial_values['content'] = ""
+        if comment:
+            initial_values['reply'] = comment
+
+        data = None
+        if request.POST:
+            is_related_action = request.POST['comment_action'] == method
+            is_related_form = True if not comment else str(comment.pk) == str(request.POST['reply'])
+            data = {}
+            data['article'] = article.pk
+            if comment:
+                data['reply'] = comment.pk
+            data['comment_action'] = method
+            data['content'] = request.POST['content'] if (is_related_action and is_related_form) else ""        
+
+        button_label = dict(BlogCommentForm.BLOG_COMMENT_ACTION_CHOICES).get(method)
+        form_id = "comment-%s-form"%(method) if not comment else "comment-%s-%s-form"%(method, comment.pk)
+        return cls.create_and_render_form(request, form_template, initial_values, widgets, button_label, form_id, data)
 
     
+    @classmethod
+    def create_and_render_form(cls, request, form_template, initial_values, widgets, submit_label, form_id, data=None, files=None):
+
+        form = cls.create_form(request, form_template, initial_values, widgets, data, files)
+        return cls.render_form(form, request, submit_label, form_id)
+
+    @classmethod
+    def create_form(cls, request, form_template, initial_values, widgets, data=None, files=None):
+        kwargs = {
+            'initial': initial_values,
+            'prefix': None,
+        }
+        kwargs['request'] = request
+
+        if data:
+            kwargs['data'] = data
+
+        if files:
+            kwargs['files'] = files
+        
+
+        new_form = cls(**kwargs)
+        
+        for widget_key, widget in widgets.iteritems():
+            new_form.fields[widget_key].widget = widget
+
+        #Now set initial values:
+        if data:
+            for data_key, data in data.iteritems():
+                new_form.fields[data_key].initial = data
+                print 'set %s = %s'%(data_key, data)
+
+        return new_form
+
+    @classmethod
+    def render_form(cls, form, request, submit_label, form_id):
+            
+        template_string = '\
+        <form action="" method="post" class="{{form_class}}" id="{{form_id}}">{% csrf_token %}\
+            {{ form.as_ul }}\
+            <input type="submit" value="{{submit_label}}">\
+        </form>'
+
+        template = Template(template_string)
+        context_dict = {}
+        context_dict.update(csrf(request))
+        context_dict['form'] = form
+        context_dict['submit_label'] = submit_label
+        context_dict['form_class'] = slugify(submit_label)
+        context_dict['form_id'] = form_id
+        context = Context(context_dict)
+        return template.render(context)
     
+
 #=============================================
 # Admin Forms ================================
 #=============================================
