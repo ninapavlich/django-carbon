@@ -1,10 +1,12 @@
 from django.views.generic import DetailView, ListView
 from django.conf import settings
+from django.views.generic.edit import FormMixin, ProcessFormView
 try:
     from django.apps import apps
     get_model = apps.get_model
 except:
     from django.db.models.loading import get_model
+
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
@@ -12,13 +14,57 @@ from carbon.atoms.views.content import *
 from .models import *
 from .forms import *
 
+class BlogCommentMixin(FormMixin, ProcessFormView):
 
-class BaseBlogDeatilView(DetailView):
+    form_class = BlogCommentForm
+
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.allow_comments:
+            form = self.get_form()        
+        else:
+            form = None
+
+        context = self.get_context_data(object=self.object,form=form)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if self.object.allow_comments:
+            form = self.get_form()
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+        else:
+            return self.get(*args, **kwargs)
+
+    # PUT is a valid HTTP verb for creating (with a known URL) or editing an
+    # object, note that browsers only support POST for now.
+    def put(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+
+    def get_form_kwargs( self ):
+        kwargs = super( BlogCommentMixin, self ).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_success_url(self):
+        return self.object.get_absolute_url()
+
+    def form_valid(self, form):
+        form.save()
+        return super(BlogCommentMixin, self).form_valid(form)
+
+class BaseBlogDetailView(BlogCommentMixin):
 
     def get_context_data(self, **kwargs):
-        context = super(BaseBlogDeatilView, self).get_context_data(**kwargs)
+        context = super(BaseBlogDetailView, self).get_context_data(**kwargs)
             
-        print 'todo: Get next/previous, and current tag'
+        # print 'todo: Get next/previous, and current tag'
         
         context['next'] = None
         context['previous'] = None
@@ -40,7 +86,7 @@ class BaseBlogListView(DetailView):
         return context
 
 
-class BlogArticleDetailView(NonAdminCachableView, PublishableView, AddressibleView, BaseBlogDeatilView):
+class BlogArticleDetailView(NonAdminCachableView, PublishableView, AddressibleView, BaseBlogDetailView):
 
 
     # model = BlogArticle
@@ -91,3 +137,6 @@ class BlogContributorDetailView(NonAdminCachableView, PublishableView, Addressib
     # articles = BlogTag.objects.published()
     # return [article for article in articles if article.is_published()]
     pass  
+
+
+

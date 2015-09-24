@@ -1,10 +1,12 @@
 import re
 import urllib
+from unidecode import unidecode
 from django import template
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.template import Library
+from django.template.defaultfilters import slugify
 from django.utils.html import strip_tags
 
 
@@ -46,6 +48,9 @@ def url_add_query(context, **kwargs):
 def tostring(object):
     return str(object)
 
+@register.filter
+def slugify(value):
+    return slugify(unidecode(value))
 
 def insert_ellipse(lst, ellipse=0):
     '''Insert ellipse where it's not sequential

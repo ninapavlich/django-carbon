@@ -64,7 +64,11 @@ class VersionableAtom(models.Model):
             except:
                 return '<span %s>&nbsp;</span>'%(style)
         return '<span %s>&nbsp;</span>'%(style)   
-    edit_item.allow_tags = True     
+    edit_item.allow_tags = True    
+
+    @property
+    def is_edited(self):
+        return self.created_date != self.modified_date
 
     @cached_property
     def abstract_children(self):
@@ -290,9 +294,12 @@ class TitleAtom(models.Model):
         unique_slugify(self, self.title)
         return self.slug
 
+    def generate_title(self):
+        return 'Untitled %s'%(self.__class__.__name__)
+
     def verify_title_and_slug(self):
         if not self.title:
-            self.title = 'Untitled %s'%(self.__class__.__name__)
+            self.title = self.generate_title()
 
         if not self.slug or not self.pk:
             self.slug = self.generate_slug()

@@ -85,6 +85,11 @@ class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMix
             return self.first_name
         return self.email
 
+    def get_public_name(self):
+        if self.first_name:
+            return self.first_name
+        return 'Anonymous User'
+
     def get_full_name(self):
         if self.first_name and self.last_name:
             return u"%s %s" % (self.first_name, self.last_name)

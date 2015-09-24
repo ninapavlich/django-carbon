@@ -97,6 +97,61 @@ class BlogCategoryAdmin(BaseCategoryAdmin):
     form = BlogCategoryAdminForm    
 
 
+
+
+
+class BlogCommentVoteFlagInline(admin.TabularInline):
+    #model = BlogCommentVote or BlogCommentFlag
+    autocomplete_lookup_fields = {
+        'fk': ['voter'],
+    }
+    raw_id_fields = ('comment','voter',)
+    fields = ('voter', 'type')
+    extra = 0
+
+class BlogCommentAdmin(VersionAdmin, BaseContentAdmin):
+    
+
+    list_display = ( "title", "user", "article", "in_response_to")
+    list_display_links = ( "article",)
+    list_filter = ("moderation_status", "user",)
+
+    readonly_fields = (
+        "version", "created_date", "created_by", "modified_date", "modified_by",
+    )
+    
+    autocomplete_lookup_fields = {
+        'fk': ('article','in_response_to', 'user'),
+    }
+    raw_id_fields = ( 'article','in_response_to', 'user')
+    
+
+    core_fields =  (
+        ('moderation_status', ),
+        ('article', 'in_response_to',),
+        ('user', 'is_deleted',),
+        ('title', 'slug'),
+        'content',
+        'moderation_comment',
+        'cleaned_content'
+    )
+
+    meta_fields = BaseVersionableAdmin.meta_fields
+
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+
+
 # admin.site.register(BlogArticle, BlogArticleAdmin)
 # admin.site.register(BlogTag, BlogTagAdmin)
 # admin.site.register(BlogCategory, BlogCategoryAdmin)
+# admin.site.register(BlogComment, BlogCommentAdmin)

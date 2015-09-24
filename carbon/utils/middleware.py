@@ -17,13 +17,32 @@ class Django403Middleware(object):
     # function
     if isinstance(response, django.http.HttpResponseForbidden) and \
         set(dir(response)) == set(dir(django.http.HttpResponseForbidden())):
-      import views
+      
       try:
-        return views.access_denied(request)
+        return access_denied(request)
+
+
       except django.template.TemplateDoesNotExist, e:
         return fallback_403(request)
 
     return response
+
+def access_denied(request, template_name='403.html'):
+  """
+  Default 403 handler, which looks for the  which prints out a hard-coded string patterned
+  after the Apache default 403 page.
+
+  Templates: `403.html`
+  Context:
+      request
+          The django request object
+  """
+  t = django.template.loader.get_template(template_name)
+  template_values = {}
+  template_values['request'] = request
+  return django.http.HttpResponseForbidden(
+      t.render(django.template.RequestContext(request, template_values)))
+
 
 def fallback_403(request):
   """

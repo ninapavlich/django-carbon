@@ -321,19 +321,17 @@ class ModerationAtom(models.Model):
         'moderation_comment':"Comment from moderator"
     }
 
-    DRAFT = 10
-    REVIEW = 20
+    SUBMITTED = 10
     PUBLISHED = 100
     REJECTED = 50
     MODERATION_STATUS_CHOICES = (
-        (DRAFT, _("Draft")),
-        (REVIEW, _("Needs Review")),
+        (SUBMITTED, _("Submitted by User")),
         (PUBLISHED, _("Published")),
-        (REJECTED, _("Rejected")),
+        (REJECTED, _("Rejected by Moderator")),
     )
 
     moderation_status = models.IntegerField(choices=MODERATION_STATUS_CHOICES, 
-        default=DRAFT, help_text=help['moderation_status'])
+        default=SUBMITTED, help_text=help['moderation_status'])
 
     moderation_comment = models.TextField(_('Moderation Comment'), blank=True,
         help_text=help['moderation_comment'])
@@ -463,4 +461,33 @@ class UserInputMolecule(VersionableAtom, AddressibleAtom, PublishableAtom, Conte
     @staticmethod
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains")
+
+
+class UpvoteDownvoteFlagMolecule(VersionableAtom):
+    class Meta:
+        abstract = True
+
+    help = {
+        'type': "",
+        'voter':""
+    }
+
+    UPVOTE = 'upvote'
+    DOWNVOTE = 'downvote'
+    FLAG = 'flag'
+    VOTE_CHOICES = (
+        (UPVOTE, _(UPVOTE)),
+        (DOWNVOTE, _(DOWNVOTE)),
+        (FLAG, _(FLAG))  
+    )
+
+    type = models.CharField(_('Vote Choices'), max_length=255, 
+        help_text=help['type'], choices=VOTE_CHOICES)
+
+    voter = models.ForeignKey(settings.AUTH_USER_MODEL, 
+        blank=True, null=True, related_name='%(app_label)s_%(class)s_user',
+        help_text=help['voter'])
+
+    # Implement what user is voting on:
+    # item = models.ForeignKey('blog.BlogComment')
 
