@@ -185,7 +185,7 @@ class BlogComment(UserInputMolecule):
 
     def get_votes(self, type):
         vote_model = get_model(settings.BLOG_COMMENT_VOTE_MODEL.split('.')[0], settings.BLOG_COMMENT_VOTE_MODEL.split('.')[1])
-        return vote_model.objects.filter(comment=self)
+        return vote_model.objects.filter(comment=self,type=type)
 
     def flag(self, user):
         flag_model = get_model(settings.BLOG_COMMENT_FLAG_MODEL.split('.')[0], settings.BLOG_COMMENT_FLAG_MODEL.split('.')[1])

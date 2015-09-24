@@ -37,13 +37,14 @@ class BlogCommentForm(forms.Form):
     
 
     comment_action = forms.ChoiceField(required=True,choices=BLOG_COMMENT_ACTION_CHOICES, widget=forms.HiddenInput())
-    content = forms.CharField(required=False, widget=forms.Textarea())
+    content = forms.CharField(required=False, widget=forms.Textarea(attrs={'placeholder': _("Comment")}), label=_("Comment"))
     article = forms.ModelChoiceField(queryset=blog_article_model.objects.all(), required=False, widget=forms.HiddenInput())
     reply = forms.ModelChoiceField(queryset=blog_comment_model.objects.all(), required=False, widget=forms.HiddenInput())
     
-    def __init__( self, request, *args, **kwargs ):
+    def __init__( self, request, was_posted, *args, **kwargs ):
         super( BlogCommentForm, self ).__init__( *args, **kwargs )
         self.request = request
+        self.was_posted = was_posted
 
     def clean_comment_action(self):
         
@@ -59,6 +60,8 @@ class BlogCommentForm(forms.Form):
         comment_action = self.data['comment_action']
         comment_content = self.cleaned_data['content']
         
+        if not self.was_posted:
+            return comment_content
         # raise forms.ValidationError(_("This is a validation test"))
 
         if comment_action == BlogCommentForm.ACTION_SUBMIT:
@@ -81,6 +84,9 @@ class BlogCommentForm(forms.Form):
         comment_action = self.data['comment_action']
         comment_reply_to_comment = self.cleaned_data['reply']
         
+        if not self.was_posted:
+            return comment_reply_to_comment
+
         if comment_action == BlogCommentForm.ACTION_REPLY:
             if not comment_reply_to_comment:
                 raise forms.ValidationError(_("Please enter a comment to reply to"))
@@ -116,6 +122,9 @@ class BlogCommentForm(forms.Form):
      
         comment_action = self.data['comment_action']
         comment_article = self.cleaned_data['article']
+
+        if not self.was_posted:
+            return comment_article
         
         if comment_action == BlogCommentForm.ACTION_SUBMIT:
             if not comment_article:
@@ -253,46 +262,54 @@ class BlogCommentForm(forms.Form):
             BlogCommentForm.ACTION_REPLY
         ]
         if method in content_ediable_actions:
-            widgets = {'content':forms.Textarea()}    
+            widgets = {'content':forms.Textarea(attrs={'placeholder': _("Comment")})}    
         else:
             widgets = {'content':forms.HiddenInput()}
 
         initial_values = {}
         initial_values['comment_action'] = method
         initial_values['article'] = article
-        initial_values['content'] = ""
+        
+        if method == BlogCommentForm.ACTION_UPDATE:
+            initial_values['content'] = comment.content
+        else:
+            initial_values['content'] = ""
+
         if comment:
             initial_values['reply'] = comment
 
         data = None
+        was_posted = False
+
         if request.POST:
-            is_related_action = request.POST['comment_action'] == method
+            was_posted = request.POST['comment_action'] == method
             is_related_form = True if not comment else str(comment.pk) == str(request.POST['reply'])
             data = {}
             data['article'] = article.pk
             if comment:
                 data['reply'] = comment.pk
             data['comment_action'] = method
-            data['content'] = request.POST['content'] if (is_related_action and is_related_form) else ""        
-
+            data['content'] = request.POST['content'] if (was_posted and is_related_form) else ""        
+            
         button_label = dict(BlogCommentForm.BLOG_COMMENT_ACTION_CHOICES).get(method)
         form_id = "comment-%s-form"%(method) if not comment else "comment-%s-%s-form"%(method, comment.pk)
-        return cls.create_and_render_form(request, form_template, initial_values, widgets, button_label, form_id, data)
+        return cls.create_and_render_form(request, (was_posted and is_related_form), form_template, initial_values, widgets, button_label, form_id, data)
 
     
     @classmethod
-    def create_and_render_form(cls, request, form_template, initial_values, widgets, submit_label, form_id, data=None, files=None):
+    def create_and_render_form(cls, request, was_posted, form_template, initial_values, widgets, submit_label, form_id, data=None, files=None):
 
-        form = cls.create_form(request, form_template, initial_values, widgets, data, files)
+        form = cls.create_form(request, was_posted, form_template, initial_values, widgets, data, files)
         return cls.render_form(form, request, submit_label, form_id)
 
     @classmethod
-    def create_form(cls, request, form_template, initial_values, widgets, data=None, files=None):
+    def create_form(cls, request, was_posted, form_template, initial_values, widgets, data=None, files=None):
         kwargs = {
             'initial': initial_values,
             'prefix': None,
         }
         kwargs['request'] = request
+        kwargs['was_posted'] = was_posted
 
         if data:
             kwargs['data'] = data
@@ -310,7 +327,9 @@ class BlogCommentForm(forms.Form):
         if data:
             for data_key, data in data.iteritems():
                 new_form.fields[data_key].initial = data
-                print 'set %s = %s'%(data_key, data)
+
+
+
 
         return new_form
 
@@ -328,7 +347,8 @@ class BlogCommentForm(forms.Form):
         context_dict.update(csrf(request))
         context_dict['form'] = form
         context_dict['submit_label'] = submit_label
-        context_dict['form_class'] = slugify(submit_label)
+        error_class = '' if not form.was_posted else 'valid' if bool(form._errors) else 'invalid'
+        context_dict['form_class'] = "%s %s"%(error_class, slugify(submit_label))
         context_dict['form_id'] = form_id
         context = Context(context_dict)
         return template.render(context)

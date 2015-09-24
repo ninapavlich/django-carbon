@@ -38,6 +38,9 @@ def get_blog_article_comments(article):
 def get_blog_comment_form(context, article, form):
     
     form_class = type(form)
+
+    request = context['request']
+    print 'POST? %s'%(request.POST)
     return form_class.create_submit_form(context, form, article)
 
 

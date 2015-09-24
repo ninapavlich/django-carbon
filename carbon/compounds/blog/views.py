@@ -17,10 +17,12 @@ from .forms import *
 class BlogCommentMixin(FormMixin, ProcessFormView):
 
     form_class = BlogCommentForm
+    was_posted = False
 
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        self.was_posted = False
         if self.object.allow_comments:
             form = self.get_form()        
         else:
@@ -31,7 +33,8 @@ class BlogCommentMixin(FormMixin, ProcessFormView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-
+        self.was_posted = True
+        
         if self.object.allow_comments:
             form = self.get_form()
             if form.is_valid():
@@ -50,6 +53,7 @@ class BlogCommentMixin(FormMixin, ProcessFormView):
     def get_form_kwargs( self ):
         kwargs = super( BlogCommentMixin, self ).get_form_kwargs()
         kwargs['request'] = self.request
+        kwargs['was_posted'] = self.was_posted
         return kwargs
 
     def get_success_url(self):
