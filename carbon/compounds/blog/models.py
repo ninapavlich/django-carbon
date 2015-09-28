@@ -116,8 +116,11 @@ class BlogComment(UserInputMolecule):
     class Meta:
         abstract = True
         ordering = ['created_date']
+   
 
     article = models.ForeignKey('blog.BlogArticle')
+
+
     in_response_to = models.ForeignKey('self', blank=True, null=True)
 
     is_deleted = models.BooleanField(default=False)
@@ -251,22 +254,22 @@ class BlogComment(UserInputMolecule):
             super(BlogComment, self).save(*args, **kwargs)
 
     @classmethod
-    def _build_comment_tree(cls, article, level=0, list=None, branch=None):
+    def _build_comment_tree(cls, parent, level=0, list=None, branch=None):
         if not list:
             list = []
 
         if branch:
             list.append(branch)
-        comment_children = cls.objects.filter(article=article,in_response_to=branch)
+        comment_children = cls.objects.filter(parent=parent,in_response_to=branch)
         for child in comment_children:
-            list = cls._build_comment_tree(article, level+1, list, child)
+            list = cls._build_comment_tree(parent, level+1, list, child)
         return list
 
 
 
     @classmethod
-    def get_comments_for_article(cls,article, include_drafts=False, include_rejected=True):
-        tree = cls._build_comment_tree(article)
+    def get_comments_for_parent(cls,parent, include_drafts=False, include_rejected=True):
+        tree = cls._build_comment_tree(parent)
 
         if include_drafts==False:
             tree = [item for item in tree if item.moderation_status!=ModerationAtom.SUBMITTED]
