@@ -26,3 +26,18 @@ def get_page_by_slug(slug=None):
         item = None
 
     return item
+
+
+@register.assignment_tag()
+def get_children_by_slug(slug=None, require_published=True):
+   
+    output = []
+    app_label = settings.PAGE_MODEL.split('.')[0]
+    object_name = settings.PAGE_MODEL.split('.')[1]
+    model = get_model(app_label, object_name)
+    
+    try:
+        item = model.objects.get(slug=slug)
+        return item.get_children(require_published)
+    except:
+        return []  

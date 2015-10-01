@@ -59,10 +59,10 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
         output = ''
         all_tags = obj.tags.all()
         if len(all_tags) > 1:
-            output += '<span>Tags: </span>'
+            output += '<strong>Tags: </strong>'
 
         elif len(all_tags) > 0:
-            output += '<span>Tag: </span>'
+            output += '<strong>Tag: </strong>'
 
         for tag in all_tags:
             output += ('<a href="?tags__id__exact=%s">%s</a> '%(tag.pk, tag.title))
