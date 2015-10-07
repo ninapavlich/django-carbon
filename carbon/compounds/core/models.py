@@ -13,6 +13,16 @@ import csv
 import httplib2
 from bs4 import BeautifulSoup
 
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+from gzip import GzipFile
+
+from boto.s3.key import Key
+import boto.s3
+
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -423,15 +433,16 @@ def get_storage():
 class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
     help = {
+        'peg_revision':"While making unstable changes, you may peg the package \
+        to last working version number. Then newer packages will only be \
+        returned if settings.DEBUG=True. Leave blank to use the lastest version.",
         'title':"File Name",
         'slug':"The filename for this item, without '.min' or the file extension",
         'source':"Copy the un-minified source",
         'minified':"Copy the minified source"
     }
 
-    
-    source = models.BooleanField(default=True, help_text=help['source'])
-    minified = models.BooleanField(default=True, help_text=help['minified'])
+    peg_revision = models.PositiveIntegerField(null=True, blank=True, help_text=help['peg_revision'])
     
     file_source_content = models.TextField(null=True, blank=True)
     error_source_content = models.TextField(null=True, blank=True)
@@ -447,6 +458,10 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     def get_extension(self):
         #Override in subclass
         return '.txt'
+
+    def get_header_type(self):
+        #Override in subclass
+        return 'text/html'
 
     def get_src_directories(self):
         output = []
@@ -489,16 +504,78 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
                 source_file = ContentFile(source)
                 minified_file = ContentFile(minified_source)
                 
-                source_name = u"%s%s"%(self.slug, self.get_extension())
-                minified_name = u"%s.min%s"%(self.slug, self.get_extension())
+                source_name = self.get_file_name()
+                minified_name = self.get_file_name(True)
 
                 self.file_source.save(source_name, source_file, save=save)
                 self.file_minified.save(minified_name, minified_file, save=save)
+
+                subfolder = self.__class__.__name__.lower()
+                archived_source_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, source_name)
+                archived_minifed_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, minified_name)
+                self.archive_file(archived_source_path, source)
+                self.archive_file(archived_minifed_path, minified_source)
+
             # else:
             #     print 'success but not different'
         else:
             # print 'error, dont save'
             self.error_source_content = error
+
+    def get_file_name(self, minified=False):
+        if minified:
+            return u"%s.min%s"%(self.slug, self.get_extension())
+        else:
+            return u"%s%s"%(self.slug, self.get_extension())
+
+    def get_archived_file_url(self, version, minified=False):
+
+        subfolder = self.__class__.__name__.lower()
+        source_name = self.get_file_name(minified)
+        source_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, version, source_name)
+        url = "http://%s.s3.amazonaws.com%s" % (settings.AWS_STORAGE_BUCKET_NAME, source_path)
+        return url
+
+    def get_url(self, minified):
+        if not self.peg_revision:
+            if minified:
+                return '%s?v=%s'%(self.file_minified.url, self.version)
+            else:
+                return '%s?v=%s'%(self.file_source.url, self.version)
+        else:
+            return self.get_archived_file_url(self.peg_revision, minified)
+
+    def archive_file(self, source_name, source_file_contents):
+        
+        conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME_MEDIA)
+        
+        headers={'Content-Type': self.get_header_type(), 'Cache-Control': 'max-age=%s'%(settings.CACHE_DURATION)}
+        
+        is_gzipped = getattr(settings, 'AWS_IS_GZIPPED', False)
+
+        if is_gzipped:
+            source_file_contents = self.compress_string(source_file_contents)
+            headers['Content-Encoding'] = 'gzip'
+
+        k = Key(bucket)
+        k.key = source_name
+        print 'headers? %s'%(headers)
+        k.set_contents_from_string(source_file_contents, headers=headers)
+        k.set_acl('public-read')
+
+        url = "http://%s.s3.amazonaws.com%s" % (settings.AWS_STORAGE_BUCKET_NAME, source_name)
+        print url
+
+    def compress_string(self, s):
+        """Gzip a given string."""
+        zbuf = StringIO()
+        zfile = GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
+        zfile.write(s)
+        zfile.close()
+        return zbuf.getvalue()
+
+
 
 
     def increment_version_number(self):
@@ -558,6 +635,9 @@ class CSSPackage(BaseFrontendPackage):
     def get_extension(self):
         return '.css'
 
+    def get_header_type(self):
+        return 'text/css'
+
     def minify(self, source):
         #Override in subclass
         return compress(source)
@@ -581,6 +661,9 @@ class JSPackage(BaseFrontendPackage):
 
     def get_extension(self):
         return '.js'
+
+    def get_header_type(self):
+        return 'application/javascript'
 
     def minify(self, source):
         #Override in subclass
@@ -672,7 +755,7 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         return False
 
     def get_temp_folder(self):
-        subfolder = (self.__class__.__name__).lower()
+        subfolder = '%s_%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()))
         directory = "/tmp/%s"%(subfolder)   
         return directory 
 

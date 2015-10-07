@@ -43,14 +43,20 @@ class TemplateAdmin(VersionAdmin, BaseVersionableAdmin):
 
 class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
+    def archived_versions(self, obj):
+        url = obj.get_archived_file_url(obj.version)
+        return "You can download archived versions using this URL schema:<br /><a href='%s' target='_blank'>%s</a>"%(url, url)
+    archived_versions.allow_tags = True
+
     prepopulated_fields = {"slug": ("title",)}
     core_fields = (
         ('title','slug'),
-        ('source','minified'),
+        # ('source','minified'),
         ('file_source', 'file_minified'),
     )
     info_fields = (
-        'version',
+        ('version','peg_revision',),
+        'archived_versions',
         'error_source_content',
     )
     meta_fields = BaseVersionableTitleAdmin.meta_fields
@@ -73,7 +79,7 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-        "error_source_content"
+        "error_source_content", "archived_versions"
     ) 
 
     def save_model(self, request, obj, form, change):        
