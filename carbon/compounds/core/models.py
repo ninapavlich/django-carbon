@@ -537,7 +537,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return url
 
     def get_url(self, minified):
-        if not self.peg_revision and not settings.DEBUG:
+        print 'peg revision? %s'%(self.peg_revision)
+        if self.peg_revision==None or settings.DEBUG:
             if minified:
                 return '%s?v=%s'%(self.file_minified.url, self.version)
             else:
