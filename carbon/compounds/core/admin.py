@@ -44,7 +44,7 @@ class TemplateAdmin(VersionAdmin, BaseVersionableAdmin):
 class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     def archived_versions(self, obj):
-        url = obj.get_archived_file_url(obj.version)
+        url = obj.get_archived_file_url(obj.version, True)
         return "You can download archived versions using this URL schema:<br /><a href='%s' target='_blank'>%s</a>"%(url, url)
     archived_versions.allow_tags = True
 

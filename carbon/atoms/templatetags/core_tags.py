@@ -84,7 +84,7 @@ def get_js_package(slug, minified=False):
         item = None
 
     if item:
-        return item.get_url()
+        return item.get_url(minified)
     return ''
 
 @register.assignment_tag()
@@ -96,5 +96,5 @@ def get_css_package(slug, minified=False):
         item = None
 
     if item:
-        return item.get_url()
+        return item.get_url(minified)
     return ''    

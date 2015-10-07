@@ -537,7 +537,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return url
 
     def get_url(self, minified):
-        if not self.peg_revision:
+        if not self.peg_revision and not settings.DEBUG:
             if minified:
                 return '%s?v=%s'%(self.file_minified.url, self.version)
             else:
@@ -553,19 +553,14 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         headers={'Content-Type': self.get_header_type(), 'Cache-Control': 'max-age=%s'%(settings.CACHE_DURATION)}
         
         is_gzipped = getattr(settings, 'AWS_IS_GZIPPED', False)
-
         if is_gzipped:
             source_file_contents = self.compress_string(source_file_contents)
             headers['Content-Encoding'] = 'gzip'
 
         k = Key(bucket)
         k.key = source_name
-        print 'headers? %s'%(headers)
         k.set_contents_from_string(source_file_contents, headers=headers)
         k.set_acl('public-read')
-
-        url = "http://%s.s3.amazonaws.com%s" % (settings.AWS_STORAGE_BUCKET_NAME, source_name)
-        print url
 
     def compress_string(self, s):
         """Gzip a given string."""
