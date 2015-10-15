@@ -15,7 +15,7 @@ from carbon.atoms.models.content import *
 
 class Page(HierarchicalAtom, ContentMolecule):
 
-    tags = models.ManyToManyField('page.PageTag', blank=True)
+    
 
     def get_url_path(self):
         path = self.path

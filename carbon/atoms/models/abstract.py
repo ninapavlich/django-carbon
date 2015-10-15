@@ -116,7 +116,7 @@ class HierarchicalAtom(models.Model):
 
 
     parent = models.ForeignKey('self', blank=True, null=True,
-        related_name="children", on_delete=models.SET_NULL)
+        on_delete=models.SET_NULL)
 
     @cached_property
     def hierarchical_children(self):

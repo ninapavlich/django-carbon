@@ -6,8 +6,7 @@ from carbon.atoms.admin.taxonomy import *
 
 from reversion.admin import VersionAdmin
 
-from .models import *
-from .forms import *
+from .forms import PageAdminForm, PageContentBlockAdminForm
 
 from django_inline_wrestler.admin import TabularInlineOrderable
 
@@ -19,17 +18,17 @@ class PageAdmin(VersionAdmin, HierarchicalContentAdmin):
     autocomplete_lookup_fields = HierarchicalContentAdmin.autocomplete_lookup_fields
     
     m2m_fields_list = list(autocomplete_lookup_fields['m2m'])
-    m2m_fields_list.insert(0, 'tags')
+    # m2m_fields_list.insert(0, 'tags')
     autocomplete_lookup_fields['m2m'] = tuple(m2m_fields_list)
 
     raw_id_fields = HierarchicalContentAdmin.raw_id_fields
     raw_id_fields_list = list(raw_id_fields)
-    raw_id_fields_list.insert(0, 'tags')
+    # raw_id_fields_list.insert(0, 'tags')
     raw_id_fields = tuple(raw_id_fields_list)
 
     core_fields = HierarchicalContentAdmin.core_fields
     core_fields_list = list(core_fields)
-    core_fields_list.insert(5, 'tags')
+    # core_fields_list.insert(5, 'tags')
     core_fields = tuple(core_fields_list)
 
     path_fields = BaseContentAdmin.path_fields

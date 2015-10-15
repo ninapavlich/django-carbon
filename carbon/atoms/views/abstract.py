@@ -190,7 +190,7 @@ class HasChildrenView(object):
 
 class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
 	object = None
-
+	catch_404s = True
 	
 
 	def get_template(self):
@@ -252,8 +252,10 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
 
 		try:
 			obj = self.get_object_query(queryset, path)
+			return obj 
 		except:
-			raise Http404(_("No %(verbose_name)s found matching the query") %
-					{'verbose_name': queryset.model._meta.verbose_name})
+			if self.catch_404s:
+				raise Http404(_("No %(verbose_name)s found matching the query") %
+						{'verbose_name': queryset.model._meta.verbose_name})
 
-		return obj 
+			return None

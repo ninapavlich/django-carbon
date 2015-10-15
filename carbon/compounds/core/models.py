@@ -537,7 +537,6 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return url
 
     def get_url(self, minified):
-        print 'peg revision? %s'%(self.peg_revision)
         if self.peg_revision==None or settings.DEBUG:
             if minified:
                 return '%s?v=%s'%(self.file_minified.url, self.version)
@@ -553,10 +552,15 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         
         headers={'Content-Type': self.get_header_type(), 'Cache-Control': 'max-age=%s'%(settings.CACHE_DURATION)}
         
-        is_gzipped = getattr(settings, 'AWS_IS_GZIPPED', False)
-        if is_gzipped:
-            source_file_contents = self.compress_string(source_file_contents)
-            headers['Content-Encoding'] = 'gzip'
+        try:
+            is_gzipped = getattr(settings, 'AWS_IS_GZIPPED', False)
+            if is_gzipped:
+                new_source_file_contents = self.compress_string(source_file_contents)
+                headers['Content-Encoding'] = 'gzip'
+                new_source_file_contents = source_file_contents
+        except:
+            pass
+
 
         k = Key(bucket)
         k.key = source_name
