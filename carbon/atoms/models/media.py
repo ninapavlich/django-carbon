@@ -126,7 +126,7 @@ def image_file_name( instance, filename ):
 def media_file_name( instance, filename ):
     
     subfolder = (instance.__class__.__name__).lower()
-    full_path = _media_file_name(instance, filename, 'file', subfolder, settings.IMAGE_MODEL)
+    full_path = _media_file_name(instance, filename, 'file', subfolder, settings.MEDIA_MODEL)
     return full_path    
 
 def title_file_name( instance, filename ):
