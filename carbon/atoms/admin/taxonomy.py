@@ -29,7 +29,7 @@ class BaseTagAdmin(BaseContentAdmin):
     
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-         "path", "path_generated", "uuid", 'image_preview'
+         "path", "path_generated", "uuid", 'image_preview', 'edit_template'
     )
     
 
@@ -52,7 +52,7 @@ class BaseTagAdmin(BaseContentAdmin):
     )
    
     path_fields = (
-        ('template'),
+        ('template', 'edit_template'),
         ('path', 'uuid',),
         ('path_generated', 'path_override'),
         ('temporary_redirect', 'permanent_redirect'),
