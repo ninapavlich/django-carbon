@@ -109,9 +109,9 @@ class BaseContentAdmin(admin.ModelAdmin):
         ('title','slug'),
         ('publication_status'),
         ('template', 'edit_template'),
+        ('image_preview','image'),
         'content',
-        'synopsis',
-        ('image_preview','image')
+        'synopsis'
     )
 
     publication_fields = (
