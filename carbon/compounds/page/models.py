@@ -98,5 +98,16 @@ class PageContentBlock(VersionableAtom, OrderedItemAtom, TitleAtom, ContentAtom,
         verbose_name_plural = 'Page Blocks'
         ordering = ['order']
         abstract = True
+
+
+class GlobalContentBlock(VersionableAtom, TitleAtom, ContentAtom, PublishableAtom):
+    
+    publish_by_default = True
+
+
+    class Meta:
+        verbose_name = 'Global Content Block'
+        verbose_name_plural = 'Global Content Blocks'
+        abstract = True        
     
     

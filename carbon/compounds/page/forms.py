@@ -11,6 +11,12 @@ class PageAdminForm(forms.ModelForm):
 		# model = Page
 		fields = '__all__'
 
+class GlobalContentBlockAdminForm(forms.ModelForm):
+	content = forms.CharField(widget=CKEditorWidget(config=settings.CKEDITOR_CONFIGS['page_content_ckeditor']), required=False)
+	class Meta:
+		# model = GlobalContentBlock
+		fields = '__all__'		
+
 
 class PageContentBlockAdminForm(forms.ModelForm):
 	content = forms.CharField(widget=CKEditorInlineWidget(config=settings.CKEDITOR_CONFIGS['pagecontentblock_content_ckeditor']), required=False)

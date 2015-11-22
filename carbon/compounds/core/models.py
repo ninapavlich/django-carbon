@@ -861,13 +861,10 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 class CSSResource(BaseFrontendResource):
     COMPILER_CSS = 'css'
     COMPILER_SCSS = 'scss'
-    COMPILER_SASS = 'sass'
-    COMPILER_LESS = 'less'
+    # COMPILER_LESS = 'less'
     COMPILER_CHOICES = (
         (COMPILER_CSS, "CSS (None)"),
-        (COMPILER_SCSS, "SCSS"),
-        (COMPILER_SCSS, "SASS"),
-        (COMPILER_LESS, "LESS"),
+        (COMPILER_SCSS, "SCSS")
     )
     #TODO:
     # clevercss

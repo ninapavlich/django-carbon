@@ -6,7 +6,7 @@ from carbon.atoms.admin.taxonomy import *
 
 from reversion.admin import VersionAdmin
 
-from .forms import PageAdminForm, PageContentBlockAdminForm
+from .forms import PageAdminForm, PageContentBlockAdminForm, GlobalContentBlockAdminForm
 
 from django_inline_wrestler.admin import TabularInlineOrderable
 
@@ -121,6 +121,36 @@ class MenuItemInline(TabularInlineOrderable):
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','edit_item',)
     extra = 0
 
+
+
+
+
+
+
+class GlobalContentBlockAdmin(BaseVersionableTitleAdmin):
+    #VersionableAtom, TitleAtom, ContentAtom, PublishableAtom
+
+    form = GlobalContentBlockAdminForm
+
+    
+    core_fields = BaseVersionableTitleAdmin.core_fields
+    core_fields_list = list(core_fields)
+    core_fields_list.append('content')
+    core_fields = tuple(core_fields_list)
+
+    meta_fields = BaseVersionableTitleAdmin.meta_fields
+
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+       
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
 
 
 
