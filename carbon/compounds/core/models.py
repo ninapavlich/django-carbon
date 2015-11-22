@@ -479,7 +479,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
 
     def render(self, save=True):
-        source, success, error = self.get_source()
+        source, success, error_message = self.get_source()
 
         if success:
             self.error_source_content = None
@@ -520,7 +520,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             #     print 'success but not different'
         else:
             # print 'error, dont save'
-            self.error_source_content = error
+            self.error_source_content = error_message
 
     def get_file_name(self, minified=False):
         if minified:
@@ -539,9 +539,15 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     def get_url(self, minified):
         if self.peg_revision==None or settings.DEBUG:
             if minified:
-                return '%s?v=%s'%(self.file_minified.url, self.version)
+                if self.file_minified:
+                    return '%s?v=%s'%(self.file_minified.url, self.version)
+                else:
+                    return None
             else:
-                return '%s?v=%s'%(self.file_source.url, self.version)
+                if self.file_source:
+                    return '%s?v=%s'%(self.file_source.url, self.version)
+                else:
+                    return None
         else:
             return self.get_archived_file_url(self.peg_revision, minified)
 
@@ -587,11 +593,20 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return source
 
     def get_source(self):
+        children = self.get_children()
+
+
+        #prepare all children by storing contents locally
+        for child in children:
+            # print '\n\n'
+            child.store_raw_file()
+
         #return concatenated source files
         source = ''
         all_success = True
         all_errors = ''
-        for child in self.get_children():
+        for child in children:
+            # print '\n\n'
             rendered, success, error = child.render()
             if not success:
                 all_success = False
@@ -642,13 +657,6 @@ class CSSPackage(BaseFrontendPackage):
         #Override in subclass
         return compress(source)
 
-    def get_source(self):
-        #prepare all css children
-        all_css = self.item_class.objects.all()
-        for child in self.get_children():
-            child.store_raw_file()
-
-        return super(CSSPackage, self).get_source()
 
     # def get_children(self):
     #     return CSSResource.objects.filter(parent=self).order_by('order')
@@ -703,7 +711,10 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         return '<span %s>&nbsp;</span>'%(style)
 
     def render(self):
-        source = self.get_source()
+        source, success, error_message = self.get_source()
+        if not success:
+            return (None, success, error_message) 
+               
         compiled, success, error = self.compile(source)
         return (compiled, success, error)
     
@@ -717,27 +728,51 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
     def get_source(self):
         if self.custom_source:
-            return self.custom_source
+            return (self.custom_source, True, None)
         elif self.file_source_url:
             
             if self.is_source_package():
+                # print '%s is a source pagage, so download the files'%(self.file_source_url)
                 get_package_contents(self.file_source_url, self.get_package_folder())
 
-                copy_directory(self.get_package_original_source_folder(), self.get_package_source_folder())
+                if self.is_source_file():
+                    # print '%s is a source file, so get contents from file...'%(self.get_package_original_source_folder())
+                    file_source, success, error_message = get_file_contents(self.get_package_original_source_folder())
+                    
+                    if success:
+                        return (file_source, True, None)
+                    else:
+                        return ('', success, error_message)
+
+                else:
+
+                    success, error = copy_directory(self.get_package_original_source_folder(), self.get_package_source_folder())
+                    if success:
+                        return ('', True, None)
+                    else:
+                        return (None, success, error)
+
+
+                
 
             else:
                 response = urllib2.urlopen(self.file_source_url)
-                return response.read()
+                http_source = response.read()
+                return (http_source, True, None)
 
-        return ''
+        return ('', True, None)
 
     def store_raw_file(self):
+        #Retreives any remote content or db content and renders it into files
         
-        raw_source = self.get_source()
-        raw_source_name = "%s.%s"%(self.slug, self.get_extension())
-        if not self.is_source_package():
-            # print 'store_raw_file: %s'%(self.slug)
-            write_to_file(raw_source_name, self.get_temp_folder(), raw_source)        
+        raw_source, success, error_message = self.get_source()
+        if success:
+            raw_source_name = "%s.%s"%(self.slug, self.get_extension())
+
+            skip_file_write = self.is_source_package() == True and self.is_source_file() == False
+            if not skip_file_write:
+                # print 'store_raw_file: %s to %s/%s'%(self.slug, self.get_resource_temp_folder(), raw_source_name)
+                write_to_file(raw_source_name, self.get_resource_temp_folder(), raw_source)    
 
     def get_extension(self):
         #Override in subclass
@@ -754,13 +789,24 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
                 return True
         return False
 
-    def get_temp_folder(self):
+    def is_source_file(self):
+        if self.file_source_path:
+            #If there is a valid filename in the 
+            return len(os.path.basename(self.file_source_path).split('.')) > 1
+        return False
+
+    def get_parent_temp_folder(self):
         subfolder = '%s_%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()))
         directory = "/tmp/%s"%(subfolder)   
         return directory 
 
+    def get_resource_temp_folder(self):
+        subfolder = '%s_%s/%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()), self.parent.slug)
+        directory = "/tmp/%s"%(subfolder)   
+        return directory 
+
     def get_package_folder(self):
-        directory = "%s/downloaded/%s"%(self.get_temp_folder(), self.slug)   
+        directory = "%s/downloaded/%s"%(self.get_parent_temp_folder(), self.slug)   
         return directory
 
     def get_package_original_source_folder(self):
@@ -768,11 +814,11 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         return directory
 
     def get_package_source_folder(self):
-        directory = "%s/%s"%(self.get_temp_folder(), self.slug)   
+        directory = "%s/%s"%(self.get_resource_temp_folder(), self.slug)   
         return directory
 
     def get_src_directories(self):
-        dirs = [self.get_temp_folder()]
+        dirs = [self.get_resource_temp_folder()]
         if self.parent:
             return  dirs + self.parent.get_src_directories()
         else:
@@ -788,7 +834,10 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
             original = None
 
         if original:
-            if original.get_source() != self.get_source():
+
+            original_source, original_success, original_source_error_message = original.get_source()
+            current_source, original_success, current_source_error_message = self.get_source()
+            if original_source != current_source:
                 source_has_changed = True
 
         super(BaseFrontendResource, self).save(*args, **kwargs)
@@ -958,6 +1007,18 @@ def write_to_file(filename, directory, content):
         error_message = 'Error storing file %s: %s - %s'%(file_path, traceback.format_exc(), sys.exc_info()[0])
         print error_message
 
+def get_file_contents(filename):
+    if not os.path.exists(filename):
+        return (None, False, "Error: File %s doesn't exist"%(filename))
+     
+    try:
+        with open(filename, 'r') as content_file:
+            content = content_file.read()       
+            return (content, True, None)
+    except Exception, err:
+        error_message = 'Error getting file contents %s: %s - %s'%(filename, traceback.format_exc(), sys.exc_info()[0])
+        return (None, False, error_message)
+
 def get_package_contents(url, target_dir):
     # print 'get unzipped: %s'%(url)
     if not os.path.exists(target_dir):
@@ -973,10 +1034,10 @@ def get_package_contents(url, target_dir):
         try:
             name, hdrs = urllib.urlretrieve(url, name)
         except IOError, e:
-            print "Can't retrieve %r to %r: %s" % (url, target_dir, e)
+            # print "Can't retrieve %r to %r: %s" % (url, target_dir, e)
             return
     else:
-        #print 'file exists. its all good.'
+        # print 'file exists. its all good.'
         pass
 
     is_zip = '.zip' in url
@@ -997,20 +1058,28 @@ def get_package_contents(url, target_dir):
         print "TODO -- add gzip support"
 
 def copy_directory(src, dest):
+    success = True
+    error = None
     # print 'copy from %s to %s'%(src, dest)
     if os.path.exists(dest):
         try:
             shutil.rmtree(dest)
         except shutil.Error as e:
-            print('Directory not removed. Error: %s' % e)
+            success = False
+            error = 'Directory not removed. Error: %s' % e
 
     try:
         shutil.copytree(src, dest)
     # Directories are the same
     except shutil.Error as e:
-        print('Directory not copied. Error: %s' % e)
+        success = False
+        error = 'Directory not copied. Error: %s' % e
+
     # Any error saying that the directory doesn't exist
     except OSError as e:
-        print('Directory not copied. Error: %s' % e)        
+        success = False
+        error = 'Directory not copied. Error: %s' % e
+
+    return (success, error)
 
     
