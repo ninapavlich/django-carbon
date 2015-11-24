@@ -30,6 +30,10 @@ class Page(HierarchicalAtom, ContentMolecule):
     def get_absolute_url(self):
         if self.is_external:
             return self.path_override
+
+        if hasattr(self.__class__, 'detail_view') and self.__class__.detail_view:
+            return reverse_lazy(self.__class__.detail_view, kwargs = {'path': self.get_url_path() })   
+
         return reverse_lazy('page_page', kwargs = {'path': self.get_url_path() })   
 
     class Meta:
