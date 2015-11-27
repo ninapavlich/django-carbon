@@ -493,3 +493,24 @@ class UpvoteDownvoteFlagMolecule(VersionableAtom):
     # Implement what user is voting on:
     # item = models.ForeignKey('blog.BlogComment')
 
+class HasSlidesMolecule(models.Model):
+    #TODO: Defile
+    #slide_class
+
+    @cached_property
+    def slides(self):
+        return self.slide_class.objects.filter(parent=self).order_by('order').select_related('slide_image')
+
+    class Meta:
+        abstract = True
+
+class SlideMolecule(VersionableAtom, OrderedItemAtom):
+    
+    # parent = models.ForeignKey('app.Model')
+    slide_image = models.ForeignKey('media.Image', null=True, blank=True)
+
+    class Meta:
+        ordering = ['order']
+        abstract = True
+
+        

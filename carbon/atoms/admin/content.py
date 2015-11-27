@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 
 from carbon.atoms.models.content import PublishableAtom
 
@@ -251,3 +252,33 @@ class HierarchicalContentAdmin(BaseContentAdmin):
         })
     )
 
+
+
+class BaseSlideInlineAdmin(admin.TabularInline):
+    
+    #model = SlideClass
+    extra = 0
+
+    autocomplete_lookup_fields = {
+        'fk': ('slide_image',),
+    }
+    raw_id_fields = ( 'slide_image',)
+
+    def preview(self, obj):
+        if obj.slide_image:
+            try:
+                object_type = type(obj.slide_image).__name__
+                edit_url = reverse('admin:%s_%s_change' %(obj.slide_image._meta.app_label,  obj.slide_image._meta.model_name),  args=[obj.slide_image.id] )
+                return "<img src='%s' alt='%s preview'/><br /><a href='%s' >Edit Image &gt;</a>"%(obj.slide_image.thumbnail.url, obj.slide_image.title, edit_url)
+            except:
+                return ""
+        return ''
+    preview.allow_tags = True
+
+
+    readonly_fields = ('preview',)
+    fields = (
+        'order',
+        'slide_image',
+        'preview',
+    )
