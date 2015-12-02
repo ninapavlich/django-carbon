@@ -31,12 +31,14 @@ class CreateFormEntryMixin(FormMixin, ProcessFormView):
 
     def get(self, request, *args, **kwargs):
         self.form_schema = self.get_form_schema()
-        self.form = form = self.get_form()
+        if self.form_schema:
+            self.form = form = self.get_form()
         return super(CreateFormEntryMixin, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.form_schema = self.get_form_schema()
-        self.form = form = self.get_form()
+        if self.form_schema:
+            self.form = form = self.get_form()
         
         return super(CreateFormEntryMixin, self).post(request, *args, **kwargs)
     
@@ -64,7 +66,9 @@ class CreateFormEntryMixin(FormMixin, ProcessFormView):
         context = super(CreateFormEntryMixin, self).get_context_data(**kwargs)
         context['form_entry_object'] = self.form_entry_object
         context['form_schema'] = self.form_schema
-        context['form'] = self.form
+
+        if hasattr(self, 'form'):
+            context['form'] = self.form
         return context
 
 
