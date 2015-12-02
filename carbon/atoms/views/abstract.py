@@ -96,7 +96,13 @@ class HasSiblingsView(object):
 	def get_next_previous(self, siblings):
 		return (self.object.get_next_sibling(siblings), self.object.get_previous_sibling(siblings))
 
+	def get(self, request, *args, **kwargs):
 
+		self.siblings = self.get_siblings()
+		self.next, self.previous = self.get_next_previous(self.siblings)
+
+		return super(HasSiblingsView, self).get(request, *args, **kwargs)
+		
 	def post(self, request, *args, **kwargs):
 
 		self.siblings = self.get_siblings()
@@ -105,12 +111,7 @@ class HasSiblingsView(object):
 		return super(HasSiblingsView, self).post(request, *args, **kwargs)
 
 
-	def get(self, request, *args, **kwargs):
-
-		self.siblings = self.get_siblings()
-		self.next, self.previous = self.get_next_previous(self.siblings)
-
-		return super(HasSiblingsView, self).get(request, *args, **kwargs)
+	
 
 	def get_context_data(self, **kwargs):
 		context = super(HasSiblingsView, self).get_context_data(**kwargs)
@@ -169,7 +170,17 @@ class HasChildrenView(HasSiblingsView):
 		except:
 			return None
 
-	
+	def get(self, request, *args, **kwargs):
+
+		if not self.object:
+			self.object = self.get_object()
+
+		try:
+			children = self.get_children()
+			self.object_list = children
+			self.children = children
+		except:
+			 self.object_list = None 
 	
 
 	def post(self, request, *args, **kwargs):
@@ -188,17 +199,7 @@ class HasChildrenView(HasSiblingsView):
 		return super(HasChildrenView, self).post(request, *args, **kwargs)
 
 
-	def get(self, request, *args, **kwargs):
-
-		if not self.object:
-			self.object = self.get_object()
-
-		try:
-			children = self.get_children()
-			self.object_list = children
-			self.children = children
-		except:
-			 self.object_list = None 
+	
 
 
 		return super(HasChildrenView, self).get(request, *args, **kwargs)
