@@ -31,8 +31,8 @@ class PersonAtom(models.Model):
 
 class StreetAddressAtom(models.Model):
 
-    street_1 = models.CharField(_('Street 1'), max_length=30, blank=True, null=True)
-    street_2 = models.CharField(_('Street_2'), max_length=30, blank=True, null=True)
+    street_1 = models.CharField(_('Street Address 1'), max_length=30, blank=True, null=True)
+    street_2 = models.CharField(_('Street Address 2'), max_length=30, blank=True, null=True)
     city = models.CharField(_('City'), max_length=30, blank=True, null=True)
     state = models.CharField(_('State'), max_length=30, blank=True, null=True)
     zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True, null=True)   

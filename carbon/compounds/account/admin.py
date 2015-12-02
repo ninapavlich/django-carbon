@@ -133,13 +133,34 @@ class UserGroupMemberInUserAdmin(admin.TabularInline):
         'fk': ['group',],
     }
     raw_id_fields = ('group',)
-    fields = ('order','group','all_members_link',)
+    fields = ('group','all_members_link',)
     extra = 0    
-    readonly_fields = ('order','all_members_link')
+    readonly_fields = ('all_members_link',)
 
 
-class OrganizationAdmin(admin.ModelAdmin):
-    pass
+class OrganizationAdmin(VersionAdmin, BaseVersionableTitleAdmin):
+    list_display = ('title', 'order')
+    list_editable = ('order',)
+
+    core_fields = (
+        ('title','slug'),
+        ('synopsis'),
+        ('content')
+    )
+    meta_fields = BaseVersionableAdmin.meta_fields
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+    search_fields = ('title','admin_note', 'synopsis', 'content')
+    
     
 
 class SocialContactLinkInline(TabularInlineOrderable):
