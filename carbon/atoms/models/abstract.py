@@ -88,7 +88,7 @@ class VersionableAtom(models.Model):
         try:
             siblings = super(VersionableAtom, self).get_siblings()
         except:
-            siblings = []
+            siblings = self.__class__.objects.all()
         return siblings
 
     def get_siblings(self):
@@ -133,13 +133,15 @@ class HierarchicalAtom(models.Model):
     def published_siblings(self):
         if self.parent:
             return self.parent.get_children(True)
-        return []
+        siblings = self.__class__.objects.all()
+        return [sibling for sibling in siblings if sibling.is_published()]
+        
 
     @cached_property
     def siblings(self):
         if self.parent:
             return self.parent.get_children()
-        return []
+        return self.__class__.objects.all()
 
     def get_siblings(self, require_published=True):
         if require_published:

@@ -15,6 +15,12 @@ class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailV
 
 	# model = Page
 	pass
+
+
+class SiblingPageDetail(NonAdminCachableView, PublishableView, AddressibleView, HasSiblingsView, DetailView):
+
+	# model = Page
+	pass	
 	
 
 

@@ -65,6 +65,15 @@ class ObjectTemplateResponseMixin(object):
 			**response_kwargs
 		)
 
+	def get_context_data(self, **kwargs):
+		context = super(ObjectTemplateResponseMixin, self).get_context_data(**kwargs)
+		if self.object != None:
+			context['object_verbose_name'] = self.object._meta.verbose_name
+			context['object_verbose_name_plural'] = self.object._meta.verbose_name_plural
+			
+
+		return context
+
 
 # class CustomTemplateResponseMixin(object):
 
@@ -75,8 +84,45 @@ class ObjectTemplateResponseMixin(object):
 # 		return [self.template_slug]
 
 
+class HasSiblingsView(object):
 
-class HasChildrenView(object):
+	def get_siblings(self):
+		
+		try:
+			return self.object.get_siblings()
+		except:
+			return None
+
+	def get_next_previous(self, siblings):
+		return (self.object.get_next_sibling(siblings), self.object.get_previous_sibling(siblings))
+
+
+	def post(self, request, *args, **kwargs):
+
+		self.siblings = self.get_siblings()
+		self.next, self.previous = self.get_next_previous(self.siblings)
+
+		return super(HasSiblingsView, self).post(request, *args, **kwargs)
+
+
+	def get(self, request, *args, **kwargs):
+
+		self.siblings = self.get_siblings()
+		self.next, self.previous = self.get_next_previous(self.siblings)
+
+		return super(HasSiblingsView, self).get(request, *args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(HasSiblingsView, self).get_context_data(**kwargs)
+		if self.siblings != None:
+			context['siblings'] = self.siblings
+			context['next'] = self.next
+			context['previous'] = self.previous
+
+		return context
+
+
+class HasChildrenView(HasSiblingsView):
 	paginate_by = 10
 	paginate_orphans = 0
 	paginator_class = Paginator
@@ -123,15 +169,7 @@ class HasChildrenView(object):
 		except:
 			return None
 
-	def get_siblings(self):
-
-		try:
-			return self.object.get_siblings()
-		except:
-			return None
-
-	def get_next_previous(self, siblings):
-		return (self.object.get_next_sibling(siblings), self.object.get_previous_sibling(siblings))
+	
 	
 
 	def post(self, request, *args, **kwargs):
@@ -146,8 +184,6 @@ class HasChildrenView(object):
 		except:
 			 self.object_list = None 
 
-		self.siblings = self.get_siblings()
-		self.next, self.previous = self.get_next_previous(self.siblings)
 
 		return super(HasChildrenView, self).post(request, *args, **kwargs)
 
@@ -163,10 +199,6 @@ class HasChildrenView(object):
 			self.children = children
 		except:
 			 self.object_list = None 
-
-		self.siblings = self.get_siblings()
-		self.next, self.previous = self.get_next_previous(self.siblings)
-
 
 
 		return super(HasChildrenView, self).get(request, *args, **kwargs)
