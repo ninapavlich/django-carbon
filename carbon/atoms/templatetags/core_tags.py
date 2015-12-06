@@ -54,18 +54,24 @@ def get_link_descendants(slug=None, item=None):
 
     return descendants
 
-@register.assignment_tag()
-def get_edit_url(object):
-    if object:
-        try:
-            return object.edit_item_url
-        except:
-            pass
+
+
+@register.assignment_tag(takes_context=True)
+def get_edit_url(context, object):
+    request = context['request']
+    if request.user and request.user.is_authenticated() and request.user.is_staff:
+        if object:
+            try:
+                return object.edit_item_url
+            except:
+                pass
+        return None
     return None
 
+
+#TODO -- figure out a way to make this check if user is admin before returning url
 @register.filter(is_safe=True)
 def edit_attribute(object):
-
     if object:
         try:
             return mark_safe('data-edit-url="%s"'%(object.edit_item_url))

@@ -191,3 +191,47 @@ class AdminLoggedInCookieMiddlewear(object):
         elif not is_staff and request.COOKIES.get('admin_logged_in'):
             response.delete_cookie("admin_logged_in")
         return response
+
+
+class SiteVersionMiddleware(object):
+
+    def get_heroku_release_version(self):
+        try:
+            import heroku
+            key = settings.HEROKU_API_KEY
+            cloud = heroku.from_key(key)
+            app = cloud.apps[settings.HEROKU_APP_LABEL]            
+            latest_release = app.releases[-1]
+            return latest_release.name
+        except:
+            return None
+
+    def get_git_release_version(self):
+        try:
+            import subprocess
+            short_revision = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).replace('\n','')
+            return '@%s'%(short_revision)
+        except:
+            return None
+
+    def process_request(self, request):
+        if hasattr(request, 'user') and request.user and request.user.is_authenticated() and request.user.is_staff: 
+            if settings.IS_ON_SERVER:
+                if settings.IS_ON_HEROKU:
+                    setattr(request, "RELEASE_VERSION", self.get_heroku_release_version())
+                else:
+                    setattr(request, "RELEASE_VERSION", self.get_git_release_version())
+            else:
+                git_version = self.get_git_release_version()
+                heroku_version = self.get_heroku_release_version()
+
+                if git_version and heroku_version:
+                    version = '%s %s'%(git_version, heroku_version)
+                elif git_version:
+                    version = git_version
+                elif heroku_version:
+                    version = heroku_version
+                else:
+                    version = "UNKNOWN"
+
+                setattr(request, "RELEASE_VERSION", version)
