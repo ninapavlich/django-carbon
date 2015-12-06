@@ -130,28 +130,28 @@ def get_form_field_by_type(type, data, label='', choices=None):
 	field = None
 
 	if type == FormField.TEXT_FIELD:
-		field = forms.CharField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.EMAIL_FIELD:
-		field = forms.EmailField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.EmailField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.URL_FIELD:
-		field = forms.CharField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.INTEGER_FIELD:
-		field = forms.IntegerField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.IntegerField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.NUMBER_FIELD:
-		field = forms.DecimalField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.DecimalField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.TEXT_AREA:
-		field = forms.CharField(widget=Textarea(model_field=data), label=label)
+		field = forms.CharField(widget=MultiLineText(model_field=data), label=label)
 
 	elif type == FormField.BOOLEAN_CHECKBOXES:
-		field = forms.BooleanField(widget=CheckboxInput(model_field=data), label=label)
+		field = forms.BooleanField(widget=Checkbox(model_field=data), label=label)
 
 	elif type == FormField.BOOLEAN_TOGGLE:				
-		field = forms.BooleanField(widget=CheckboxInput(model_field=data), label=label)
+		field = forms.BooleanField(widget=Checkbox(model_field=data), label=label)
 
 	elif type == FormField.SELECT_DROPDOWN:
 		field = forms.ChoiceField(widget=Select(model_field=data), label=label, choices=choices)
@@ -181,29 +181,29 @@ def get_form_field_by_type(type, data, label='', choices=None):
 		field = MultipleChoiceField(widget=SelectMultiple(model_field=data), label=label, choices=choices)
 
 	elif type == FormField.COMMA_SEPARATED_LIST:
-		field = forms.CharField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.FILE:
-		field = forms.FileField(widget=ClearableFileInput(model_field=data), label=label)
+		field = forms.FileField(widget=ClearableFile(model_field=data), label=label)
 
 	elif type == FormField.SECURE_FILE:
-		field = forms.FileField(widget=ClearableFileInput(model_field=data), label=label)
+		field = forms.FileField(widget=ClearableFile(model_field=data), label=label)
 
 	elif type == FormField.DATE:
-		field = forms.DateField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.DateField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.TIME:
-		field = forms.TimeField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.TimeField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.DATE_TIME:
-		field = forms.DateTimeField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.DateTimeField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.HIDDEN_FIELD:
-		field = forms.CharField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 		
 	else:
 		#DEFAULT:
-		field = forms.CharField(widget=TextInputWidget(model_field=data), label=label)
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 
 	# is_required = models.BooleanField(default=False, 
 	#     help_text=help['is_required'])    

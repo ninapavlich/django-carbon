@@ -1,6 +1,6 @@
 {% comment %}{{model_field.type}} - {{model_field.title}}{% endcomment %}
 
-{% if model_field.type == 'text-field' or model_field.type == 'date' or model_field.type == 'time' or model_field.type == 'date-time' or model_field.type == 'comma-separated-list' or model_field.type == 'score' or model_field.type == 'range' or model_field.type == 'number-slider' or model_field.type == 'password' %}
+{% if model_field.type == 'text-field' or model_field.type == 'email-field' or model_field.type == 'url-field' or model_field.type == 'integer-field' or model_field.type == 'number-field' or model_field.type == 'date' or model_field.type == 'time' or model_field.type == 'date-time' or model_field.type == 'comma-separated-list' or model_field.type == 'score' or model_field.type == 'range' or model_field.type == 'number-slider' or model_field.type == 'password' %}
 
 {% include 'form/partials/text_field.html' %}
 

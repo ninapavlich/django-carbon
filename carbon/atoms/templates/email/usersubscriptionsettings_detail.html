@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load staticfiles i18n %}
+{% load email_tags form_tags %}
+
+{% block title %}{% trans "Update Email Preferences" %}{% endblock %}
+
+
+{% block content %}
+<div class="container">
+  <h1>{% trans "Update Email Preferences" %}</h1>
+  
+  <form action="." method="post">
+    {% csrf_token %}
+    
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+    {% for form in formset %}
+        <div class="{{ formset.prefix }}">
+            {% get_email_category_by_id form.category.value as category %}
+
+            <h3>{{category.title}}</h3>
+
+            {% for field in form %}
+    
+            {% if field.field.field_model %}
+
+            {% get_rendered_field field as rendered_field %}
+            {{rendered_field|safe}}
+
+            {% endif %}
+
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+
+    <input type="submit" value="Update Preferences" class="submit" />
+</form>
+</div>
+{% endblock %}

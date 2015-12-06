@@ -42,10 +42,15 @@ class BaseFormInput(object):
 		# return DjangoTemplate(self.custom_template).render(final_attrs)
 		template = loader.get_template(self.file_template)
 		
+		print ' -------- '
+		print ' -- template name: %s'%(self.file_template)
+		print ' -- model_field: %s'%(context['model_field'])
+		print ' -- template: %s'%(template)
+
 		return template.render(context)
 
 
-class TextInputWidget(BaseFormInput, BaseTextInput):
+class SingleLineText(BaseFormInput, BaseTextInput):
 	input_type = 'text'
 
 
@@ -61,9 +66,10 @@ class TextInputWidget(BaseFormInput, BaseTextInput):
 			# Only add the 'value' attribute if a value is non-empty.
 			final_attrs['value'] = force_text(self._format_value(value))        
 		
+		
 		return self.render_input(final_attrs, context)
 
-class Textarea(BaseFormInput, BaseTextarea):
+class MultiLineText(BaseFormInput, BaseTextarea):
 
 	def render(self, field, context=None, attrs=None):
 		self.bound_field = field
@@ -75,7 +81,7 @@ class Textarea(BaseFormInput, BaseTextarea):
 		final_attrs = self.build_attrs(attrs, name=name)
 		return self.render_input(final_attrs, context)
 
-class CheckboxInput(BaseFormInput, BaseCheckboxInput):
+class Checkbox(BaseFormInput, BaseCheckboxInput):
 	
 	def check_test(self, v):
 		return not (v is False or v is None or v == '')
@@ -119,7 +125,7 @@ class SelectMultiple(BaseFormInput, BaseSelectMultiple):
 	# 	super(SelectMultiple, self).decompress(value)
 		
 
-class ClearableFileInput(BaseFormInput, BaseClearableFileInput):
+class ClearableFile(BaseFormInput, BaseClearableFileInput):
 	def render(self, field, context=None, attrs=None):
 		self.bound_field = field
 		value = field.value()

@@ -27,21 +27,20 @@ class FormFieldInline(admin.StackedInline):
 	core_fields = (
 		('type','order'),
 		('title', 'slug'),
-		('secondary_label','placeholder_text',),
-		('help_text','default'),
+		('secondary_label','help_text',),
+		('placeholder_text','default'),
+		('is_required', 'hide',),
+		'error_message',
 		'choices',
 	)
 
-	advanced_properties = (
-		'hide',
-		'error_message',
+	additional_content = (				
 		'extra_css_classes',
-		('icon_left', 'icon_right'),
-		('inset_text_left', 'inset_text_right'),
+		# ('icon_left', 'icon_right'),
+		# ('inset_text_left', 'inset_text_right'),
 		'content',
 	)
 	validation_options = (
-		'is_required',
 		('is_digits','is_alphanumeric'),
 		('min_length','max_length'),
 		('step_interval'),
@@ -61,11 +60,11 @@ class FormFieldInline(admin.StackedInline):
 			'fields': core_fields,
 			'classes': ( 'grp-collapse grp-open', )
 		}),
-		("Advanced Properties", {
-			'fields': advanced_properties,
+		("Additional Content", {
+			'fields': additional_content,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
-		("Validation Options", {
+		("Advanced Validation Options", {
 			'fields': validation_options,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
@@ -78,27 +77,44 @@ class FormFieldInline(admin.StackedInline):
 
 class FormAdmin(VersionAdmin, BaseContentAdmin):
 	core_fields = (
-		('title','slug'),
-		('publication_status'),
-		('template', 'submit_template'),
-		('form_action',),
-		('required_logged_in_user','is_editable'),
-		('email_admin_on_submission','email_admin_override'),
-		('email_admin_on_submission_template', 'email_admin_on_submission_category'),
-		('email_user_on_submission','email_user_field_slug'),
-		('email_user_on_submission_template','email_user_on_submission_category'),
-		('redirect_url_on_submission',),
-		('submit_label', 'extra_css_classes'),
-		('form_create_message'),
-		('form_update_message'),
-		('form_error_message')
+		('title','slug'),		
 	)
+	form_behavior = (
+		'redirect_url_on_submission',
+		'form_action',
+		'required_logged_in_user',
+		'is_editable',		
+		
+		'extra_css_classes',
+		'third_party_id'
+	)
+	form_messages_and_abels = (
+		'submit_label',
+		'form_create_message',
+		'form_update_message',
+		'form_error_message',
+	)
+	email_email_fields = (
+		'email_admin_on_submission',
+		'email_admin_override',
+		'email_admin_on_submission_category',
+		'email_admin_on_submission_template',
+	
+		'email_user_on_submission',
+		'email_user_field_slug',
+		'email_user_on_submission_template',
+		'email_user_on_submission_category'
+	)
+	
 
-	additional_fields = (
-		'content',
-		('submission_content'),
+	additional_content_fields = (
+		('publication_status'),
+		('image_preview','image'),
+		'template',
 		'synopsis',
-		('image_preview','image')
+		'content',
+		('submit_template'),
+		('submission_content'),
 	)
 
 	autocomplete_lookup_fields = {
@@ -124,28 +140,40 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 
 
 	fieldsets = (
-		("Main Body", {
+		("Form Title", {
 			'fields': core_fields,
 			'classes': ( 'grp-collapse grp-open', )
 		}),
-		("Additional Content", {
-			'fields': additional_fields,
+		("Form Behavior", {
+			'fields': form_behavior,
+			'classes': ( 'grp-collapse grp-open', )
+		}),
+		("Form Messages & Labels", {
+			'fields': form_messages_and_abels,
+			'classes': ( 'grp-collapse grp-open', )
+		}),
+		("Form Email Behavior", {
+			'fields': email_email_fields,
+			'classes': ( 'grp-collapse grp-open', )
+		}),
+		("Additional Content  (For Standalone Forms only)", {
+			'fields': additional_content_fields,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
-		("Path", {
+		("Path (For Standalone Forms only)", {
 			'fields': path_fields,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
-		("Publication", {
+		("Publication (For Standalone Forms only)", {
 			'fields': publication_fields,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
 		
-		("Search Engine Optimization", {
+		("Search Engine Optimization (For Standalone Forms only)", {
 			'fields': seo_fields,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
-		("Social Integration", {
+		("Social Integration (For Standalone Forms only)", {
 			'fields': social_fields,
 			'classes': ( 'grp-collapse grp-closed', )
 		}),
@@ -157,9 +185,27 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 
 
 class FormEntryAdmin(VersionAdmin, BaseVersionableAdmin):
+
+	def mark_new(modeladmin, request, queryset):
+	    queryset.update(status=FormEntry.NEW)
+	mark_new.short_description = "Mark selected entries as new"
+
+	def mark_read(modeladmin, request, queryset):
+	    queryset.update(status=FormEntry.READ)
+	mark_read.short_description = "Mark selected entries as read"
+
+	def mark_replied(modeladmin, request, queryset):
+	    queryset.update(status=FormEntry.REPLIED)
+	mark_replied.short_description = "Mark selected entries as replied"
+
+	def mark_archived(modeladmin, request, queryset):
+	    queryset.update(status=FormEntry.ARCHIVED)
+	mark_archived.short_description = "Archive selected entries"
 	
-	list_display = ( "form_schema", "pk", "created_date",  "created_by", "admin_note",'status',)
-	list_filter = ("created_by", "modified_by", "form_schema", "created_date", 'status', 'tags')
+	actions = [mark_new, mark_read, mark_replied, mark_archived]
+
+	list_display = ( "form_schema", "pk", "created_date",  "admin_note",'status',)
+	list_filter = ("form_schema", "created_date", 'status', 'tags', "created_by", "modified_by",)
 
 	autocomplete_lookup_fields = {
 		'fk': ('form_schema',),

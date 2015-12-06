@@ -68,7 +68,7 @@ class EmailSettingsView(DetailView):
 		self.object = self.get_object()  
 
 		EmailCategorySubscriptionSettingsFormSet = formset_factory(EmailCategorySubscriptionSettingsForm, extra=0)
-		self.formset = ArticleFormSet(request.POST, request.FILE)
+		self.formset = EmailCategorySubscriptionSettingsFormSet(initial=settings_data)
 		
 		if self.forset.is_valid():        
 			messages.success(request, 'Your subscription settings were updated')

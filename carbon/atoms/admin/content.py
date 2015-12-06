@@ -267,8 +267,7 @@ class BaseSlideInlineAdmin(admin.TabularInline):
     def preview(self, obj):
         if obj.slide_image:
             try:
-                object_type = type(obj.slide_image).__name__
-                edit_url = reverse('admin:%s_%s_change' %(obj.slide_image._meta.app_label,  obj.slide_image._meta.model_name),  args=[obj.slide_image.id] )
+                edit_url = obj.slide_image.edit_item_url
                 return "<img src='%s' alt='%s preview'/><br /><a href='%s' >Edit Image &gt;</a>"%(obj.slide_image.thumbnail.url, obj.slide_image.title, edit_url)
             except:
                 return ""

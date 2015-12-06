@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.db import models
 from django.db.models import Q
@@ -25,9 +27,9 @@ from .utils import *
 class Form(ContentMolecule):
 	field_model = None
 	help = {
-		'form_action': "Current publication status",
+		
 		'admin_email':"",
-		'email_admin_override':"Leave blank to use default email address (%s)"%(settings.DEFAULT_FROM_EMAIL),
+		'email_admin_override':"Separate email addresses with comma, semi-color or space. Leave blank to send to default email address (%s)"%(settings.DEFAULT_FROM_EMAIL),
 		'email_admin_on_submission':"",
 		'email_admin_on_submission_template':"",
 		'email_admin_on_submission_category':"",
@@ -35,22 +37,27 @@ class Form(ContentMolecule):
 		'email_user_on_submission_template':"",
 		'email_user_on_submission_category':"",
 		'submission_content':"",
-		'redirect_url_on_submission':"",
-		'submit_label':"",
-		'extra_css_classes':"",
 		'submit_template':"",
-		'required_logged_in_user':"",
-		'is_editable':"",
-		'form_error_message':"",
-		'form_create_message':"",
-		'form_update_message':""
+
+		'redirect_url_on_submission':"When a form is submitted you may override where the user is redirected.",
+		'form_action': "Defines whether to display this form on its own page with its own URL, or whether to embed it on another page elsehwere in the site. NOTE: Several of the subsections below only apply if the form action is a standalone form.",
+		'required_logged_in_user':"Requires user to log in or create an account before filling out form. NOTE: This should only be turned on if you have enabled user registration on the site.",
+		'is_editable':"Allows user to update the entry. NOTE: If this is checked, unless you also require a logged in user on the form, anyone with the correct URL can later update the entry. Therefore it is recommended that you use this in conjunction with requiring a logged in user.",
+		
+		'submit_label':"Label on the submit button.",
+		'form_error_message':"Global message to show user when there is an error in the form. NOTE: Individual fields have separate error messages.",
+		'form_create_message':"Message to show user when they successfully submit the form.",
+		'form_update_message':"Message to show user when they successfully update the form. NOTE: Form must be editable to allow users to update the form.",
+
+		'extra_css_classes':"Adds custom css classes into the form template.",
+		'third_party_id': "An identifier to integrate the form with another system",
 	}
 
 	POST_TO_FORM_PAGE = 'form-page'
 	POST_TO_EMBEDDED_PAGE = 'embedded-page'
 	FORM_ACTION_CHOICES = (
-		(POST_TO_FORM_PAGE, _("Form Page")),
-		(POST_TO_EMBEDDED_PAGE, _("Embedded Page"))
+		(POST_TO_FORM_PAGE, _("Standalone Form")),
+		(POST_TO_EMBEDDED_PAGE, _("Form Embedded in Page"))
 	)
 
 	form_action = models.CharField(max_length=255, choices=FORM_ACTION_CHOICES, 
@@ -63,7 +70,7 @@ class Form(ContentMolecule):
 		help_text=help['is_editable'])
 
 
-	email_admin_override = models.CharField(null=True, blank=True, 
+	email_admin_override = models.CharField(_('Admins to email on submission'), null=True, blank=True, 
 		max_length=255,help_text=help['email_admin_override'])
 	email_admin_on_submission = models.BooleanField(default=True, 
 		help_text=help['email_admin_on_submission'])
@@ -113,6 +120,9 @@ class Form(ContentMolecule):
 	extra_css_classes = models.CharField(max_length=255, null=True, blank=True, 
 		help_text=help['extra_css_classes'])
 
+	third_party_id = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['third_party_id'])
+
 	def get_success_url(self, entry=None):
 		if self.redirect_url_on_submission:
 			return self.redirect_url_on_submission
@@ -151,21 +161,23 @@ class Form(ContentMolecule):
 			}
 
 			if self.email_admin_on_submission:
+
 				if not self.email_admin_on_submission_template:
 					raise ImproperlyConfigured( "Form is set to email admin on submission, but email admin template not specified" )
 
 				if not self.email_admin_on_submission_category:
 					raise ImproperlyConfigured( "Form is set to email admin on submission, but email admin category not specified" )
 
-				self.email_admin_on_submission_template.send_email_message(settings.DEFAULT_FROM_EMAIL, 
-					self.email_admin_on_submission_category, context)
+				admin_email_list = self.get_admin_emails()
+				for admin_email in admin_email_list:
+					self.email_admin_on_submission_template.send_email_message(admin_email, self.email_admin_on_submission_category, context)
 			
 			if self.email_user_on_submission:
 				user_email_field = self.get_email_recipient_field()
 				if user_email_field==None:
 					raise ImproperlyConfigured( "User recipient field not found" )
 				
-				if not self.email_admin_on_submission_template:
+				if not self.email_user_on_submission_template:
 					raise ImproperlyConfigured( "Form is set to email user on submission, but email user template not specified" )
 
 				if not self.email_user_on_submission_category:
@@ -173,6 +185,11 @@ class Form(ContentMolecule):
 
 				self.email_user_on_submission_template.send_email_message(user_email_field, 
 						self.email_user_on_submission_category, context)
+
+	def get_admin_emails(self):
+		if self.email_admin_override:
+			return re.split('; |, ',self.email_admin_override)
+		return [settings.DEFAULT_FROM_EMAIL]
 
 
 	def get_all_fields(self):
@@ -230,7 +247,7 @@ class Form(ContentMolecule):
 class Validation(models.Model):
 	#Maps to http://parsleyjs.org/doc/index.html#psly-validators-overview
 	help = {
-		'is_required':"",
+		'is_required':"If this field is required, a value of some sort is needed for the user to submit the form. See the advanced validation options to apply more specific validation parameters.",
 		'is_digits':"",
 		'is_alphanumeric':"",
 		'min_length':"",
@@ -308,13 +325,14 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 		'help_text':"",
 		'content':"Rich-text instructions",
 		'default':"Default field value",
-		'extra_css_classes':"",
-		'hide':"Hide field from form without deleting and data entered by users",
+		'extra_css_classes':"Adds custom css classes onto the form field in the template.",
+		'hide':"Hide field from form without deleting and data entered by users. Use this instead of deleting a form field.",
 		'icon_right':'Add icon to the right side of the field. Preview icons at http://fontawesome.io/icons/',
 		'icon_left':'Add icon to the left side of the field. Preview icons at http://fontawesome.io/icons/',
 		'inset_text_right':"Inset field with content on the right",
 		'inset_text_left':"Inset field with content on the left",
-		'error_message':"",
+		'error_message':"Message to display when this field is invalid.",
+		'third_party_id': "An identifier to integrate the form with another system",
 		'choices':"Comma separated options where applicable. If an option "
 			"itself contains commas, surround the option starting with the %s"
 			"character and ending with the %s character." %
@@ -427,6 +445,9 @@ class FormField(VersionableAtom, TitleAtom, Validation):
 
 	error_message = models.CharField(max_length=255, blank=True, null=True,
 		help_text=help['error_message'])
+
+	third_party_id = models.CharField(max_length=255, blank=True, null=True,
+		help_text=help['third_party_id'])
 
 	def get_choices(self):
 		raw_choices = self.choices.split(',')
@@ -546,6 +567,7 @@ class FormEntry(VersionableAtom):
 
 	def get_entries(self):
 		return self.field_entry_model.objects.filter(form_entry=self).order_by('form_field__order')
+
 
 	class Meta:
 		abstract = True

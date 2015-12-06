@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load staticfiles i18n %}
+{% load email_tags form_tags %}
+
+{% block title %}{{object.rendered_subject|safe}}{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <h1>{{object.rendered_subject|safe}}</h1>
+
+  <iframe src="{{object.get_rendered_url}}" style="width: 1000px; height: 800px; border:0px;" ></iframe>
+</div>
+
+{% endblock %}

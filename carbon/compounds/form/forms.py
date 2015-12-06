@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-
+from django.utils.html import escape
 
 from ckeditorfiles.widgets import CKEditorInlineWidget
 from ckeditorfiles.widgets import CKEditorWidget
@@ -54,6 +54,11 @@ class FormEntryForm(forms.ModelForm):
     def get_form_fields(self):
         return self.form_fields
 
+    def cleaned_value(self, value):
+        value = escape(value)
+        return value
+
+
     def save(self, **kwargs):
         entry = super(FormEntryForm, self).save()
         
@@ -61,7 +66,7 @@ class FormEntryForm(forms.ModelForm):
         for field_key in self.fields:
             if self.form_field_prefix in field_key:
                 field = self.fields[field_key]
-                value = self._raw_value(field_key)
+                value = self.cleaned_value(self._raw_value(field_key))
                 
                 
                 field_entry, created = self.field_model.objects.get_or_create(form_entry=entry, form_field=field.widget.model_field)

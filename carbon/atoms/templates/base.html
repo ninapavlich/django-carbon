@@ -1,0 +1,38 @@
+{% load staticfiles i18n core_tags helpful_tags cache media_tags %}
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie lt-ie7 lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie ie7 lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie ie8 lt-ie9" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js ie ie9 gte-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 9]>    <html class="no-js gte-ie9" lang="en"> <![endif]-->
+<!--[if !IE ]>    <html class="no-js gte-ie9" lang="en"> <![endif]-->
+<html class="no-js gte-ie9" lang="en" >
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <title>{% block title %}{% endblock %}{% block titlediv %} | {% endblock %}{{ SITE_TITLE }}</title>
+
+        {% block page_meta %}{% endblock %}
+        
+        {% block css %}{% endblock %}     
+        
+        
+    </head>
+    <body class="{% block bodyclass %}{% endblock %}" >
+        
+        {% block header %}
+        {% endblock %}
+        
+        {% block content %}
+        {% endblock %}
+    
+        {% block footer %}
+        {% endblock %}
+        
+        
+        {% block js %}{% endblock %}
+
+    </body>
+</html>

@@ -135,7 +135,7 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
 
 class EmailCategorySubscriptionSettingsAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
-    prepopulated_fields = {"slug": ("title",)}
+    # prepopulated_fields = {"slug": ("title",)}
 
     autocomplete_lookup_fields = {
         'fk': ('category','parent',),
@@ -163,6 +163,8 @@ class EmailCategorySubscriptionSettingsAdmin(VersionAdmin, BaseVersionableTitleA
 
 class EmailCategorySubscriptionSettingsInline(admin.TabularInline):
     #model = EmailCategorySubscriptionSettings  
+
+
     fk_name = 'parent'
     autocomplete_lookup_fields = {
         'fk': ('category',),
@@ -170,7 +172,8 @@ class EmailCategorySubscriptionSettingsInline(admin.TabularInline):
     }
     raw_id_fields = ('category',)
 
-    fields = ('category','title','status')
+    fields = ('category','status')
+    readonly_fields = ['category']
     
     extra = 0
 

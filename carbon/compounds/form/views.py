@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+import django.dispatch
 from django.http import QueryDict
 
 from django.views.generic.detail import DetailView
@@ -13,6 +14,54 @@ from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
 
 
+signal_form_error = django.dispatch.Signal(providing_args=["form_schema"])
+signal_form_entry_created = django.dispatch.Signal(providing_args=["form_schema", "form_entry"])
+signal_form_entry_updated = django.dispatch.Signal(providing_args=["form_schema", "form_entry"])
+
+
+class FormSignalOperator(FormMixin, ProcessFormView):
+    default_error_message = "Please correct the errors below."
+    default_success_message = "Your form was saved."
+
+    def get_form_schema(self):
+        raise ImproperlyConfigured("View should override get_form_schema() function")
+
+    def get_form_schema(self):
+        raise ImproperlyConfigured("View should override get_form_schema() function")
+
+    def get_is_create_form(self):
+        raise ImproperlyConfigured("View should override get_is_create_form() function")
+
+    def form_invalid(self, form):
+        form_schema = self.get_form_schema()
+        if form_schema:
+            messages.error(self.request, self.form_schema.form_error_message or self.default_error_message)
+            form_schema_class = type(form_schema)
+            signal_form_error.send(sender=form_schema_class, form_schema=form_schema)
+        else:
+            messages.error(self.request, self.default_error_message)
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+    def form_valid(self, form):
+        self.form_entry_object = form.save()
+        created = self.get_is_create_form()
+
+        form_schema = self.get_form_schema()
+        if form_schema:
+            messages.success(self.request, form_schema.form_create_message or self.default_success_message)        
+            form_schema.handle_successful_submission(form, self.form_entry_object, created)
+
+            form_entry_class = type(self.form_entry_object)
+            if created:
+                signal_form_entry_created.send(sender=form_entry_class, form_schema=form_schema, form_entry=self.form_entry_object)
+            else:
+                signal_form_entry_updated.send(sender=form_entry_class, form_schema=form_schema, form_entry=self.form_entry_object)
+
+        return super(FormSignalOperator, self).form_valid(form)
+
+
 
 class FormSubmittedView(AddressibleView, PublishableView, DetailView):
     
@@ -21,13 +70,17 @@ class FormSubmittedView(AddressibleView, PublishableView, DetailView):
 
     
 
-class CreateFormEntryMixin(FormMixin, ProcessFormView):
+class CreateFormEntryMixin(FormSignalOperator):
     content_type = None
     form_entry_object = None
+    default_success_message = "Your form was created."
 
     def get_form_schema(self):
         #Override in subclass
         raise ImproperlyConfigured("View should override get_form_schema() function")
+
+    def get_is_create_form(self):
+        return True
 
     def get(self, request, *args, **kwargs):
         self.form_schema = self.get_form_schema()
@@ -52,15 +105,6 @@ class CreateFormEntryMixin(FormMixin, ProcessFormView):
     def get_success_url(self):
         return self.form_schema.get_success_url(self.form_entry_object)
 
-    def form_invalid(self, form):
-        messages.error(self.request, self.form_schema.form_error_message or 'Please correct the errors below.')
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def form_valid(self, form):
-        self.form_entry_object = form.save()
-        messages.success(self.request, self.form_schema.form_create_message or 'Your form was created.')        
-        self.form_schema.handle_successful_submission(form, self.form_entry_object, True)
-        return super(CreateFormEntryMixin, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super(CreateFormEntryMixin, self).get_context_data(**kwargs)
@@ -72,9 +116,10 @@ class CreateFormEntryMixin(FormMixin, ProcessFormView):
         return context
 
 
-class CreateFormEntryView(AddressibleView, PublishableView, FormMixin, ProcessFormView):
+class CreateFormEntryView(AddressibleView, PublishableView, FormSignalOperator):
     content_type = None
     form_entry_object = None
+    default_success_message = "Your form was created."
 
     def get_form_kwargs(self):
         
@@ -86,15 +131,12 @@ class CreateFormEntryView(AddressibleView, PublishableView, FormMixin, ProcessFo
     def get_success_url(self):
         return self.object.get_success_url(self.form_entry_object)
 
-    def form_invalid(self, form):
-        messages.error(self.request, self.object.form_error_message or 'Please correct the errors below.')
-        return self.render_to_response(self.get_context_data(form=form))
+    def get_form_schema(self):
+        return self.object
 
-    def form_valid(self, form):
-        self.form_entry_object = form.save()
-        messages.success(self.request, self.object.form_create_message or 'Your form was created.')        
-        self.object.handle_successful_submission(form, self.form_entry_object, True)
-        return super(CreateFormEntryView, self).form_valid(form)
+    def get_is_create_form(self):
+        return True
+
 
     def get_context_data(self, **kwargs):
         context = super(CreateFormEntryView, self).get_context_data(**kwargs)
@@ -102,10 +144,11 @@ class CreateFormEntryView(AddressibleView, PublishableView, FormMixin, ProcessFo
         return context
 
 
-class UpdateFormEntryView(PublishableView, AddressibleView, FormMixin, ProcessFormView):
+class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
     content_type = None
     form_entry_object = None
     form_entry_class = None
+    default_success_message = "Your form was updated."
 
     def get_form_kwargs(self):
         
@@ -165,15 +208,12 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormMixin, ProcessFo
     def get_success_url(self):
         return self.object.get_success_url(self.form_entry_object)
 
-    def form_invalid(self, form):
-        messages.error(self.request, 'Please correct the errors below.')
-        return self.render_to_response(self.get_context_data(form=form))
+    def get_form_schema(self):
+        return self.form_entry_object.form_schema
 
-    def form_valid(self, form):
-        self.form_entry_object = form.save()        
-        messages.success(self.request, 'Your form was updated.')
-        self.object.handle_successful_submission(form, self.form_entry_object, False)
-        return super(UpdateFormEntryView, self).form_valid(form)        
+    def get_is_create_form(self):
+        return False
+
 
     def get_context_data(self, **kwargs):
         context = super(UpdateFormEntryView, self).get_context_data(**kwargs)
