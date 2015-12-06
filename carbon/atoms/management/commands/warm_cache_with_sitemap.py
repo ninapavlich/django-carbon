@@ -1,10 +1,6 @@
-import os
-import urllib2
-import zlib
 import lxml.etree
-import logging
-import traceback 
 import requests
+import datetime
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -17,6 +13,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        from datetime import datetime
+        startTime = datetime.now()
         current_site = Site.objects.get_current()
         protocol = 'http' if not settings.USE_SSL else 'https'
         url = '%s://%s'%(protocol, current_site.domain)
@@ -29,7 +27,7 @@ class Command(BaseCommand):
             counter += 1
             print "Loaded %s of %s (%s)"%(counter, len(sitemap_urls), url)
 
-        print "Loaded %s urls, which were found in the sitemap"%(len(sitemap_urls))
+        print "Finished loading %s sitemap URLs in %s"%(len(sitemap_urls), datetime.now() - startTime)
 
     
     
