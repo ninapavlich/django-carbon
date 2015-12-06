@@ -22,8 +22,12 @@ class Command(BaseCommand):
         url = '%s://%s'%(protocol, current_site.domain)
         sitemap_urls = get_sitemap_urls(url)
 
+        print "Found %s URLs to load from %s"%(len(sitemap_urls), url)
+        counter = 0
         for url in sitemap_urls:
             retrieve_content(url)
+            counter += 1
+            print "Loaded %s of %s (%s)"%(counter, len(sitemap_urls), url)
 
         print "Loaded %s urls, which were found in the sitemap"%(len(sitemap_urls))
 
