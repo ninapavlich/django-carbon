@@ -36,6 +36,7 @@ class FormFieldInline(admin.StackedInline):
 
 	additional_content = (				
 		'extra_css_classes',
+		'third_party_id',
 		# ('icon_left', 'icon_right'),
 		# ('inset_text_left', 'inset_text_right'),
 		'content',

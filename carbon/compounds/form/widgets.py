@@ -37,15 +37,7 @@ class BaseFormInput(object):
 		context['model_field'] = self.model_field
 		context['field'] = self.bound_field
 
-		
-
-		# return DjangoTemplate(self.custom_template).render(final_attrs)
 		template = loader.get_template(self.file_template)
-		
-		print ' -------- '
-		print ' -- template name: %s'%(self.file_template)
-		print ' -- model_field: %s'%(context['model_field'])
-		print ' -- template: %s'%(template)
 
 		return template.render(context)
 
