@@ -172,7 +172,7 @@ class HierarchicalAtom(models.Model):
         if index != None:
             next_index = (index + 1) if index < len(siblings)-1 else None
             
-        if next_index:
+        if next_index != None:
             next_item = siblings[next_index]
         
 
@@ -200,7 +200,7 @@ class HierarchicalAtom(models.Model):
         if index != None:
             previous_index = (index -1 ) if index > 0 else None
             
-        if previous_index:
+        if previous_index != None:
             previous_item = siblings[previous_index]
         
         return previous_item
