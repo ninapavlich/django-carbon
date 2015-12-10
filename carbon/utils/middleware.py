@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import datetime
+
 import django.http
 import django.template
 from django.conf import settings
@@ -82,6 +85,15 @@ def access_denied(request, template_name='403.html'):
 
 
 #https://pypi.python.org/pypi/django-donottrack/0.1
+def set_cookie(response, key, value, days_expire = 7):
+  if days_expire is None:
+    max_age = 365 * 24 * 60 * 60  #one year
+  else:
+    max_age = days_expire * 24 * 60 * 60 
+  expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+  response.set_cookie(key, value, max_age=max_age, expires=expires, domain=settings.SESSION_COOKIE_DOMAIN, secure=settings.SESSION_COOKIE_SECURE or None)
+
+
 def get_donottrack(request):
     """
     Returns ``True`` if ``HTTP_DNT`` header is ``'1'``, ``False`` otherwise.
@@ -107,6 +119,8 @@ class DoNotTrackMiddleware(object):
         """
         request.donottrack = get_donottrack(request)
 
+
+
         return None
 
     def process_response(self, request, response):
@@ -116,6 +130,11 @@ class DoNotTrackMiddleware(object):
 
         """
         patch_vary_headers(response, ('DNT',))
+        if request.donottrack:
+          response.set_cookie("donottrack", '1')
+        else:
+          response.delete_cookie("donottrack")
+
 
         return response
 
