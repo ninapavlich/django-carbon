@@ -7,13 +7,12 @@ from django.views.generic import DetailView
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
-from carbon.compounds.form.views import signal_form_error, signal_form_entry_created
+
 
 
 from .models import *
 from .forms import *
-from inertia.apps.form.models import Form, FormEntry
-from inertia.utils.zoho import handle_form_entry
+
 
 class PageDetail(NonAdminCachableView, PublishableView, AddressibleView, DetailView):
 
@@ -56,12 +55,3 @@ class PageBlockView(object):
 		return self.object.get_page_content_blocks()
 
 
-@receiver(signal_form_error, sender=Form)
-def on_form_error(sender, **kwargs):
-	form = kwargs['form_schema']
-    #pass...
-
-@receiver(signal_form_entry_created, sender=FormEntry)
-def on_form_created(sender, **kwargs):
-    form_entry = kwargs['form_entry']
-    handle_form_entry(form_entry)
