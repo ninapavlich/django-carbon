@@ -94,6 +94,22 @@ def get_js_package(slug, minified=False):
     return ''
 
 @register.assignment_tag()
+def get_js_source(slug, minified=False):
+    model = get_model('core', 'JSPackage')
+    try:
+        item = model.objects.get(slug=slug)
+    except:
+        item = None
+
+    if item:
+        if minified:
+            return item.generated_file_minified
+        else:
+            return item.generated_file_source
+    return ''   
+
+
+@register.assignment_tag()
 def get_css_package(slug, minified=False):
     model = get_model('core', 'CSSPackage')
     try:
@@ -103,4 +119,19 @@ def get_css_package(slug, minified=False):
 
     if item:
         return item.get_url(minified)
-    return ''    
+    return ''   
+
+@register.assignment_tag()
+def get_css_source(slug, minified=False):
+    model = get_model('core', 'CSSPackage')
+    try:
+        item = model.objects.get(slug=slug)
+    except:
+        item = None
+
+    if item:
+        if minified:
+            return item.generated_file_minified
+        else:
+            return item.generated_file_source
+    return ''   

@@ -444,7 +444,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
     peg_revision = models.PositiveIntegerField(null=True, blank=True, help_text=help['peg_revision'])
     
-    file_source_content = models.TextField(null=True, blank=True)
+    generated_file_source = models.TextField(null=True, blank=True)
+    generated_file_minified = models.TextField(null=True, blank=True)
     error_source_content = models.TextField(null=True, blank=True)
 
     file_source = models.FileField(upload_to=title_file_name, blank=True, null=True, storage=get_storage())
@@ -488,13 +489,14 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
                 minified_source = self.minify(source)
             except Exception, err:
                 self.error_source_content = 'Error minifying %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
-                minified_source = self.file_source_content
+                minified_source = self.generated_file_minified
 
-            is_different = self.file_source_content != minified_source
+            is_different = self.generated_file_minified != minified_source
 
             if is_different:
                 
-                self.file_source_content = minified_source
+                self.generated_file_minified = minified_source
+                self.generated_file_source = source
                 
                 #Only increment version number on success, and if different
                 self.version = self.version+1
