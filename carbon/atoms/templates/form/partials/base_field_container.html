@@ -36,6 +36,10 @@
 
 {% include 'form/partials/file.html' with secure=True %}
 
+{% elif model_field.type == 'image' %}
+
+{% include 'form/partials/file.html' %}
+
 {% elif model_field.type == 'select-image' %}
 
 {% include 'form/partials/select_image.html' %}
@@ -59,5 +63,9 @@
 {% elif model_field.type == 'hidden-field' %}
 
 {% include 'form/partials/hidden.html' %}
+
+{% elif model_field.type == 'honeypot-field' %}
+
+{% include 'form/partials/text_field.html' %}
 
 {% endif %}

@@ -2,4 +2,4 @@
 type="hidden"
 name="{{ field.name }}" 
 id="{{ field.auto_id }}"
-value="{{ field.value }}" />
+value="{% firstof field.value model_field.default %}" />

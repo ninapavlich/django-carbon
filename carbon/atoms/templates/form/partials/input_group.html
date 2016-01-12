@@ -5,9 +5,6 @@
 
 {% block input %}
 
-CHOICES? {{field.choices}}
-
-TYPE? {{type}}
 
 {% with model_field.get_choices as field_choices %}
 {% for x,y in field_choices %}

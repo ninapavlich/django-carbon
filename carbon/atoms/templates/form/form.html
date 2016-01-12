@@ -1,5 +1,6 @@
 {% load form_tags %}
-<form action="{% if form_entry_object %}{{form_entry_object.get_absolute_url}}{% else %}{{object.get_form_action}}{% endif %}" method="post" {% if object.has_multipart %}enctype="multipart/form-data"{% endif %}>
+
+<form action="{% if form_entry_object %}{{form_entry_object.get_absolute_url}}{% else %}{{object.get_form_action}}{% endif %}" method="post" {% if form_entry_object.has_multipart %}enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
     
     <input  type="hidden" name="{{ form.form_schema.name }}" id="{{ form.form_schema.auto_id }}" value="{{ form.form_schema.value|default_if_none:'' }}" />

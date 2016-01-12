@@ -37,6 +37,9 @@ def get_form_field_input_type_by_type(type):
 	if type == FormField.HIDDEN_FIELD:
 		return 'hidden'
 
+	if type == FormField.HONEYPOT_FIELD:
+		return 'text'
+
 	elif type == FormField.TEXT_AREA:
 		return 'text' #TODO
 
@@ -80,6 +83,9 @@ def get_form_field_input_type_by_type(type):
 		return 'file'
 
 	elif type == FormField.SECURE_FILE:
+		return 'file'
+
+	elif type == FormField.IMAGE:
 		return 'file'
 
 	elif type == FormField.DATE:
@@ -199,6 +205,9 @@ def get_form_field_by_type(type, data, label='', choices=None):
 		field = forms.DateTimeField(widget=SingleLineText(model_field=data), label=label)
 
 	elif type == FormField.HIDDEN_FIELD:
+		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
+
+	elif type == FormField.HONEYPOT_FIELD:
 		field = forms.CharField(widget=SingleLineText(model_field=data), label=label)
 		
 	else:

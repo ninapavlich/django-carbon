@@ -38,6 +38,8 @@
         {% if not hide_post_value %}
         {% if override_value and not request.POST %}
         value="{{ override_value }}"
+        {% elif model_field.default and not request.POST %}
+        value="{{ override_value }}"
         {% else %}
         value="{{ field.value|default_if_none:'' }}"
         {% endif %}
