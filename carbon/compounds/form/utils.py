@@ -70,9 +70,6 @@ def get_form_field_input_type_by_type(type):
 	elif type == FormField.SELECT_MULTIPLE_HORIZONTAL:
 		return 'select' #TODO
 
-	elif type == FormField.SELECT_MULTIPLE_CHECKBOXES:
-		return 'select' #TODO
-
 	elif type == FormField.SELECT_MULTIPLE_IMAGES:
 		return 'checkbox'
 

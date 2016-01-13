@@ -93,12 +93,12 @@ class FormEntryForm(forms.ModelForm):
                 if value and field.widget.model_field.is_multipart:
 
                     type = raw_value.__class__.__name__
-                    print 'TYPE? %s'%(type)
+                    # print 'TYPE? %s'%(type)
                     if isinstance(raw_value, InMemoryUploadedFile) or isinstance(raw_value, TemporaryUploadedFile):
                         file_upload_path = join('media', 'form_uploads', str(self.form_schema.slug), str(entry.pk), raw_value.name)
                         
                         #if site_settings.DEBUG:
-                        print 'FILE UPLOAD PATH: %s'%(file_upload_path)
+                        # print 'FILE UPLOAD PATH: %s'%(file_upload_path)
 
                         try:
                             

@@ -1,6 +1,7 @@
 import cStringIO
 from PIL import Image
 import re
+import ast
 from dateutil.parser import parse as parsedate
 
 from django import forms
@@ -649,18 +650,29 @@ class FormField(VersionableAtom, TitleAtom, Validation):
             self.type == FormField.SELECT_MULTIPLE_BUTTONS or \
             self.type == FormField.SELECT_MULTIPLE_IMAGES:
 
+           
             if len(raw_value)==0:
                 value = ''
             else:
+                is_list = isinstance(raw_value, (list, tuple))
 
-                #SUSS OUT VALUE
-                if(len(raw_value)>0):
-                    first_element = raw_value[0]
-                    if isinstance(first_element, (list)):
-                        raw_value = first_element
+                if not is_list:
+                    #SUSS OUT VALUE -- not sure what this does -nina
+                    # if(len(raw_value)>0):
+                    #     first_element = raw_value[0]
+                    #     print 'frst element? %s'%(first_element)
+                    #     if isinstance(first_element, (list)):
+                    #         raw_value = first_element
+                    unescaped = unescape(raw_value)
+                    as_list = ast.literal_eval(unescaped.strip())
+                    value = ','.join(as_list)
 
-                value = ','.join(raw_value)
-                # print 'compress Raw value = %s; value = %s'%(raw_value, value)
+                else:
+                    value = ','.join(raw_value)
+
+                print 'is_list? %s compress Raw value = %s; value = %s'%(is_list, raw_value, value)
+
+            print 'python->DB value %s -> %s'%(raw_value, value)
         else:
             value = raw_value
         
@@ -674,6 +686,8 @@ class FormField(VersionableAtom, TitleAtom, Validation):
             self.type == FormField.SELECT_MULTIPLE_BUTTONS or \
             self.type == FormField.SELECT_MULTIPLE_IMAGES:
 
+            
+
             if isinstance(raw_value, basestring):
                 if raw_value=='':
                     value = []
@@ -683,8 +697,12 @@ class FormField(VersionableAtom, TitleAtom, Validation):
             else:
                 #already formatted
                 value = raw_value
+
+            print 'DB->python value %s -> %s'%(raw_value, value)
         else:
             value = raw_value
+
+
         
         return value
 
@@ -832,3 +850,12 @@ def is_int(value):
         return True
     except ValueError:
         return False
+
+def unescape(value):
+    from htmlentitydefs import name2codepoint
+    # for some reason, python 2.5.2 doesn't have this one (apostrophe)
+    name2codepoint['#39'] = 39
+
+    return re.sub('&(%s);' % '|'.join(name2codepoint),
+              lambda m: unichr(name2codepoint[m.group(1)]), value)
+
