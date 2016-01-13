@@ -481,13 +481,12 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return ("admin_note__icontains","title__icontains",)
 
     def request_render(self):
-        print 'request render!'
         self.needs_render = True
         self.save()
 
 
     def render(self, save_file=True, force=False):
-        print 'render(save_file=%s, force=%s) needs_render? %s'%(save_file, force, self.needs_render)
+        # print 'render(save_file=%s, force=%s) needs_render? %s'%(save_file, force, self.needs_render)
         if force==False and self.needs_render==False:
             return
 
@@ -861,7 +860,6 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
         if source_has_changed and self.parent:
             #Re-save parent
-            # print 'saving child'
             self.parent.request_render()
 
     @staticmethod
