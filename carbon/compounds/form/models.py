@@ -473,9 +473,9 @@ class Validation(models.Model):
                 if isinstance(value, InMemoryUploadedFile) or isinstance(value, TemporaryUploadedFile):
                   test = value.name
 
-                print self.pattern
-                print test
-                print self.pattern.decode('string_escape')
+                # print self.pattern
+                # print test
+                # print self.pattern.decode('string_escape')
 
                 result = re.match(self.pattern, test)
                 if not result:
@@ -665,14 +665,12 @@ class FormField(VersionableAtom, TitleAtom, Validation):
                     #         raw_value = first_element
                     unescaped = unescape(raw_value)
                     as_list = ast.literal_eval(unescaped.strip())
-                    value = ','.join(as_list)
+                    value = ', '.join(as_list)
 
                 else:
-                    value = ','.join(raw_value)
+                    value = ', '.join(raw_value)
 
-                print 'is_list? %s compress Raw value = %s; value = %s'%(is_list, raw_value, value)
-
-            print 'python->DB value %s -> %s'%(raw_value, value)
+            # print 'python->DB value %s -> %s'%(raw_value, value)
         else:
             value = raw_value
         
@@ -692,13 +690,13 @@ class FormField(VersionableAtom, TitleAtom, Validation):
                 if raw_value=='':
                     value = []
                 else:
-                    value = raw_value.split(',')
+                    value = raw_value.split(', ')
                     # print 'decompress Raw value = %s; value = %s'%(raw_value, value)
             else:
                 #already formatted
                 value = raw_value
 
-            print 'DB->python value %s -> %s'%(raw_value, value)
+            # print 'DB->python value %s -> %s'%(raw_value, value)
         else:
             value = raw_value
 

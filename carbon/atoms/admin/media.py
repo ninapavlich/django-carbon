@@ -81,15 +81,25 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
             return base_image
     image_variants.allow_tags = True
 
+    def dimensions(self, obj):
+
+        if obj.image:
+            return 'Original Dimensions: %sx%s Size: %s'%(obj.image_width, obj.image_height, obj.display_size)
+
+            return base_image
+    dimensions.allow_tags = True
+
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
-        "preview", "image_variants", "tag_list"
+        "preview", "image_variants", "tag_list", "image_width", "image_height",
+        "display_size", "size", "dimensions"
     )
     
     core_fields = (
         'title',
         ('image','preview'),
+        ('dimensions'),
         ('image_variants'),
         ('clean_filename_on_upload','allow_overwrite'),
         ('alt','use_png'),
@@ -125,6 +135,7 @@ class BaseMediaAdmin(BaseMedia, BaseVersionableAdmin):
     core_fields = (
         'title',
         ('file','image'),
+        ('dimensions',),
         ('clean_filename_on_upload','allow_overwrite'),
         'credit',
         'caption',
