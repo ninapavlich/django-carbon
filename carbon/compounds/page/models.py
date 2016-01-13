@@ -53,7 +53,7 @@ class PageTag(TagMolecule):
         return reverse_lazy('page_tag', kwargs = {'path': self.get_url_path() })   
 
     def get_children(self):
-        all_children = self.__class__.objects.filter(tags__in=[self])
+        all_children = self.__class__.objects.filter(parent=self)
         return [child for child in all_children if child.is_published()]
 
     class Meta:

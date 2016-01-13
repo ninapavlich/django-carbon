@@ -451,6 +451,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     file_source = models.FileField(upload_to=title_file_name, blank=True, null=True, storage=get_storage())
     file_minified = models.FileField(upload_to=title_file_name, blank=True, null=True, storage=get_storage())
 
+    needs_render = models.BooleanField(default=False)
+
     def get_children(self):
         if not self.item_class:
             raise NotImplementedError('Class should specify an item_class value')
@@ -478,8 +480,17 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     def autocomplete_search_fields():
         return ("admin_note__icontains","title__icontains",)
 
+    def request_render(self):
+        print 'request render!'
+        self.needs_render = True
+        self.save()
 
-    def render(self, save=True):
+
+    def render(self, save_file=True, force=False):
+        print 'render(save_file=%s, force=%s) needs_render? %s'%(save_file, force, self.needs_render)
+        if force==False and self.needs_render==False:
+            return
+
         source, success, error_message = self.get_source()
 
         if success:
@@ -509,14 +520,17 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
                 source_name = self.get_file_name()
                 minified_name = self.get_file_name(True)
 
-                self.file_source.save(source_name, source_file, save=save)
-                self.file_minified.save(minified_name, minified_file, save=save)
+                self.file_source.save(source_name, source_file, save=save_file)
+                self.file_minified.save(minified_name, minified_file, save=save_file)
 
                 subfolder = self.__class__.__name__.lower()
                 archived_source_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, source_name)
                 archived_minifed_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, minified_name)
                 self.archive_file(archived_source_path, source)
                 self.archive_file(archived_minifed_path, minified_source)
+
+            self.needs_render = False
+            self.save()
 
             # else:
             #     print 'success but not different'
@@ -635,12 +649,10 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    # def save(self, *args, **kwargs):
+    #     print 'saving parent'
+    #     super(BaseFrontendPackage, self).save(*args, **kwargs)
 
-
-        self.render(False)
-
-        super(BaseFrontendPackage, self).save(*args, **kwargs)
 
         
 
@@ -700,6 +712,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         help_text=help['file_source_url'])  
     file_source_path = models.CharField(_('File Source Path'), max_length=255, 
         null=True, blank=True, help_text=help['file_source_path']) 
+
+
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"
@@ -847,7 +861,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
         if source_has_changed and self.parent:
             #Re-save parent
-            self.parent.save()
+            # print 'saving child'
+            self.parent.request_render()
 
     @staticmethod
     def autocomplete_search_fields():
@@ -1081,4 +1096,3 @@ def copy_directory(src, dest):
 
     return (success, error)
 
-    

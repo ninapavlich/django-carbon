@@ -48,6 +48,12 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         return "You can download archived versions using this URL schema:<br /><a href='%s' target='_blank'>%s</a>"%(url, url)
     archived_versions.allow_tags = True
 
+    def rerender(modeladmin, request, queryset):
+        for object in queryset:
+            object.render(True, True)
+            messages.add_message(request, messages.SUCCESS, 'Package %s was re-rendered'%(object.title))
+    rerender.short_description = "Re-Render Package"
+
     prepopulated_fields = {"slug": ("title",)}
     core_fields = (
         ('title','slug'),
@@ -58,6 +64,7 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         ('version','peg_revision',),
         'archived_versions',
         'error_source_content',
+        'needs_render'
     )
     meta_fields = BaseVersionableTitleAdmin.meta_fields
     fieldsets = (
@@ -82,6 +89,8 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         "error_source_content", "archived_versions"
     ) 
 
+    actions = [rerender]
+
     def save_model(self, request, obj, form, change):        
         # before_version = obj.version
 
@@ -93,6 +102,18 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
         # elif new_item.version == before_version:
         #     messages.add_message(request, messages.INFO, 'No file updates detected')
+
+    def response_change(self, request, obj):
+        response = super(BaseFrontendPackageAdmin, self).response_change(request, obj)
+        obj.render()
+        return response
+
+    def response_add(self, request, new_object):
+        response = super(BaseFrontendPackageAdmin, self).response_add(request, new_object)
+        obj.render()
+        return response
+
+
 
 class CSSPackageAdmin(BaseFrontendPackageAdmin):
     pass
