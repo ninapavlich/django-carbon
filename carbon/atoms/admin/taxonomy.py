@@ -115,8 +115,9 @@ class BaseSimplifiedTagAdmin(BaseContentAdmin):
     prepopulated_fields = {"slug": ("title",)}
     
     readonly_fields = (
-        "created_date", "created_by", "modified_date", "modified_by",
+        "version", "created_date", "created_by", "modified_date", "modified_by",
     )
+    
     
 
 

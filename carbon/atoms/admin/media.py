@@ -7,6 +7,7 @@ from django.contrib.admin import helpers
 from django.contrib.admin.filters import SimpleListFilter
 from django.contrib.admin.models import LogEntry, ADDITION
 from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse_lazy, resolve
 from django.shortcuts import render_to_response
@@ -156,19 +157,14 @@ class FolderTagAdmin(admin.ModelAdmin):
 
     def move_to_folder(self, request, queryset):        
 
-        print 'folder? %s'%(request.POST)
-        print 'queryset: %s'%(queryset)
         if request.POST.get('post', None):
 
             folder = self.get_folder(request, request.POST.get('folder', None))
-            print 'folder? %s'%(folder)
-            print 'queryset: %s'%(queryset)
-
+            
             count = len(queryset)
             for item in queryset:
                 item.folder = folder
                 item.save()
-
 
             if folder:
                 #Redirect to folder that items were moved to...
@@ -189,7 +185,7 @@ class FolderTagAdmin(admin.ModelAdmin):
 
         else:
 
-            return render_to_response('admin/media/add_to_folder.html', 
+            return render_to_response('admin/media/move_to_folder.html', 
             {
                 'queryset': queryset, 
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
