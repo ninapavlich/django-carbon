@@ -1,0 +1,307 @@
+{% extends "admin/base_site.html" %}
+
+{% load i18n l10n media_admin_tags %}
+
+{% block title %}{% trans "Move to folder" %} | {% trans 'Django site admin' %}{% endblock %}
+
+
+{% block breadcrumbs %}
+    <ul>
+        <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+        <li>{% trans "Move to folder..." %}</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+
+ <style>
+    .grid{
+        width:100%;
+        overflow:hidden;
+        margin-top:20px;
+    }
+    
+    .grid li{
+        display:block;
+        position: relative;
+        margin-right: 20px;
+        padding:20px;
+        border: 1px solid #ccc;
+        background: #eee;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+
+        
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+
+        float:left;
+        width:240px
+    }
+    
+
+    .grid li img{
+        max-width: 100%;
+        margin:auto;
+    }
+    .grid li figcaption{
+        font-weight: bold;
+    }
+    
+
+  
+    @media(min-width:121px) and (max-width:360px) {
+    .grid li {
+        width:66.6666666667%;
+        margin-right:0;
+        margin-bottom:0
+    }
+
+    .grid li:nth-child(1n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(1n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:361px) and (max-width:600px) {
+    .grid li {
+        width:40%;
+        margin-right:20%;
+        margin-bottom:20%
+    }
+
+    .grid li:nth-child(2n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(2n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:601px) and (max-width:840px) {
+    .grid li {
+        width:28.5714285714%;
+        margin-right:7.14285714286%;
+        margin-bottom:7.14285714286%
+    }
+
+    .grid li:nth-child(3n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(3n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:841px) and (max-width:1080px) {
+    .grid li {
+        width:22.2222222222%;
+        margin-right:3.7037037037%;
+        margin-bottom:3.7037037037%
+    }
+
+    .grid li:nth-child(4n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(4n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:1081px) and (max-width:1320px) {
+    .grid li {
+        width:18.1818181818%;
+        margin-right:2.27272727273%;
+        margin-bottom:2.27272727273%
+    }
+
+    .grid li:nth-child(5n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(5n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:1321px) and (max-width:1560px) {
+    .grid li {
+        width:15.3846153846%;
+        margin-right:1.53846153846%;
+        margin-bottom:1.53846153846%
+    }
+
+    .grid li:nth-child(6n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(6n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:1561px) and (max-width:1800px) {
+    .grid li {
+        width:13.3333333333%;
+        margin-right:1.11111111111%;
+        margin-bottom:1.11111111111%
+    }
+
+    .grid li:nth-child(7n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(7n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:1801px) and (max-width:2040px) {
+    .grid li {
+        width:11.7647058824%;
+        margin-right:.840336134454%;
+        margin-bottom:.840336134454%
+    }
+
+    .grid li:nth-child(8n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(8n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:2041px) and (max-width:2280px) {
+    .grid li {
+        width:10.5263157895%;
+        margin-right:.657894736842%;
+        margin-bottom:.657894736842%
+    }
+
+    .grid li:nth-child(9n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(9n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:2281px) and (max-width:2520px) {
+    .grid li {
+        width:9.52380952381%;
+        margin-right:.529100529101%;
+        margin-bottom:.529100529101%
+    }
+
+    .grid li:nth-child(10n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(10n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:2521px) and (max-width:2760px) {
+    .grid li {
+        width:8.69565217391%;
+        margin-right:.434782608696%;
+        margin-bottom:.434782608696%
+    }
+
+    .grid li:nth-child(11n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(11n+0) {
+        margin-right:0
+    }
+    }
+
+    @media(min-width:2761px) and (max-width:3000px) {
+    .grid li {
+        width:8%;
+        margin-right:.363636363636%;
+        margin-bottom:.363636363636%
+    }
+
+    .grid li:nth-child(12n+1) {
+        clear:both
+    }
+
+    .grid li:nth-child(12n+0) {
+        margin-right:0
+    }
+    }
+
+</style> 
+
+
+
+<form action="" method="post">{% csrf_token %}
+
+
+    <fieldset class="grp-module">
+        <h2 class="grp-collapse-handler">Move {{queryset|length}} item(s) to folder...</h2>
+
+
+        <div class="grp-row grp-cells-1 folder l-2c-fluid l-d-4">
+            <div class="c-1">
+                <label class="required" for="id_folder">{% trans "Folder" %}</label>
+            </div>
+
+            <div class="c-2">
+                <select name="folder" id="id_folder">
+                    {% for folder in folders %}
+                    <option value="{{folder.pk}}">{{folder.title_path}}</option>
+                    {% endfor %}
+                    <option value="">(Remove from all folders, move to the top-level)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin:10px;padding:10px;clear:both;">
+            <strong>The following items will be moved...</strong>
+            <ul class="grid">
+                {% for item in queryset %}
+                <li>
+                    <figure>
+                        <img src="{{item.thumbnail_url}}" alt="{{item.title}}">
+                        <figcaption>{{item}}</figcaption>
+                    </figure>
+                </li>
+                {% endfor %}
+            </ul>
+            
+        </div>
+
+        {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
+        {% endfor %}
+
+        <input type="hidden" name="action" value="add_to_folder" />
+        <input type="hidden" name="post" value="yes" />
+
+        
+    </fieldset>
+    
+    <footer class="grp-module grp-submit-row grp-fixed-footer">
+        <ul>            
+            <li><input type="submit" name="apply" class="grp-button" value="Move" /></li>            
+        </ul>
+    </footer>
+  
+</form>
+
+{% endblock %}

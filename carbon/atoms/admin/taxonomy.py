@@ -97,6 +97,47 @@ class BaseTagAdmin(BaseContentAdmin):
         })
     )
 
+class BaseSimplifiedTagAdmin(BaseContentAdmin):
+
+    def admin_hierarchy(self, obj):
+        return obj.admin_hierarchy
+    admin_hierarchy.allow_tags = True
+
+    list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
+    list_display_links = ( "admin_hierarchy", "path", "title",)
+    list_filter = (
+        "publication_status", "created_by", "modified_by", 
+    )
+    ordering = ("hierarchy",)
+
+
+
+    prepopulated_fields = {"slug": ("title",)}
+    
+    readonly_fields = (
+        "created_date", "created_by", "modified_date", "modified_by",
+    )
+    
+
+
+    core_fields = (
+        ('title','slug'),
+    )
+
+
+    meta_fields = BaseVersionableAdmin.meta_fields
+
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )    
+
 class BaseCategoryAdmin(BaseTagAdmin):
 
     autocomplete_lookup_fields = {
@@ -143,6 +184,39 @@ class BaseCategoryAdmin(BaseTagAdmin):
         ("Social Integration", {
             'fields': social_fields,
             'classes': ( 'grp-collapse grp-closed', )
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+class BaseSimplifiedCategoryAdmin(BaseSimplifiedTagAdmin):
+
+    autocomplete_lookup_fields = {
+        'fk': ('parent',),
+    }
+    raw_id_fields = ( 'parent',)
+
+    core_fields = BaseSimplifiedTagAdmin.core_fields
+    core_fields_list = list(core_fields)
+    core_fields_list.insert(0, ('edit_parent','parent'))
+    core_fields = tuple(core_fields_list)
+
+    list_filter = BaseSimplifiedTagAdmin.list_filter
+    list_filter_list = list(list_filter)
+    list_filter_list.insert(0, 'parent')
+    list_filter = tuple(list_filter_list)
+
+    
+    meta_fields = BaseSimplifiedTagAdmin.meta_fields
+
+    readonly_fields = BaseSimplifiedTagAdmin.readonly_fields + ('edit_parent',)
+
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
         }),
         ("Meta", {
             'fields': meta_fields,

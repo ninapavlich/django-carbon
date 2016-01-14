@@ -33,6 +33,12 @@ class BaseVersionableAdmin(admin.ModelAdmin):
         })
     )
 
+    autocomplete_lookup_fields = {
+        'fk': (),
+        'm2m': ()
+    }
+    raw_id_fields = ( 'created_by', 'modified_by')
+
     list_filter = (
             "created_by", "modified_by", )
 

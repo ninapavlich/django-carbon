@@ -358,6 +358,8 @@ class AddressibleAtom(TitleAtom):
 
     path = models.CharField(_('path'), max_length=255, 
         help_text=help['path'], blank=True, null=True)
+    title_path = models.CharField(_('title path'), max_length=255, 
+        help_text=help['path'], blank=True, null=True)
     path_generated = models.CharField(_('generated path'), max_length=255, 
         help_text=help['path_generated'], blank=True, null=True)
     path_override = models.CharField(_('path override'), max_length=255,
@@ -417,7 +419,7 @@ class AddressibleAtom(TitleAtom):
 
         return path
 
-    def build_path(self):
+    def build_path(self, path_attribute='slug', parent_path_attribute='path'):
 
         try: 
             model = type(self)
@@ -427,13 +429,14 @@ class AddressibleAtom(TitleAtom):
             has_parent = False
 
         if has_parent and self.parent:
-            parent_path = self.parent.path
+            parent_path = getattr(self.parent, parent_path_attribute)
             if parent_path and not parent_path.endswith('/'):
                 parent_path = "%s/"%(parent_path)
 
-            return "%s%s/" % (parent_path, self.slug)
+            
+            return "%s%s/" % (parent_path, getattr(self, path_attribute))
         else:
-            return "/%s/" % self.slug
+            return "/%s/" % getattr(self, path_attribute)
 
     def build_hierarchy_path(self):
 
@@ -555,10 +558,13 @@ class AddressibleAtom(TitleAtom):
         
         self.verify_title_and_slug()
 
-        self.path_generated = self.build_path()
+        self.path_generated = self.build_path('slug', 'path')
+
+        self.title_path = self.build_path('title', 'title_path')
+
+        self.path = self.generate_path()
 
         
-        self.path = self.generate_path()
 
         self.hierarchy = self.build_hierarchy_path()
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import pre_delete
 
-from carbon.atoms.models.content import TagMolecule
+from carbon.atoms.models.content import TagMolecule, CategoryMolecule
 from carbon.atoms.models.media import *
 
 from imagekit import ImageSpec
@@ -14,11 +14,20 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 
 
 
-
 class MediaTag(TagMolecule):
     publish_by_default = True
     # default_template = 'media_tag'
     # item_classes = [Image, Media, SecureImage, SecureMedia]
+    
+    class Meta:
+        abstract = True
+
+class MediaFolder(CategoryMolecule):
+    publish_by_default = True
+    # item_class = None
+    # item_classes = None
+    # category_property_name = 'folder'
+
     
     class Meta:
         abstract = True
@@ -38,7 +47,7 @@ class Image(ImageMolecule):
     # width_1200_fill = ImageSpecField( source='image', format='PNG',
     #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
+    # tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
@@ -48,7 +57,7 @@ class Image(ImageMolecule):
 
 class Media(MediaMolecule):
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
+    # tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
