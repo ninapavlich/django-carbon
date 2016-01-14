@@ -134,13 +134,11 @@ class BaseMediaAdmin(BaseMedia, BaseVersionableAdmin):
     
     core_fields = (
         'title',
-        ('file','image'),
-        ('dimensions',),
+        ('file',),
         ('clean_filename_on_upload','allow_overwrite'),
         'credit',
         'caption',
         'tags'
-
     )
 
     meta_fields = BaseVersionableAdmin.meta_fields
@@ -156,3 +154,38 @@ class BaseMediaAdmin(BaseMedia, BaseVersionableAdmin):
     )
     list_display = ('title','file','display_size', 'size')
     list_filter = ('tags',)
+
+class BaseSecureMediaAdmin(BaseMediaAdmin):
+    def secure_url(self, obj):
+        duration = 120
+        url = obj.get_secure_url(duration)
+        if url:
+            return "<a href='%s'>Download</a><br /><br />This link will expire after %s seconds.</a>"%(url, duration)
+        return ''
+    secure_url.allow_tags = True
+
+    readonly_fields = (
+        "version", "created_date", "created_by", "modified_date", "modified_by",
+        "secure_url"
+    )  
+    core_fields = (
+        'title',
+        ('file','secure_url'),
+        ('clean_filename_on_upload','allow_overwrite'),
+        'credit',
+        'caption',
+        'tags'
+    )
+    meta_fields = BaseMediaAdmin.meta_fields
+
+    fieldsets = (
+        ("Image", {
+            'fields': core_fields,
+        }),
+        ("Meta", {
+            'fields': meta_fields,
+            'classes': ( 'grp-collapse grp-closed', )
+        })
+    )
+
+

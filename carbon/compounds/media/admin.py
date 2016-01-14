@@ -37,7 +37,7 @@ class MediaAdmin(BaseBatchUploadAdmin, BaseMediaAdmin):
     ]
     
 
-class SecureMediaAdmin(BaseMediaAdmin, BaseBatchUploadAdmin):
+class SecureMediaAdmin(BaseBatchUploadAdmin, BaseSecureMediaAdmin):
     
     # extra_urls = [
     #     {'url':reverse_lazy('admin_securedocument_batch_view'), 'title':'Batch Upload Secure Media'}

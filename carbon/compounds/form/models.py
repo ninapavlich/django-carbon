@@ -21,6 +21,8 @@ from carbon.utils.icons import ICON_CHOICES
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
+from carbon.atoms.models.media import BaseSecureAtom
+
 from .widgets import *
 from .utils import *
 
@@ -802,12 +804,17 @@ class FieldEntry(VersionableAtom):
           if self.form_field.is_multipart:      
             file_url = "%s%s"%(settings.MEDIA_URL, self.value)
             if self.form_field.type==FormField.IMAGE:
-              return '<img src="%s" >'%(file_url)
+                return '<img src="%s" >'%(file_url)
             elif self.form_field.type==FormField.FILE:
-              return '<a href="%s" target="_blank">%s</a>'%(file_url, self.value)      
+                return '<a href="%s" target="_blank">%s</a>'%(file_url, self.value)
+            elif self.form_field.type==FormField.SECURE_FILE:
+                duration = 120
+                key_name = "%s/%s"%(settings.AWS_MEDIA_FOLDER, self.value)
+                file_url = BaseSecureAtom.generate_link(settings.AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE, key_name, duration)
+                return '<a href="%s" target="_blank">%s</a><br /><br />This link will expire after %s seconds.</a>'%(file_url, self.value, duration)
 
             else:
-              return file_url
+                return file_url
 
           return self.value
         return ''

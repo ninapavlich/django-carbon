@@ -26,11 +26,6 @@ from .content import HasImageAtom
 
 #HELPER FUNCTIONS
 
-# bucket = conn.create_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-#             k = boto.s3.key.Key(bucket)
-#             k.key = settings.MEDIA_DIRECTORY + self.private_file
-#             k.set_acl('private')
-
 def is_incremented_file(original, updated):
     """
     Return True if files are incremented versions of eachother: avatar.png, avatar-1.png, avatar-436.png
@@ -175,8 +170,6 @@ def get_storage(type):
         storage = import_string(settings.IMAGE_STORAGE)()
     elif type=='BaseMedia':
         storage = import_string(settings.MEDIA_STORAGE)()
-    elif type=='BaseSecureImage':
-        storage = import_string(settings.SECURE_IMAGE_STORAGE)()
     elif type=='BaseSecureMedia':
         storage = import_string(settings.SECURE_MEDIA_STORAGE)()
 
@@ -254,7 +247,51 @@ class RichContentAtom(models.Model):
     class Meta:
         abstract = True        
 
+class BaseSecureAtom(models.Model):
 
+    @staticmethod
+    def make_file_private(file):        
+        try:
+            if file:
+                key_name = "%s/%s"%(settings.AWS_MEDIA_FOLDER, file.name)
+                BaseSecureAtom.make_private(settings.AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE, key_name)                
+        except:
+            print 'Error making file private: %s'%(traceback.format_exc())
+
+    @staticmethod
+    def make_private(bucket_name, key_name):        
+        try:
+            connection = boto.s3.connection.S3Connection(
+                settings.AWS_ACCESS_KEY_ID,
+                settings.AWS_SECRET_ACCESS_KEY)
+            bucket = connection.create_bucket(bucket_name)
+            key = boto.s3.key.Key(bucket)
+            key.key = key_name
+            key.set_acl('private')
+        except:
+            print 'Error making private: %s'%(traceback.format_exc())
+
+    @staticmethod
+    def generate_authorized_link(file, duration_seconds):
+
+        key_name = "%s/%s"%(settings.AWS_MEDIA_FOLDER, file.name)
+        return BaseSecureAtom.generate_link(settings.AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE, key_name, duration_seconds)  
+
+    @staticmethod
+    def generate_link(bucket, key_name, duration_seconds):
+
+        connection = boto.s3.connection.S3Connection(
+            settings.AWS_ACCESS_KEY_ID,
+            settings.AWS_SECRET_ACCESS_KEY,
+            is_secure=True)
+        
+        return connection.generate_url(duration_seconds, 'GET',
+            bucket=bucket,
+            key=key_name,
+            force_http=True)
+
+    class Meta:
+        abstract = True
 
 
 class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
@@ -417,19 +454,6 @@ class ImageMolecule( BaseImageMolecule ):
 
 
 
-class SecureImageMolecule( BaseImageMolecule ):
-    help = {
-        'image':"To ensure a precise color replication in image variants, make sure an sRGB color profile has been assigned to each image.",
-    }
-
-    try:
-        image = models.ImageField(upload_to=image_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'), help_text=help['image'])
-    except:
-        image = models.ImageField(upload_to=image_file_name, blank=True, null=True, help_text=help['image'])
-
-    class Meta:
-        abstract = True
-    
 
 class MediaMolecule( ImageMolecule ):
 
@@ -442,8 +466,9 @@ class MediaMolecule( ImageMolecule ):
     except:
         file = models.FileField(upload_to=media_file_name, blank=True, null=True)
 
-class SecureMediaMolecule( SecureImageMolecule ):
+class SecureMediaMolecule( BaseSecureAtom, RichContentAtom, VersionableAtom, AddressibleAtom ):
 
+    
     class Meta:
         verbose_name_plural = 'secure media'
         abstract = True
@@ -452,6 +477,18 @@ class SecureMediaMolecule( SecureImageMolecule ):
         file = models.FileField(upload_to=media_file_name, blank=True, null=True,storage=get_storage('BaseSecureMedia'))
     except:
         file = models.FileField(upload_to=media_file_name, blank=True, null=True)       
+
+    def get_secure_url(self, duration=60):
+        if self.file:
+            return BaseSecureAtom.generate_authorized_link(self.file, duration)
+        return None
+
+    def save(self, *args, **kwargs):
+
+        super(SecureMediaMolecule, self).save(*args, **kwargs)
+
+        if self.file:
+            BaseSecureAtom.make_file_private(self.file)
 
 
 try:

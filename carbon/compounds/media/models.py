@@ -54,24 +54,6 @@ class Media(MediaMolecule):
         abstract = True
         verbose_name_plural = 'media'
 
-class SecureImage(SecureImageMolecule):
-
-    #EXAMPLE VARIANTS
-    # variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
-
-    # square_600 = ImageSpecField( source='image', format='PNG',
-    #     processors=[ResizeToFill(600, 600)], options={'quality': 85})
-
-    # width_1200 = ImageSpecField( source='image', format='PNG',
-    #     processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
-
-    # width_1200_fill = ImageSpecField( source='image', format='PNG',
-    #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
-
-    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
-
-    class Meta:
-        abstract = True
 
 
 class SecureMedia(SecureMediaMolecule):
@@ -85,10 +67,6 @@ class SecureMedia(SecureMediaMolecule):
 
 @receiver(pre_delete, sender=Image, dispatch_uid='image_delete_signal')
 def on_delete_image(sender, instance, using, **kwargs):
-    instance.image.delete(save=False)  
-
-@receiver(pre_delete, sender=SecureImage, dispatch_uid='secure_image_delete_signal')
-def on_delete_secure_image(sender, instance, using, **kwargs):
     instance.image.delete(save=False)  
 
 @receiver(pre_delete, sender=Media, dispatch_uid='media_delete_signal')

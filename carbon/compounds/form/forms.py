@@ -1,13 +1,16 @@
 from os.path import join, split
+
 from django import forms
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage, DefaultStorage
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.utils.html import escape
-
+from django.utils.module_loading import import_by_path
 
 from ckeditorfiles.widgets import CKEditorInlineWidget
 from ckeditorfiles.widgets import CKEditorWidget
+
+from carbon.atoms.models.media import BaseSecureAtom
 from .models import *
 
 class FormFieldInlineAdminForm(forms.ModelForm):
@@ -88,6 +91,7 @@ class FormEntryForm(forms.ModelForm):
                 field = self.fields[field_key]
                 raw_value = self._raw_value(field_key)
                 value = self.cleaned_value(raw_value)
+                model_field = field.widget.model_field
 
                 #TODO-- add secure file handling...
                 if value and field.widget.model_field.is_multipart:
@@ -95,30 +99,23 @@ class FormEntryForm(forms.ModelForm):
                     type = raw_value.__class__.__name__
                     # print 'TYPE? %s'%(type)
                     if isinstance(raw_value, InMemoryUploadedFile) or isinstance(raw_value, TemporaryUploadedFile):
-                        file_upload_path = join('media', 'form_uploads', str(self.form_schema.slug), str(entry.pk), raw_value.name)
                         
-                        #if site_settings.DEBUG:
-                        # print 'FILE UPLOAD PATH: %s'%(file_upload_path)
-
+                        
+                        file_upload_path = join('form_uploads', str(self.form_schema.slug), str(entry.pk), str(model_field.slug), raw_value.name)
+                            # if settings.DEBUG:
+                            #     print 'FILE UPLOAD PATH: %s'%(file_upload_path)
                         try:
                             
-                            if field.widget.model_field.type == FormField.SECURE_FILE:
-
-                                secure_file_storage = import_by_path(settings.SECURE_DOCUMENT_STORAGE)()
+                            if model_field.type == FormField.SECURE_FILE:
+                                
+                                secure_file_storage = import_by_path(settings.SECURE_MEDIA_STORAGE)()
                                 value = secure_file_storage.save(file_upload_path, raw_value)
 
-                                #Make the secure file private      
-                                import boto
-                                from boto.s3.connection import S3Connection          
-                                conn = boto.s3.connection.S3Connection(
-                                    settings.AWS_ACCESS_KEY_ID,
-                                    settings.AWS_SECRET_ACCESS_KEY)
-                                bucket = conn.create_bucket(settings.AWS_STORAGE_SECURE_BUCKET_NAME)
-                                k = boto.s3.key.Key(bucket)
-                                k.key = value
-                                k.set_acl('private')
+                                key_name = "%s/%s"%(settings.AWS_MEDIA_FOLDER, value)
+                                BaseSecureAtom.make_private(settings.AWS_STORAGE_BUCKET_NAME_MEDIA_SECURE, key_name)
 
                             else:
+                                
                                 file_storage = DefaultStorage()
                                 value = file_storage.save(file_upload_path, raw_value)
                         except:
