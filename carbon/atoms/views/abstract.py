@@ -46,6 +46,10 @@ class ObjectTemplateResponseMixin(object):
         if self.object and self.object.template:
             return [self.object.template.slug]
 
+        elif self.model and self.model.default_template:
+            print "DEFAULT TEMPLATE: %s"%(self.model.default_template)
+            return [self.model.default_template]
+
         elif self.template_name is None:
             raise ImproperlyConfigured(
                 "ObjectTemplateResponseMixin requires either a definition of "

@@ -110,7 +110,7 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     def response_add(self, request, new_object):
         response = super(BaseFrontendPackageAdmin, self).response_add(request, new_object)
-        obj.render()
+        new_object.render()
         return response
 
 
