@@ -280,7 +280,7 @@ class AdminLinkInline(TabularInlineOrderable):
 class AdminAppGroupAdmin(VersionAdmin, BaseVersionableAdmin):
     #inlines = [AdminAppLinkInline]
     core_fields = (
-        ('title',),
+        ('title', 'open_by_default'),
     )
     meta_fields = BaseVersionableTitleAdmin.meta_fields
     fieldsets = (
@@ -293,6 +293,9 @@ class AdminAppGroupAdmin(VersionAdmin, BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     ) 
+
+    list_display = ('title', 'order',)
+    list_editable = ('order',)
 
 class AdminSidebarAdmin(VersionAdmin, BaseVersionableAdmin):
     #inlines = [AdminLinkInline]
@@ -310,6 +313,9 @@ class AdminSidebarAdmin(VersionAdmin, BaseVersionableAdmin):
             'classes': ( 'grp-collapse grp-closed', )
         })
     ) 
+
+    list_display = ('title', 'order',)
+    list_editable = ('order',)
 
 class LegacyURLRefererInline(admin.TabularInline):
     #model = LegacyURLReferer

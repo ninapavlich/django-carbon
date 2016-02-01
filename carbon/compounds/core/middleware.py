@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import urlparse
 
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
@@ -26,5 +27,17 @@ class LegacyURLMiddleware(object):
             return HttpResponsePermanentRedirect(legacy_url.path)
         except:
             pass
+
+        if not full_path.endswith('/'):
+            if settings.APPEND_SLASH:
+
+                if '?' in full_path:
+                    pieces = full_path.split('?')
+                    slashed_path = '%s/%s'%(pieces[0], pieces[1])
+                else:
+                    slashed_path = '%s/'%full_path
+                
+                return HttpResponsePermanentRedirect(slashed_path)
+                
 
         return response

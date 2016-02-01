@@ -69,11 +69,14 @@ class BaseAdminDashboard(Dashboard):
             children = link_set.get_children()
             child_links = [link.model_path for link in children]
             # -- Django Admin
+
+            classes = ['grp-closed'] if not link_set.open_by_default else []
             self.children.append(modules.AppList(
                 title=_(link_set.title),
                 column=1,
                 collapsible=True,
                 models=child_links,
+                css_classes=classes
             ))
         
         
@@ -81,21 +84,13 @@ class BaseAdminDashboard(Dashboard):
 
         # -- Django Admin
         self.children.append(modules.AppList(
-            title=_('Applications'),
+            title=_('All Models'),
             column=1,
             collapsible=True,
-            exclude=('django.contrib.*',),
             css_classes=classes
         ))
 
-        # append an app list module for "Administration"
-        self.children.append(modules.AppList(
-            title=_('Administration'),
-            column=1,
-            collapsible=True,
-            models=('django.contrib.*',),
-            css_classes=classes
-        ))     
+         
 
         sidebar_link_sets = self.sidebar_model.objects.all()
         for link_set in sidebar_link_sets:

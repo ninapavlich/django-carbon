@@ -302,8 +302,12 @@ class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
 
 
 class AdminAppGroup( VersionableAtom, AddressibleAtom ):
+
+    open_by_default = models.BooleanField(default=True)
+
     class Meta:
         abstract = True
+        ordering = ['order']
 
     def get_children(self):
         if not self.item_class:
