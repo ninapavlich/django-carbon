@@ -6,18 +6,18 @@ from .models import *
 
 
 class TemplateAdminForm(forms.ModelForm):
-    custom_template = forms.CharField(widget=AceOverlayWidget(mode='html', wordwrap=True, theme='twilight', width="850px", height="700px", showprintmargin=True), required=False)
+    custom_template = forms.CharField(widget=AceOverlayWidget(mode='html', wordwrap=True, theme='github', width="850px", height="700px", showprintmargin=True), required=False)
     # class Meta:
     #     model = Template
 
 
 class CSSResourceAdminForm(forms.ModelForm):
-    custom_source = forms.CharField(widget=AceOverlayWidget(mode='sass', wordwrap=True, theme='twilight', width="850px", height="800px", showprintmargin=True), required=False)
+    custom_source = forms.CharField(widget=AceOverlayWidget(mode='sass', wordwrap=True, theme='github', width="850px", height="800px", showprintmargin=True), required=False)
     # class Meta:
     #     model = CSSResource   
 
 class JSResourceAdminForm(forms.ModelForm):
-    custom_source = forms.CharField(widget=AceOverlayWidget(mode='javascript', wordwrap=True, theme='twilight', width="850px", height="800px", showprintmargin=True), required=False)
+    custom_source = forms.CharField(widget=AceOverlayWidget(mode='javascript', wordwrap=True, theme='github', width="850px", height="800px", showprintmargin=True), required=False)
     # class Meta:
     #     model = JSResource   
 
