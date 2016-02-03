@@ -39,7 +39,8 @@ class VersionableAtom(models.Model):
         blank=True, null=True, related_name='%(app_label)s_%(class)s_modified_by',
         on_delete=models.SET_NULL)
 
-    admin_note = models.TextField(_('admin note'), blank=True, null=True)
+    admin_note = models.TextField(_('admin note'), blank=True, null=True,
+        help_text="Not publicly visible")
 
     class Meta:
         abstract = True

@@ -264,11 +264,7 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
     def get_object_query(self, queryset, path):
         return queryset.filter(path=path).select_related('template').get()
 
-    def get_object(self, queryset=None):
-        
-        if self.object:
-            return self.object
-
+    def get_query_path(self):
         if self.kwargs.get('path'):
             path = self.kwargs.get('path', '')
         else:
@@ -281,6 +277,16 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
         if not path.startswith("/"):
             path = "/%s"%path
 
+        return path
+
+
+    def get_object(self, queryset=None):
+        
+        if self.object:
+            return self.object
+
+        path = self.get_query_path()
+
         queryset = self.get_queryset()
         
         # search_path = path
@@ -288,6 +294,8 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
         #     search_path = path.replace(self.model.url_domain, '')
 
         try:
+            # print path
+            # print queryset
             obj = self.get_object_query(queryset, path)
             return obj 
         except:
