@@ -35,6 +35,7 @@ class FormEntryForm(forms.ModelForm):
     
     form_field_prefix = 'form_field_'
     form_fields = []
+    auto_populate_get_values = True #Auto-populate values from GET into the forms initial values
 
     # IMPLEMENT
     # field_model = FieldEntry
@@ -42,12 +43,12 @@ class FormEntryForm(forms.ModelForm):
     #     model = FormEntry
     #     fields = ['form']
 
-    def __init__(self, form_schema, *args, **kwargs):
+    def __init__(self, form_schema, request, *args, **kwargs):
         self.form_schema = form_schema
+        self.request = request
         super(FormEntryForm, self).__init__(*args, **kwargs)
 
         self.fields['form_schema'].initial = self.form_schema
-
         
         self.model_form_fields = self.form_schema.get_all_fields()
         
@@ -56,6 +57,18 @@ class FormEntryForm(forms.ModelForm):
             key = self.form_field_prefix+model_field.slug
             self.fields[key] = form_field
             self.form_fields.append(form_field)
+
+
+        #Auto-populate form fields with get values if applicable
+        is_get = self.request.method=="GET"
+        if is_get and self.auto_populate_get_values:
+            for key in self.request.GET:
+                has_corresponding_form_field = key in self.fields
+                if has_corresponding_form_field:
+                    self.fields[key].initial = self.request.GET[key]
+
+        
+        
 
     
 

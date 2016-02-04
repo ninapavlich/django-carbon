@@ -100,6 +100,7 @@ class CreateFormEntryMixin(FormSignalOperator):
         #ADD REFERNCE TO FORM OBJECT
         kwargs = super(CreateFormEntryMixin, self).get_form_kwargs()
         kwargs['form_schema'] = self.form_schema
+        kwargs['request'] = self.request
         return kwargs
 
     def get_success_url(self):
@@ -126,6 +127,7 @@ class CreateFormEntryView(AddressibleView, PublishableView, FormSignalOperator):
         #ADD REFERNCE TO FORM OBJECT
         kwargs = super(CreateFormEntryView, self).get_form_kwargs()
         kwargs['form_schema'] = self.object
+        kwargs['request'] = self.request
         return kwargs
 
     def get_success_url(self):
@@ -156,6 +158,7 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
 
         #ADD REFERNCE TO FORM OBJECT AND FIELD DATA
         kwargs['form_schema'] = self.object
+        kwargs['request'] = self.request
         kwargs['instance'] = self.form_entry_object
         
 
