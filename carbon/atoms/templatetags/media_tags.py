@@ -35,6 +35,11 @@ def get_variant_links(object):
     output.append(object.get_variant_link(variant))
   return output    
 
+@register.assignment_tag()
+def get_secure_link(object, duration):
+  
+  return object.get_secure_url(duration)    
+
 @register.simple_tag
 def upload_js():
     return """

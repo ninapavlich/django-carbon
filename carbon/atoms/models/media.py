@@ -344,6 +344,20 @@ class BaseImageMolecule( RichContentAtom, VersionableAtom, AddressibleAtom ):
             return None
 
     @cached_property
+    def image_width(self):
+        try:
+            return self.image.width
+        except:
+            return None
+
+    @cached_property
+    def image_height(self):
+        try:
+            return self.image.height
+        except:
+            return None
+
+    @cached_property
     def file(self):
         return self.image  
 
