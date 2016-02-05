@@ -47,7 +47,6 @@ class ObjectTemplateResponseMixin(object):
             return [self.object.template.slug]
 
         elif self.model and self.model.default_template:
-            print "DEFAULT TEMPLATE: %s"%(self.model.default_template)
             return [self.model.default_template]
 
         elif self.template_name is None:
@@ -231,7 +230,7 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
     def get_template(self):
         return self.object.template
 
-    def post(self, request, *args, **kwargs):
+    def handle(self, request):
 
         if not self.object:
             self.object = self.get_object()
@@ -241,22 +240,17 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
 
         if self.object.permanent_redirect != None and self.object.permanent_redirect != '':
             return HttpResponsePermanentRedirect( self.object.permanent_redirect )
+
+    def post(self, request, *args, **kwargs):
+
+        self.handle(request)
 
         return super(AddressibleView, self).post(request, *args, **kwargs)
 
 
     def get(self, request, *args, **kwargs):
-
         
-        
-        if not self.object:
-            self.object = self.get_object()
-
-        if self.object.temporary_redirect != None and self.object.temporary_redirect != '':
-            return HttpResponseRedirect( self.object.temporary_redirect )
-
-        if self.object.permanent_redirect != None and self.object.permanent_redirect != '':
-            return HttpResponsePermanentRedirect( self.object.permanent_redirect )
+        self.handle(request)
 
         return super(AddressibleView, self).get(request, *args, **kwargs)
 
