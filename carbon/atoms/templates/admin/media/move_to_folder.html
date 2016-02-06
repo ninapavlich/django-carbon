@@ -266,7 +266,7 @@
                     {% for folder in folders %}
                     <option value="{{folder.pk}}">{{folder.title_path}}</option>
                     {% endfor %}
-                    <option value="">(Remove from all folders, move to the top-level)</option>
+                    <option value="-1">(Remove from all folders, move to the top-level)</option>
                 </select>
             </div>
         </div>

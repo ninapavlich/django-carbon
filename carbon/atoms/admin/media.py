@@ -96,6 +96,9 @@ class FolderTagAdmin(admin.ModelAdmin):
         if folder_id is None:
             folder_id = request.GET.get('folder__id__exact', None) or request.GET.get('folder_id', None) or request.GET.get('folder', None)
 
+        if folder_id=="None":
+            folder_id=None
+
         return folder_id
 
     def get_tag_qs(self, request, tag_id=None):
@@ -185,6 +188,7 @@ class FolderTagAdmin(admin.ModelAdmin):
             count = len(queryset)
             for item in queryset:
                 item.folder = folder
+                print 'set folder to %s on %s'%(item.folder, item)
                 item.save()
 
             if folder:
