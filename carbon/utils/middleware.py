@@ -130,7 +130,7 @@ class DoNotTrackMiddleware(object):
 
         """
         patch_vary_headers(response, ('DNT',))
-        if request.donottrack:
+        if hasattr(request, 'donottrack') and request.donottrack:
           response.set_cookie("donottrack", '1')
         else:
           response.delete_cookie("donottrack")
