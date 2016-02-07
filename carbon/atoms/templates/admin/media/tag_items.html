@@ -2,13 +2,13 @@
 
 {% load i18n l10n media_admin_tags %}
 
-{% block title %}{% trans "Move to folder" %} | {% trans 'Django site admin' %}{% endblock %}
+{% block title %}{% trans "Tag items..." %} | {% trans 'Django site admin' %}{% endblock %}
 
 
 {% block breadcrumbs %}
     <ul>
         <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-        <li>{% trans "Move to folder..." %}</li>
+        <li>{% trans "Tag items..." %}</li>
     </ul>
 {% endblock %}
 
@@ -253,26 +253,25 @@
 
 
     <fieldset class="grp-module">
-        <h2 class="grp-collapse-handler">Move {{queryset|length}} item(s) to folder...</h2>
+        <h2 class="grp-collapse-handler">Tag {{queryset|length}} item(s) with...</h2>
 
 
         <div class="grp-row grp-cells-1 folder l-2c-fluid l-d-4">
             <div class="c-1">
-                <label class="required" for="id_folder">{% trans "Folder" %}</label>
+                <label class="required" for="id_folder">{% trans "Tag" %}</label>
             </div>
 
             <div class="c-2">
-                <select name="folder" id="id_folder">
-                    {% for folder in folders %}
-                    <option value="{{folder.pk}}">{{folder.title_path}}</option>
+                <select name="tag" id="id_tag">
+                    {% for tag in tags %}
+                    <option value="{{tag.pk}}">{{tag.title}}</option>
                     {% endfor %}
-                    <option value="-1">(Remove from all folders, move to the top-level)</option>
                 </select>
             </div>
         </div>
 
         <div style="margin:10px;padding:10px;clear:both;">
-            <strong>The following items will be moved...</strong>
+            <strong>The following items will be tagged...</strong>
             <ul class="grid">
                 {% for item in queryset %}
                 <li>
@@ -290,7 +289,7 @@
         <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
         {% endfor %}
 
-        <input type="hidden" name="action" value="move_to_folder" />
+        <input type="hidden" name="action" value="tag_items" />
         <input type="hidden" name="post" value="yes" />
 
         
@@ -298,7 +297,7 @@
     
     <footer class="grp-module grp-submit-row grp-fixed-footer">
         <ul>            
-            <li><input type="submit" name="apply" class="grp-button" value="Move" /></li>            
+            <li><input type="submit" name="apply" class="grp-button" value="Apply Tag" /></li>            
         </ul>
     </footer>
   

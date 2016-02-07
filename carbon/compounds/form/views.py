@@ -35,7 +35,7 @@ class FormSignalOperator(FormMixin, ProcessFormView):
     def form_invalid(self, form):
         form_schema = self.get_form_schema()
         if form_schema:
-            messages.error(self.request, self.form_schema.form_error_message or self.default_error_message)
+            messages.error(self.request, form_schema.form_error_message or self.default_error_message)
             form_schema_class = type(form_schema)
             signal_form_error.send(sender=form_schema_class, form_schema=form_schema)
         else:

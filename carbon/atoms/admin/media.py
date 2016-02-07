@@ -96,7 +96,19 @@ class FolderTagAdmin(admin.ModelAdmin):
         if folder_id is None:
             folder_id = request.GET.get('folder__id__exact', None) or request.GET.get('folder_id', None) or request.GET.get('folder', None)
 
+        if folder_id=="None":
+            folder_id=None
+
         return folder_id
+
+    def get_tag_qs(self, request, tag_id=None):
+        if tag_id is None:
+          tag_id = request.POST.get('tag__id__exact', None) or request.POST.get('tag_id', None) or request.POST.get('tag', None)
+
+        if tag_id is None:
+            tag_id = request.GET.get('tag__id__exact', None) or request.GET.get('tag_id', None) or request.GET.get('tag', None)
+
+        return tag_id
 
     def get_folder(self, request, folder_id=None):
         
@@ -105,6 +117,15 @@ class FolderTagAdmin(admin.ModelAdmin):
         if folder_id and int(folder_id) >= 0:
 
             return self.folder_model.objects.get(pk=folder_id)
+        return None
+
+    def get_tag(self, request, tag_id=None):
+        
+        tag_id = self.get_tag_qs(request, tag_id)
+
+        if tag_id and int(tag_id) >= 0:
+
+            return self.tag_model.objects.get(pk=tag_id)
         return None
     
     def get_add_folder_url(self, request):
@@ -136,10 +157,13 @@ class FolderTagAdmin(admin.ModelAdmin):
         else:
             return self.folder_model.objects.filter(parent=None)
 
-
-
     def get_all_folders(self):
         return self.folder_model.objects.all()
+
+
+
+    def get_all_tags(self):
+        return self.tag_model.objects.all()
         
 
     def get_queryset(self, request):
@@ -164,6 +188,7 @@ class FolderTagAdmin(admin.ModelAdmin):
             count = len(queryset)
             for item in queryset:
                 item.folder = folder
+                print 'set folder to %s on %s'%(item.folder, item)
                 item.save()
 
             if folder:
@@ -195,6 +220,38 @@ class FolderTagAdmin(admin.ModelAdmin):
 
         move_to_folder.short_description = "Move to folder..."
 
+    def tag_items(self, request, queryset):        
+
+        if request.POST.get('post', None):
+
+            tag = self.get_tag(request, request.POST.get('tag', None))
+            
+            
+
+            if tag:
+
+                count = len(queryset)
+                for item in queryset:
+                    item.tags.add(tag)
+                    item.save()
+
+                messages.success(request, u'%s items tagged with %s'%(count, tag))
+          
+            redirect_url = request.get_full_path()
+            return HttpResponseRedirect(redirect_url)
+
+        else:
+
+            return render_to_response('admin/media/tag_items.html', 
+            {
+                'queryset': queryset, 
+                'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
+                'tags':self.get_all_tags()
+            }, 
+            context_instance=RequestContext(request))
+
+        tag_items.short_description = "Tag items..."
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         current_folder = self.get_folder(request)
@@ -212,7 +269,7 @@ class FolderTagAdmin(admin.ModelAdmin):
     raw_id_fields = ( 'tags','folder')
 
     list_filter = BaseVersionableAdmin.list_filter + (TagListFilter, FolderListFilter,)
-    actions = [move_to_folder]
+    actions = [move_to_folder, tag_items]
 
 class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
 
