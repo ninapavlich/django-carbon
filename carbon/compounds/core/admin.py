@@ -203,7 +203,23 @@ class JSResourceInline(BaseFrontendResourceInline):
     fk_name = 'parent'
     prepopulated_fields = {"slug": ("title",)}
 
-
+    core_fields = (
+        ('title','slug', 'order', 'edit_item'),
+        ('file_source_url', 'file_source_path'),
+    )
+    source_fields = (
+        'custom_source',
+    )
+    fieldsets = (
+        ("Main Body", {
+            'fields': core_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+        ("Source", {
+            'fields': source_fields,
+            'classes': ( 'grp-collapse grp-open', )
+        }),
+    ) 
 
 
 

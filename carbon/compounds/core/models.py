@@ -42,7 +42,6 @@ from django.contrib.contenttypes.models import ContentType
 from slimit import minify
 from csscompressor import compress
 import sass
-# import scss
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw, get_all_templates
@@ -491,7 +490,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
     def render(self, save_file=True, force=False):
         # print 'render(save_file=%s, force=%s) needs_render? %s'%(save_file, force, self.needs_render)
-        if force==False and self.needs_render==False:
+        if force==False and self.needs_render==False and self.error_source_content==None:
             return
 
         source, success, error_message = self.get_source()
@@ -507,7 +506,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
             is_different = self.generated_file_minified != minified_source
 
-            if is_different:
+            if is_different or force==True:
                 
                 self.generated_file_minified = minified_source
                 self.generated_file_source = source
@@ -643,7 +642,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             
             slug_decoded = child.slug.decode("utf-8")
             rendered_decoded = rendered_unicode
-            source += u'/* --- %s ---- */%s'%(slug_decoded, rendered_decoded)
+            source += u'\n\n\n/* --- SOURCE: %s --- */\n\n%s'%(slug_decoded, rendered_decoded)
 
 
         # unicode_src = source.decode('ascii')
@@ -836,8 +835,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
     def get_package_source_folder(self):
         directory = "%s/%s"%(self.get_resource_temp_folder(), self.slug)   
-        return directory
-
+        return directory        
+    
     def get_src_directories(self):
         dirs = [self.get_resource_temp_folder()]
         if self.parent:
@@ -882,10 +881,11 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 class CSSResource(BaseFrontendResource):
     COMPILER_CSS = 'css'
     COMPILER_SCSS = 'scss'
+    COMPILER_SASS = 'sass'
     # COMPILER_LESS = 'less'
     COMPILER_CHOICES = (
         (COMPILER_CSS, "CSS (None)"),
-        (COMPILER_SCSS, "SCSS")
+        (COMPILER_SCSS, "SASS")
     )
     #TODO:
     # clevercss
@@ -915,20 +915,17 @@ class CSSResource(BaseFrontendResource):
             else:
             
                 try:
-                    # scss.config.LOAD_PATHS = self.get_src_directories()
+                    # Insert comments around import statements for easier debugging.
+                    import_comments_string = source.replace("'", '"')
+                    
+                    def insert_comments(matchobj):
+                      filenames = re.findall(r'"(.*?)"', matchobj.group(0))
+                      filename = ' '.join(filenames)
+                      return '\n\n/* --- IMPORT: %s --- %s */\n%s'%(filename, matchobj.group(0))
 
-                    # _scss_vars = {}
-                    # _scss = scss.Scss(
-                    #     scss_vars=_scss_vars,
-                    #     scss_opts={
-                    #         'compress': True,
-                    #         'debug_info': True,
-                    #     }
-                    # )
+                    import_comments_string = re.sub(r'@import "(.*?)"', insert_comments, import_comments_string)
 
-                    # compiled = _scss.compile(source)
-
-                    compiled = sass.compile(string=source,include_paths=self.get_src_directories())
+                    compiled = sass.compile(string=import_comments_string,include_paths=self.get_src_directories())
                     return (compiled, success, error)
 
                 except Exception, err:
@@ -942,33 +939,6 @@ class CSSResource(BaseFrontendResource):
 
         return (source, success, error)
 
-    # def replaceSCSSImports( self, css ):
-    #     #matches = re.search("^@import.*", css)
-    #     matches = re.findall("^@import.*?;", css)
-
-    #     # print "BEFORE"
-    #     # print css
-
-    #     print 'matching against %s'%(matches)
-    #     if matches:
-    #         for match in matches:
-    #             import_path = match[match.index('@import')+7:match.index(';')].replace('"', '').replace("'", '').strip()
-    #             if import_path != self.slug:
-    #                 try:
-    #                     source = self.__class__.objects.get(slug=import_path).get_source()
-    #                 except:
-    #                     source = ''                
-    #                 css = css.replace(match, source)
-                
-
-
-    #         # re.search(r"^@import (.+)[0-9a-zA-Z_]", s).group()
-    #         # 
-    #         # 
-
-    #     # print "AFTER"
-    #     # print css
-    #     return css
 
 
     class Meta:
