@@ -541,6 +541,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             # print 'error, dont save'
             self.error_source_content = error_message
 
+        self.save()
+
     def get_file_name(self, minified=False):
         if minified:
             return u"%s.min%s"%(self.slug, self.get_extension())
@@ -653,8 +655,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         abstract = True
 
     # def save(self, *args, **kwargs):
-    #     print 'saving parent'
     #     super(BaseFrontendPackage, self).save(*args, **kwargs)
+    #     print "ERROR? %s"%(self.error_source_content)
 
 
         

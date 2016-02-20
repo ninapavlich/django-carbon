@@ -51,7 +51,11 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     def rerender(modeladmin, request, queryset):
         for object in queryset:
             object.render(True, True)
-            messages.add_message(request, messages.SUCCESS, 'Package %s was re-rendered'%(object.title))
+            if object.error_source_content == None:
+                messages.add_message(request, messages.SUCCESS, 'Package %s was re-rendered'%(object.title))
+            else:
+                messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+
     rerender.short_description = "Re-Render Package"
 
     prepopulated_fields = {"slug": ("title",)}
@@ -91,26 +95,23 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     actions = [rerender]
 
-    def save_model(self, request, obj, form, change):        
-        # before_version = obj.version
 
-        super(BaseFrontendPackageAdmin, self).save_model(request, obj, form, change)
+    def response_change(self, request, object):
+        response = super(BaseFrontendPackageAdmin, self).response_change(request, object)
+        object.render()
 
-        # new_item = self.model.objects.get(pk=obj.pk)
-        # if new_item.error_source_content:
-        #     messages.add_message(request, messages.ERROR, 'There was an error generating the package. Please review the Error Source Content field for more info.')
+        if object.error_source_content != None:
+            messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
 
-        # elif new_item.version == before_version:
-        #     messages.add_message(request, messages.INFO, 'No file updates detected')
-
-    def response_change(self, request, obj):
-        response = super(BaseFrontendPackageAdmin, self).response_change(request, obj)
-        obj.render()
         return response
 
-    def response_add(self, request, new_object):
-        response = super(BaseFrontendPackageAdmin, self).response_add(request, new_object)
-        new_object.render()
+    def response_add(self, request, object):
+        response = super(BaseFrontendPackageAdmin, self).response_add(request, object)
+        object.render()
+
+        if object.error_source_content != None:
+            messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+
         return response
 
 
