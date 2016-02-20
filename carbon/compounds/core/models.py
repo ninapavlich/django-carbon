@@ -921,7 +921,7 @@ class CSSResource(BaseFrontendResource):
                     def insert_comments(matchobj):
                       filenames = re.findall(r'"(.*?)"', matchobj.group(0))
                       filename = ' '.join(filenames)
-                      return '\n\n/* --- IMPORT: %s --- %s */\n%s'%(filename, matchobj.group(0))
+                      return '\n\n/* --- IMPORT: %s --- */\n%s'%(filename, matchobj.group(0))
 
                     import_comments_string = re.sub(r'@import "(.*?)"', insert_comments, import_comments_string)
 
