@@ -168,11 +168,13 @@ def displaybytes(bytes):
 def get_storage(type):
     if type=='BaseImage':
         storage = import_string(settings.IMAGE_STORAGE)()
+    elif type=='BaseSecureImage':
+        storage = import_string(settings.SECURE_IMAGE_STORAGE)()
     elif type=='BaseMedia':
         storage = import_string(settings.MEDIA_STORAGE)()
     elif type=='BaseSecureMedia':
         storage = import_string(settings.SECURE_MEDIA_STORAGE)()
-
+    
     return storage
 
 
@@ -467,6 +469,36 @@ class ImageMolecule( BaseImageMolecule ):
         abstract = True
 
 
+class SecureImageMolecule( BaseImageMolecule ):
+    help = {
+        'image':"To ensure a precise color replication in image variants, make sure an sRGB color profile has been assigned to each image.",
+    }
+    default_image_link_duration = 60*60 #= 1 hour
+
+
+    try:
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True,storage=get_storage('BaseSecureImage'), help_text=help['image'])
+    except:
+        image = models.ImageField(upload_to=image_file_name, blank=True, null=True, help_text=help['image'])
+
+
+    @cached_property
+    def image_url(self):
+        if self.image:
+            return BaseSecureAtom.generate_authorized_link(self.image, self.default_image_link_duration)
+        else:
+            return None
+
+    def save(self, *args, **kwargs):
+
+        super(SecureImageMolecule, self).save(*args, **kwargs)
+
+        if self.image:
+            BaseSecureAtom.make_file_private(self.image)
+
+
+    class Meta:
+        abstract = True
 
 
 class MediaMolecule( ImageMolecule ):
@@ -503,6 +535,10 @@ class SecureMediaMolecule( BaseSecureAtom, RichContentAtom, VersionableAtom, Add
 
         if self.file:
             BaseSecureAtom.make_file_private(self.file)
+
+
+
+
 
 
 try:

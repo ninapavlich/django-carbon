@@ -31,9 +31,10 @@ class ImageAdmin(BaseImageAdmin, BaseBatchUploadAdmin):
 
 class SecureImageAdmin(BaseImageAdmin, BaseBatchUploadAdmin):
 
-    extra_urls = [
-        {'url':reverse_lazy('admin_secureimage_batch_view'), 'title':'Batch Upload Secure Images'}
-    ]
+    # extra_urls = [
+    #     {'url':reverse_lazy('admin_secureimage_batch_view'), 'title':'Batch Upload Secure Images'}
+    # ]
+    pass
     
 
 

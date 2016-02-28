@@ -52,6 +52,25 @@ class Image(ImageMolecule):
     class Meta:
         abstract = True
 
+class SecureImage(SecureImageMolecule):
+
+    #EXAMPLE VARIANTS
+    # variants = ('thumbnail','width_1200', 'width_1200_fill', 'square_600')
+
+    # square_600 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFill(600, 600)], options={'quality': 85})
+
+    # width_1200 = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None, False)], options={'quality': 85})
+
+    # width_1200_fill = ImageSpecField( source='image', format='PNG',
+    #     processors=[ResizeToFit(1200, None)], options={'quality': 85})
+
+    # tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
+
+    class Meta:
+        abstract = True        
+
 
 
 
@@ -67,7 +86,7 @@ class Media(MediaMolecule):
 
 class SecureMedia(SecureMediaMolecule):
 
-    tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
+    # tags = models.ManyToManyField('media.MediaTag', blank=True, related_name='%(app_label)s_%(class)s_tags')
 
     class Meta:
         abstract = True
