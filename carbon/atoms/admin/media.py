@@ -408,7 +408,6 @@ class BaseSecureMediaAdmin(BaseMediaAdmin):
         ('clean_filename_on_upload','allow_overwrite'),
         'credit',
         'caption',
-        'tags'
     )
     meta_fields = BaseMediaAdmin.meta_fields
 
