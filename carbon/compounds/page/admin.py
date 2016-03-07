@@ -85,7 +85,7 @@ class PageContentBlockInline(admin.StackedInline):
     )
     additional_fields = (
         ('synopsis'),
-        ('publication_status'),
+        ('publication_status', 'publication_date'),
         ('publish_on_date', 'expire_on_date')
     )
 
