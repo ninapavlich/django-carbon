@@ -32,4 +32,5 @@ class BaseRSSUrlAdmin(BaseVersionableTitleAdmin):
         })
     )
 
+    list_display = ['title', 'url', 'last_imported', 'active']
     actions = [sync_rss]

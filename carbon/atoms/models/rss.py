@@ -30,6 +30,9 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
 
     def sync_rss(self):
 
+        if not self.active:
+            return
+
         response = requests.get(self.url)
         raw_xml = response.text
 
@@ -38,6 +41,9 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
             do_import = self.import_entry(entry_element)
             if do_import:
                 content_object = self.parse_entry(entry_element)
+
+        self.last_imported = datetime.datetime.now()
+        self.save()
 
     def get_entry_uuid(self, entry_element):
         return self.url+entry_element.id
