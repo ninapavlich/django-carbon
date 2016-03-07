@@ -78,28 +78,26 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
 
         if created:
             entry.publication_status = PublishableAtom.PUBLISHED
+            entry.title = entry_element.title
+            entry.slug = entry_element.id
+            entry.publication_date = date
+            entry.synopsis = synopsis
+            entry.content = content
+            entry.path_override = entry_element.link  
             entry.save()
-        
 
-        entry.title = entry_element.title
-        entry.slug = entry_element.id
-        entry.publication_date = date
-        entry.synopsis = synopsis
-        entry.content = content
-        entry.path_override = entry_element.link  
-        entry.save()
-
-        model_has_image = hasattr(self.content_model, 'image')
-        if model_has_image:
-            image_url = None if (not model_has_image or not 'image' in entry_element) else entry_element.image['href']
-            if not image_url:
-                
-                soup = BeautifulSoup(content)
-                content_images = [image["src"] for image in soup.findAll("img")]
-                if(len(content_images) > 0):
-                    image_url = content_images[0]
-                    self.set_image(entry, image_url)
         
+            model_has_image = hasattr(self.content_model, 'image')
+            if model_has_image:
+                image_url = None if (not model_has_image or not 'image' in entry_element) else entry_element.image['href']
+                if not image_url:
+                    
+                    soup = BeautifulSoup(content)
+                    content_images = [image["src"] for image in soup.findAll("img")]
+                    if(len(content_images) > 0):
+                        image_url = content_images[0]
+                        self.set_image(entry, image_url)
+            
 
 
 
