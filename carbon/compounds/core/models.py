@@ -277,6 +277,13 @@ class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
         
         return self.path_override
 
+    def get_absolute_url(self):
+        if self.content_object:
+            if hasattr(self.content_object, 'get_absolute_url'):
+                return self.content_object.get_absolute_url()
+        
+        return self.path_override
+
 
     def get_link(self):
         '<a href="%s" target="%s" class="%s" %s>%s</a>'%(self.get_path, self.target, self.css_classes, self.title, self.extra_attributes)
