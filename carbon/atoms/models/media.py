@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+from django.utils import timezone
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -13,6 +14,7 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from django.utils.functional import cached_property
+from django.core.files.storage import get_storage_class
 
 import boto
 from boto.s3.connection import S3Connection, Bucket, Key
@@ -211,8 +213,7 @@ class RichContentAtom(models.Model):
     
     size = models.BigIntegerField(null=True, blank=True, help_text=help['size'])
     display_size = models.CharField(_("Display Size"), max_length=255, blank=True, null=True)  
-
-    
+    file_modified_date = models.DateTimeField(_('File Modified Date'), blank=True, null=True)
 
     
 
@@ -232,6 +233,15 @@ class RichContentAtom(models.Model):
             self.size = None
             self.display_size = None
 
+        file_changed = False
+        if self.pk is not None:
+            original = type(self).objects.get(pk=self.pk)
+            if original.file != self.file:
+                file_changed = True
+
+        if file_changed or not self.file_modified_date:
+            self.file_modified_date = timezone.now()
+
         super(RichContentAtom, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -241,6 +251,27 @@ class RichContentAtom(models.Model):
             return ("%s :: %s %s")%(self.__class__.__name__, self.caption, self.credit)
         else:
             return ("%s :: %s")%(self.__class__.__name__, self.pk)
+
+    @cached_property
+    def cache_source_path(self):
+        """
+        NOTE -- this function assumes we're using the default imagekit namer function
+        """
+    
+        source_filename = getattr(self.file, 'name', None)
+
+        if source_filename is None or os.path.isabs(source_filename):
+            # Generally, we put the file right in the cache file directory.
+            dir = settings.IMAGEKIT_CACHEFILE_DIR
+        else:
+            # For source files with relative names (like Django media files),
+            # use the source's name to create the new filename.
+            dir = os.path.join(settings.IMAGEKIT_CACHEFILE_DIR,
+                               os.path.splitext(source_filename)[0])
+        return dir
+
+    def delete_cached_file(self):
+        print "TODO..."
 
     @staticmethod
     def autocomplete_search_fields():
@@ -545,7 +576,7 @@ try:
     image_model = settings.IMAGE_MODEL
     @receiver(pre_delete, sender=image_model, dispatch_uid='image_delete_signal')
     def remove_image_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_image_file_from_s3(sender, instance, using, settings.IMAGE_MODEL)
+        base_remove_image_file_from_s3(sender, instance, using, settings.IMAGE_MODEL, settings.MEDIA_STORAGE)
 except:
     pass
 
@@ -553,11 +584,11 @@ try:
     secure_image_model = settings.SECURE_IMAGE_MODEL
     @receiver(pre_delete, sender=secure_image_model, dispatch_uid='secure_image_delete_signal')
     def remove_secure_file_from_s3(sender, instance, using, **kwargs):
-        base_remove_image_file_from_s3(sender, instance, using, settings.SECURE_IMAGE_MODEL)    
+        base_remove_image_file_from_s3(sender, instance, using, settings.SECURE_IMAGE_MODEL, settings.SECURE_MEDIA_STORAGE)    
 except:
     pass
 
-def base_remove_image_file_from_s3(sender, instance, using, model_name, **kwargs):
+def base_remove_image_file_from_s3(sender, instance, using, model_name, storage_bucket_path, **kwargs):
     try:
         delete_file_on_delete = settings.IMAGE_MODEL_DELETE_FILE_ON_DELETE
     except:
@@ -571,30 +602,28 @@ def base_remove_image_file_from_s3(sender, instance, using, model_name, **kwargs
 
     if exists_in_separate_object==False and delete_file_on_delete:
 
+        print 'okay, were going to delete this item....'
+
         #Figure out what bucket to delete
         delete_bucket = None
         if hasattr(instance, 'variants') and instance.variants:
-            for variant in instance.variants:
-                field = getattr(instance, variant)
-                delete_bucket = "/".join(str(field).split('/')[:-1])
 
-            try:
-                if delete_bucket:
-                    conn = boto.s3.connection.S3Connection(
-                        settings.AWS_ACCESS_KEY_ID,
-                        settings.AWS_SECRET_ACCESS_KEY)
+            storage_bucket_class = get_storage_class(storage_bucket_path)
+            storage_bucket = storage_bucket_class()
+            print 'BUCKET: %s'%(storage_bucket)
 
-                    bucket = Bucket(conn, settings.AWS_MEDIA_BUCKET_NAME)
+            connection = storage_bucket.connection
+            bucket = storage_bucket.bucket
+            delete_path = '%s/%s'%(storage_bucket.location, instance.cache_source_path)
 
-                    for key in bucket.list(prefix=delete_bucket):
-                        # print 'delete: %s'%(key)
-                        key.delete()               
-
-            except:
-                pass
+            print 'going to delete files in dir %s in loc %s'%(delete_path, storage_bucket.location)
+            for key in bucket.list(prefix=delete_path):
+                print 'Going to delete %s'%(key)
+                key.delete()
 
         try:
             instance.image.delete(save=False)  
+            print 'clear file...'
         except:
             pass
 

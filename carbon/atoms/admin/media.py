@@ -308,7 +308,6 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
     
 
     def image_variants(self, obj):
-
         if obj.image:
             base_image =  '<a href="%s" target="_blank">Original Size (%spx x %spx)</a><br />'%(obj.image_url, obj.image_width, obj.image_height)
             for variant in obj.__class__.variants:
@@ -318,8 +317,18 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
             return base_image
     image_variants.allow_tags = True
 
-    def dimensions(self, obj):
+    def image_variants_links(self, obj):
 
+        if obj.image:
+            base_image =  '<a href="%s" target="_blank">Original Size (%spx x %spx)</a><br />'%(obj.image_url, obj.image_width, obj.image_height)
+            for variant in obj.__class__.variants:
+                image_variant_name = variant.replace("_", " ").title()
+                base_image +=  '<a href="%s" target="_blank">%s</a><br />'%(obj.get_variant_url(variant), image_variant_name)
+
+            return base_image
+    image_variants_links.allow_tags = True
+
+    def dimensions(self, obj):
         if obj.image:
             return 'Original Dimensions: %sx%s Size: %s'%(obj.image_width, obj.image_height, obj.display_size)
 
@@ -330,7 +339,7 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",
         "preview", "image_variants", "image_width", "image_height",
-        "display_size", "size", "dimensions", 
+        "display_size", "size", "dimensions", "file_modified_date"
     )
     
     core_fields = (
@@ -344,8 +353,14 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
         'caption'
     )
     
-
-    meta_fields = BaseVersionableAdmin.meta_fields
+    meta_fields = (
+        ('version',),
+        ('created_date', 'created_by'),
+        ('modified_date', 'modified_by'),
+        'file_modified_date',
+        'admin_note'
+    )
+    
 
     fieldsets = (
         ("Image", {
@@ -365,7 +380,11 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
 class BaseMediaAdmin(BaseMedia, BaseVersionableAdmin):
 
 
-    readonly_fields = BaseVersionableAdmin.readonly_fields
+    readonly_fields = (
+        "version", "created_date", "created_by", "modified_date", "modified_by",
+        "file_modified_date"
+    )   
+
     
     core_fields = (
         'title',
@@ -375,7 +394,13 @@ class BaseMediaAdmin(BaseMedia, BaseVersionableAdmin):
         'caption'
     )
 
-    meta_fields = BaseVersionableAdmin.meta_fields
+    meta_fields = (
+        ('version',),
+        ('created_date', 'created_by'),
+        ('modified_date', 'modified_by'),
+        'file_modified_date',
+        'admin_note'
+    )
 
     fieldsets = (
         ("Image", {
@@ -409,7 +434,13 @@ class BaseSecureMediaAdmin(BaseMediaAdmin):
         'credit',
         'caption',
     )
-    meta_fields = BaseMediaAdmin.meta_fields
+    meta_fields = (
+        ('version',),
+        ('created_date', 'created_by'),
+        ('modified_date', 'modified_by'),
+        'file_modified_date',
+        'admin_note'
+    )
 
     fieldsets = (
         ("Image", {
