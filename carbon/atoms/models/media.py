@@ -270,9 +270,6 @@ class RichContentAtom(models.Model):
                                os.path.splitext(source_filename)[0])
         return dir
 
-    def delete_cached_file(self):
-        print "TODO..."
-
     @staticmethod
     def autocomplete_search_fields():
         return ("id__iexact", "title__icontains", "credit__icontains","caption__icontains",'admin_note__icontains')
@@ -602,28 +599,21 @@ def base_remove_image_file_from_s3(sender, instance, using, model_name, storage_
 
     if exists_in_separate_object==False and delete_file_on_delete:
 
-        print 'okay, were going to delete this item....'
-
-        #Figure out what bucket to delete
-        delete_bucket = None
+        #Delete all the corresponding cached images:
         if hasattr(instance, 'variants') and instance.variants:
 
             storage_bucket_class = get_storage_class(storage_bucket_path)
             storage_bucket = storage_bucket_class()
-            print 'BUCKET: %s'%(storage_bucket)
-
+            
             connection = storage_bucket.connection
             bucket = storage_bucket.bucket
             delete_path = '%s/%s'%(storage_bucket.location, instance.cache_source_path)
 
-            print 'going to delete files in dir %s in loc %s'%(delete_path, storage_bucket.location)
             for key in bucket.list(prefix=delete_path):
-                print 'Going to delete %s'%(key)
                 key.delete()
 
         try:
             instance.image.delete(save=False)  
-            print 'clear file...'
         except:
             pass
 
