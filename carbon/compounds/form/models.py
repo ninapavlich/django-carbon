@@ -157,7 +157,14 @@ class Form(ContentMolecule):
             #POPULATE KEY/VALUE PAIR:
             for field in input_fields:
                 field_entry = field_entry_hash[field.slug]
-                object = {'title':field.title,'value':field_entry.value,'entry':field_entry, 'field':field}
+                object = {
+                    'title':field.title,
+                    'value':field_entry.value,
+                    'rendered_value':field_entry.get_rendered_value(),
+                    'is_honeypot':field.is_honeypot,
+                    'entry':field_entry, 
+                    'field':field
+                }
                 fields.append(object)
                 fields_dict[field.slug] = object
 
@@ -644,6 +651,12 @@ class FormField(VersionableAtom, TitleAtom, Validation):
     def get_form_field(self):
         return get_form_field_by_type(self.type, self, self.title, self.get_choices())
 
+    @property
+    def is_honeypot(self):
+        if self.type == FormField.HONEYPOT_FIELD:
+            return True
+        return False
+
     def compress(self, raw_value):
     #PYTHON -> DATABASE
         if self.type == FormField.SELECT_MULTIPLE_CHECKBOXES or \
@@ -818,6 +831,8 @@ class FieldEntry(VersionableAtom):
 
           return self.value
         return ''
+
+    
         
     
     class Meta:
