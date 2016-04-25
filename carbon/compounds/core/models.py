@@ -23,10 +23,11 @@ from gzip import GzipFile
 from boto.s3.key import Key
 import boto.s3
 
-from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.files.base import ContentFile
+from django.db import models
+from django.dispatch import receiver
 from django.template import Template as DjangoTemplate
 from django.template import loader
 from django.template.loaders.filesystem import Loader as FileSystemLoader
@@ -37,6 +38,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+
 
 #CSS/JS libs
 from slimit import minify
@@ -724,7 +726,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
     file_source_path = models.CharField(_('File Source Path'), max_length=255, 
         null=True, blank=True, help_text=help['file_source_path']) 
 
-
+    def generate_slug(self):
+        return slugify(self.title)
 
     def edit_parent(self):
         style="style='width:278px;display:block;'"
@@ -760,7 +763,7 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
             
             if self.is_source_package():
                 # print '%s is a source pagage, so download the files'%(self.file_source_url)
-                get_package_contents(self.file_source_url, self.get_package_folder())
+                get_package_contents(self.file_source_url, self.get_package_download_folder())
 
                 if self.is_source_file():
                     # print '%s is a source file, so get contents from file...'%(self.get_package_original_source_folder())
@@ -794,12 +797,20 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         
         raw_source, success, error_message = self.get_source()
         if success:
-            raw_source_name = "%s.%s"%(self.slug, self.get_extension())
+            
 
             skip_file_write = self.is_source_package() == True and self.is_source_file() == False
             if not skip_file_write:
                 # print 'store_raw_file: %s to %s/%s'%(self.slug, self.get_resource_temp_folder(), raw_source_name)
-                write_to_file(raw_source_name, self.get_resource_temp_folder(), raw_source)    
+                write_to_file(self.get_resource_temp_name(), self.get_resource_temp_folder(), raw_source)    
+
+    def delete_downloaded_files(self):
+        if self.file_source_url != None:
+            if os.path.exists(self.get_package_download_folder()):
+                shutil.rmtree(self.get_package_download_folder())
+
+            if os.path.exists(self.get_package_source_folder()):
+                shutil.rmtree(self.get_package_source_folder())
 
     def get_extension(self):
         #Override in subclass
@@ -824,20 +835,23 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
     def get_parent_temp_folder(self):
         subfolder = '%s_%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()))
-        directory = "/tmp/%s"%(subfolder)   
+        directory = "/tmp/%s/%s"%(subfolder, self.parent.slug)   
         return directory 
+
+    def get_resource_temp_name(self):
+        return "%s.%s"%(self.slug, self.get_extension())
 
     def get_resource_temp_folder(self):
         subfolder = '%s_%s/%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()), self.parent.slug)
         directory = "/tmp/%s"%(subfolder)   
         return directory 
 
-    def get_package_folder(self):
+    def get_package_download_folder(self):
         directory = "%s/downloaded/%s"%(self.get_parent_temp_folder(), self.slug)   
         return directory
 
     def get_package_original_source_folder(self):
-        directory = "%s/%s"%(self.get_package_folder(), self.file_source_path)   
+        directory = "%s/%s"%(self.get_package_download_folder(), self.file_source_path)   
         return directory
 
     def get_package_source_folder(self):
@@ -850,11 +864,14 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
             return  dirs + self.parent.get_src_directories()
         else:
             return dirs
+
+
     
 
     def save(self, *args, **kwargs):
         
         source_has_changed = False
+        download_path_has_changed = False
         if self.pk is not None:
             original = self.__class__.objects.get(pk=self.pk)
         else:
@@ -862,15 +879,24 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
 
         if original:
 
+
             original_source, original_success, original_source_error_message = original.get_source()
             current_source, original_success, current_source_error_message = self.get_source()
             if original_source != current_source:
                 source_has_changed = True
 
+
+            if self.file_source_url != original.file_source_url or self.file_source_path != original.file_source_path:
+                download_path_has_changed = True
+
+            if download_path_has_changed:
+                self.delete_downloaded_files()
+
+
         super(BaseFrontendResource, self).save(*args, **kwargs)
 
 
-        if source_has_changed and self.parent:
+        if (source_has_changed or download_path_has_changed) and self.parent:
             #Re-save parent
             self.parent.request_render()
 
@@ -1076,4 +1102,5 @@ def copy_directory(src, dest):
         error = 'Directory not copied. Error: %s' % e
 
     return (success, error)
+
 
