@@ -46,6 +46,9 @@
     </div>
 </div>
 
+{% block before_items %}
+
+{% endblock %}
 
 <div class="g-d-c" style="margin:auto;">
     <div class="g-d-24">
@@ -56,30 +59,33 @@
 
         
         
-        <figure data-credit="{{ object.credit }}" class="g-d-6">
-            <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
+        {% cache 86400 imagepicker object.id object.modified_date %}
+            <figure data-credit="{{ object.credit }}" class="g-d-6">
+                <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
 
 
 
-            {% if object.image %}
-            <div class="preview">
-                <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}"/><br />
-            </div>
-            
-            <p class="picker-links">  
-                {% get_variant_links object as variants %}
-                {% for variant in variants %}
-                {{variant|safe}}
-                {% endfor %}
-            </p>
+                {% if object.image %}
+                <div class="preview">
+                    <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}"/><br />
+                </div>
+                
+                <p class="picker-links">  
+                    {% get_variant_links object as variants %}
+                    {% for variant in variants %}
+                    {{variant|safe}}
+                    {% endfor %}
+                </p>
 
-           
-            
-            {% endif %}
+               
+                
+                {% endif %}
 
-            {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
-            <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
-        </figure>
+                {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
+                <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
+            </figure>
+        {% endcache %}
+        
         
 
 
@@ -120,6 +126,11 @@
         </nav>
     </div>
 </div>
+
+{% block after_items %}
+
+{% endblock %}
+
 <style>
     .g-d-6{
         float: left;
@@ -201,32 +212,49 @@
 <script>
     (function($) {
 
+        function getCKEditor(container){
+            if(container.CKEDITOR){
+                return container.CKEDITOR;
+            }else{
+                if(container.opener){
+                    return getCKEditor(container.opener)
+                }
+            }
+            return null
+        }
         function initPickerLinks(){
+
+            var editor = getCKEditor(window.opener);
+            console.log("EDITOR: "+editor)
 
             $('.picker-links a:not(.inited)').click(function(e){
                 e.preventDefault();
                 var img = e.currentTarget;
                 $(e).addClass("inited");
 
-                window.opener.CKEDITOR.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
-                    // -- Set the Image Alt Tag via Caption
-                    var dialog = this.getDialog();
-                    var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
-                    var caption_text = $(img).data("caption");
-                    var credit_text = $(img).data("credit");
-                    var use_caption = caption_text? credit_text? caption_text+" - "+credit_text : caption_text : credit_text? credit_text : '';
+                
+                if(editor!=null){
+                    editor.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
+                        // -- Set the Image Alt Tag via Caption
+                        var dialog = this.getDialog();
+                        var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
+                        var caption_text = $(img).data("caption");
+                        var credit_text = $(img).data("credit");
+                        var use_caption = caption_text? credit_text? caption_text+" - "+credit_text : caption_text : credit_text? credit_text : '';
 
-                    var alt_element = dialog.getContentElement( 'info', 'txtAlt' );
-                    if(alt_element){
-                        alt_element.setValue(alt_text);
-                    }
+                        var alt_element = dialog.getContentElement( 'info', 'txtAlt' );
+                        if(alt_element){
+                            alt_element.setValue(alt_text);
+                        }
 
-                    var caption_element = dialog.getContentElement( 'info', 'caption' );
-                    if(caption_element){
-                        caption_element.setValue(use_caption);
-                    }
-                });
-                window.close();
+                        var caption_element = dialog.getContentElement( 'info', 'caption' );
+                        if(caption_element){
+                            caption_element.setValue(use_caption);
+                        }
+                    });
+                    window.close();
+                }
+                
             });
 
         }
