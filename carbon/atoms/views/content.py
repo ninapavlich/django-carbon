@@ -23,7 +23,7 @@ class PublishableView(SingleObjectMixin):
 
     def get(self, request, *args, **kwargs):
         if self.is_published() == False:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
+            raise Http404(_("No published %(verbose_name)s found matching the query") %
                         {'verbose_name': self.model._meta.verbose_name})
 
         return super(PublishableView, self).get(request, *args, **kwargs)
@@ -31,7 +31,7 @@ class PublishableView(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
 
         if self.is_published() == False:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
+            raise Http404(_("No published %(verbose_name)s found matching the query") %
                         {'verbose_name': self.model._meta.verbose_name})
 
         return super(PublishableView, self).post(request, *args, **kwargs)
@@ -55,7 +55,7 @@ class ModerationView(SingleObjectMixin):
 
     def get(self, request, *args, **kwargs):
         if self.is_moderated() == False:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
+            raise Http404(_("No moderated %(verbose_name)s found matching the query") %
                         {'verbose_name': self.model._meta.verbose_name})
 
         return super(ModerationView, self).get(request, *args, **kwargs)
@@ -63,7 +63,7 @@ class ModerationView(SingleObjectMixin):
     def post(self, request, *args, **kwargs):
 
         if self.is_moderated() == False:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
+            raise Http404(_("No moderated %(verbose_name)s found matching the query") %
                         {'verbose_name': self.model._meta.verbose_name})
 
         return super(ModerationView, self).post(request, *args, **kwargs)

@@ -1,6 +1,6 @@
 {% extends "admin/media/change_list_image.html" %}
 
-{% load i18n grp_tags admin_urls admin_static admin_list media_admin_tags core_tags %}
+{% load i18n grp_tags admin_urls admin_static admin_list media_admin_tags core_tags helpful_tags %}
 
 
 
@@ -17,10 +17,11 @@
                 
                 {% if current_folder %}
                 {% if current_folder.parent %}
-                <div><a href="?folder={{current_folder.parent.pk}}">&larr; Go back to {{current_folder.parent.title}}</a></div>
+                <div><a href="{% url_add_query folder=current_folder.parent.pk %}">&larr; Go back to {{current_folder.parent.title}}</a></div>
                 {% else %}
                 {% get_changelist_url cl.model_admin as top_url %}
-                <div><a href="{{top_url}}">&larr; All folders</a></div>
+                {% get_query_string as query_string %}
+                <div><a href="{{top_url}}{{query_string}}">&larr; All folders</a></div>
                 {% endif %}
             </div>
             <div class="pull-left">
@@ -54,12 +55,12 @@
         {% if folders|length > 0 %}
         
             {% for folder in folders %}
-            <li><a href="?folder={{folder.pk}}" class="folder"><span>{{folder.title}}</span></a></li>
+            <li><a href="{% url_add_query folder=folder.pk %}" class="folder"><span>{{folder.title}}</span></a></li>
             {% endfor %}
         
         {% endif %}
-
-            <li ><a href="{{add_folder_url}}"  class="folder add"><span>+ Add New Folder</span></a></li>
+            {% get_query_string as query_string %}
+            <li ><a href="{{add_folder_url}}{{query_string}}"  class="folder add"><span>+ Add New Folder</span></a></li>
         </ul>
         {% endif %}
 
@@ -89,7 +90,7 @@
         float:left;
     }
     .subfolders{
-        background: #eee url("https://cgp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
+        background: #eee url("https://ninalp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
     }
     .subfolders li{
         float:left;

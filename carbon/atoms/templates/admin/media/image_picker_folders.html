@@ -15,9 +15,10 @@
                 
                 {% if current_folder %}
                 {% if current_folder.parent %}
-                <div><a href="?folder={{current_folder.parent.pk}}">&larr; Go back to {{current_folder.parent.title}}</a></div>
+                <div><a href="{% url_add_query folder=current_folder.parent.pk %}">&larr; Go back to {{current_folder.parent.title}}</a></div>
                 {% else %}
-                <div><a href="{{top_url}}">&larr; All folders</a></div>
+                {% get_query_string as query_string %}
+                <div><a href="{{top_url}}{{query_string}}">&larr; All folders</a></div>
                 {% endif %}
             </div>
             <div class="pull-left">
@@ -79,7 +80,7 @@
         float:left;
     }
     .subfolders{
-        background: #eee url("https://cgp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
+        background: #eee url("https://ninalp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
     }
     .subfolders li{
         float:left;

@@ -43,6 +43,19 @@ def url_add_query(context, **kwargs):
 
     return path[:-1]
 
+@register.assignment_tag(takes_context=True)
+def get_query_string(context):
+    request = context.get('request')
+
+    get = request.GET.copy()
+    
+    path = '?'
+    for query, val in get.items():
+        path += '%s=%s&' % (query, val)
+
+
+    return path[:-1]
+
 
 @register.filter
 def tostring(object):
