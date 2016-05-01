@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 import datetime
 import feedparser
@@ -23,7 +24,9 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
 
     logo_url = models.CharField(max_length=255, null=True, blank=True)
     logo_width = models.CharField(max_length=255, null=True, blank=True)
-    logo_width = models.CharField(max_length=255, null=True, blank=True)
+    logo_height = models.CharField(max_length=255, null=True, blank=True)
+
+    regex = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True  
@@ -52,7 +55,17 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
         return self.url+entry_element.id
 
     def import_entry(self, entry_element):
-        #Override in subclass
+        content = entry_element.content[0].value
+        if self.regex:
+            prog = re.compile(self.regex, re.M|re.I)
+            match = prog.match( content )
+
+            if match:
+               return True
+            else:
+               return False
+        #OR Override in subclass
+
         return True
 
     def set_image(self, content_object, url):

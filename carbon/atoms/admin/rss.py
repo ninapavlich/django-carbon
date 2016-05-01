@@ -17,8 +17,10 @@ class BaseRSSUrlAdmin(BaseVersionableTitleAdmin):
         ('title','slug'),
         'url',
         'last_imported',
-        'active'
-
+        'active',
+        'logo_url',
+        ('logo_width','logo_height'),
+        'regex'
     )
     fieldsets = (
         ("Main Body", {

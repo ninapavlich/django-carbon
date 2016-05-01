@@ -166,7 +166,7 @@ class OrganizationAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 class SocialContactLinkInline(TabularInlineOrderable):
     # model = SocialContactLink
     fk_name = 'user'    
-    fields = ('order','title','url','icon')
+    fields = ('order','title','url','icon', 'css_classes', 'extra_attributes')
     extra = 0
 
 # admin.site.register(Organization, OrganizationAdmin)    
