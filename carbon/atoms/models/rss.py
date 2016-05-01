@@ -21,6 +21,9 @@ class RSSSourceMolecule( VersionableAtom, TitleAtom ):
 
     last_imported = models.DateTimeField(blank=True, null=True)
 
+    logo_url = models.CharField(max_length=255, null=True, blank=True)
+    logo_width = models.CharField(max_length=255, null=True, blank=True)
+    logo_width = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True  

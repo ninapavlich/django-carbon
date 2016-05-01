@@ -253,7 +253,7 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
 ########################################################################
 
 
-class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom):
+class MenuItem(VersionableAtom, HierarchicalAtom, LinkAtom, PublishableAtom, AddressibleAtom):
     
     publish_by_default = True
 

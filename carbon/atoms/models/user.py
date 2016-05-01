@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 
 from .abstract import *
 from .access import *
-from .content import HasImageAtom
+from .content import *
 
 from carbon.utils.icons import ICON_CHOICES
 
@@ -118,12 +118,11 @@ class UserProfileMolecule(UserMolecule, HasImageAtom):
     class Meta:
         abstract = True
 
-class SocialContactLinkMolecule( VersionableAtom, TitleAtom, OrderedItemAtom ):
+class SocialContactLinkMolecule( VersionableAtom, TitleAtom, OrderedItemAtom, LinkAtom):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, 
         blank=True, null=True)
-    url = models.CharField(_("URL"), max_length=255, blank = True, 
-        null = True)
+    
     icon = models.CharField(max_length=255, null=True, blank=True, choices=ICON_CHOICES, 
         help_text='Preview icons at http://fontawesome.io/icons/',)  
     

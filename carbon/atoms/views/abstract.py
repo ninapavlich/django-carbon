@@ -33,7 +33,8 @@ class NonUserCachableView(object):
 
     @method_decorator(users_skip_cache)
     def dispatch(self, *args, **kwargs):
-        return super(NonUserCachableView, self).dispatch(*args, **kwargs)  
+        return super(NonUserCachableView, self).dispatch(*args, **kwargs) 
+
 
 class ObjectTemplateResponseMixin(object):
 

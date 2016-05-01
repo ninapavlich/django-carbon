@@ -275,7 +275,7 @@ class HasImageAtom(models.Model):
         abstract = True        
 
 
-class LinkAtom(AddressibleAtom):
+class LinkAtom(models.Model):
 
     help = {
         'target': "",
@@ -295,6 +295,9 @@ class LinkAtom(AddressibleAtom):
         (PARENT, _(PARENT)),
         (TOP, _(TOP))        
     )
+
+    url = models.CharField(_("URL"), max_length=255, blank = True, 
+        null = True)
 
     target = models.CharField(_('Target'), max_length=255, 
         help_text=help['target'], choices=TARGET_CHOICES, default=SELF)
@@ -421,7 +424,6 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
 
 class TagMolecule(ContentMolecule):
                 
-    #Basically just a tag but with hierarchy
     item_class = None
     item_classes = None
     tag_property_name = 'tags'
