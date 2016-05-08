@@ -98,7 +98,7 @@ class BlogArticle(ContentMolecule):
     category = models.ForeignKey('blog.BlogCategory', blank=True, null=True, 
         on_delete=models.SET_NULL)
 
-    def build_path(self):
+    def build_path(self, path_attribute='slug', parent_path_attribute='path'):
 
         if self.category:
             return "%s%s/" % (self.category.path, self.slug)
