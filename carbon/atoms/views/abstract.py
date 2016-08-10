@@ -44,6 +44,7 @@ class ObjectTemplateResponseMixin(object):
     content_type = None
     
     def get_template_names(self):
+        
         if self.object and self.object.template:
             return [self.object.template.slug]
 
@@ -229,6 +230,7 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
     
 
     def get_template(self):
+        print "TEMPLATE?? %s"%(self.object.template)
         return self.object.template
 
     def handle(self, request):
