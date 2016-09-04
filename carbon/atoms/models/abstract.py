@@ -56,6 +56,10 @@ class VersionableAtom(models.Model):
             return url
         return None
 
+    @property
+    def django_id(self):
+        return u"%s.%s.%s"%(self._meta.app_label, self._meta.object_name, self.pk)
+
     def edit_item(self):
         style="style='width:278px;display:block;'"
         if self.pk:            
