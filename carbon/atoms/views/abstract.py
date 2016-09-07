@@ -44,6 +44,7 @@ class ObjectTemplateResponseMixin(object):
     content_type = None
     
     def get_template_names(self):
+        print "GET TEMPLATE NAMES!"
         if self.object and self.object.template:
             return [self.object.template.slug]
 
