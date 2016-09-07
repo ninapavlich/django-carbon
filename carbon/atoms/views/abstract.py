@@ -44,7 +44,7 @@ class ObjectTemplateResponseMixin(object):
     content_type = None
     
     def get_template_names(self):
-        print "GET TEMPLATE NAMES!"
+
         if self.object and self.object.template:
             return [self.object.template.slug]
 
@@ -71,7 +71,7 @@ class ObjectTemplateResponseMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(ObjectTemplateResponseMixin, self).get_context_data(**kwargs)
-        if self.object != None:
+        if hasattr(self, 'object') and self.object != None:
             context['object_verbose_name'] = self.object._meta.verbose_name
             context['object_verbose_name_plural'] = self.object._meta.verbose_name_plural
             
@@ -230,6 +230,7 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
     
 
     def get_template(self):
+        print "TEMPLATE?? %s"%(self.object.template)
         return self.object.template
 
     def handle(self, request):

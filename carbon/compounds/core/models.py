@@ -427,13 +427,17 @@ def title_file_name( instance, filename ):
 
     full_path = '/'.join( [ subfolder, filename ] )
 
-    #if instance.allow_overwrite==True:
-    if hasattr(instance, 'file_source') and instance.file_source.storage.exists(full_path):
-        instance.file_source.storage.delete(full_path)
+    try:
+        #if instance.allow_overwrite==True:
+        if hasattr(instance, 'file_source') and instance.file_source.storage.exists(full_path):
+            instance.file_source.storage.delete(full_path)
 
-    #if instance.allow_overwrite==True:
-    if hasattr(instance, 'file_minified') and instance.file_minified.storage.exists(full_path):
-        instance.file_minified.storage.delete(full_path)
+        #if instance.allow_overwrite==True:
+        if hasattr(instance, 'file_minified') and instance.file_minified.storage.exists(full_path):
+            instance.file_minified.storage.delete(full_path)
+    
+    except Exception, err:
+        print "Warning: Error deleting previous file contents"
         
     return full_path
 
