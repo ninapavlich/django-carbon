@@ -65,8 +65,9 @@ class FormSignalOperator(FormMixin, ProcessFormView):
 
 class FormSubmittedView(AddressibleView, PublishableView, DetailView):
     
-    def get_template(self):
-        return self.object.submit_template
+    def get_template_names(self):
+
+        return [self.object.submit_template.slug]
 
     
 
