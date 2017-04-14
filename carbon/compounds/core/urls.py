@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import include, url
 
 from .views import admin_import_links
 
-urlpatterns = patterns('',
+urlpatterns = [
 	
 	url(r'^admin/utils/import/links/$', admin_import_links, name='admin_import_links'),
-)
+]

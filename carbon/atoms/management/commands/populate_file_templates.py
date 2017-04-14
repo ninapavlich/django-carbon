@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         #Create file templates if any are missing
         
-        template_dirs = settings.TEMPLATE_DIRS
+        template_dirs = settings.TEMPLATES[0]['DIRS']
 
         for template_dir in template_dirs:
             for root, dirs, files in os.walk(template_dir):

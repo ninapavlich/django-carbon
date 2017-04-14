@@ -157,16 +157,16 @@ def get_form_field_by_type(type, data, label='', choices=None):
 		field = forms.BooleanField(widget=Checkbox(model_field=data), label=label)
 
 	elif type == FormField.SELECT_DROPDOWN:
-		field = forms.ChoiceField(widget=Select(model_field=data), label=label, choices=choices)
+		field = forms.ChoiceField(widget=Select(model_field=data,choices=choices), label=label, choices=choices)
 
 	elif type == FormField.SELECT_RADIO_BUTTONS:
-		field = forms.ChoiceField(widget=Select(model_field=data), label=label, choices=choices)
+		field = forms.ChoiceField(widget=Select(model_field=data,choices=choices), label=label, choices=choices)
 
 	elif type == FormField.SELECT_BUTTONS:
-		field = forms.ChoiceField(widget=Select(model_field=data), label=label, choices=choices)
+		field = forms.ChoiceField(widget=Select(model_field=data,choices=choices), label=label, choices=choices)
 
 	elif type == FormField.SELECT_IMAGE:
-		field = forms.ChoiceField(widget=Select(model_field=data), label=label, choices=choices)
+		field = forms.ChoiceField(widget=Select(model_field=data,choices=choices), label=label, choices=choices)
 
 	elif type == FormField.SELECT_MULTIPLE_CHECKBOXES:
 		field = MultipleChoiceField(widget=SelectMultiple(model_field=data), label=label, choices=choices)

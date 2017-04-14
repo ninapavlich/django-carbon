@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 #this is a test
 setup(name = 'django_carbon',
       description = 'Django Carbon Library',
-      version = '0.9',
+      version = '0.10',
       url = 'https://github.com/ninapavlich/django-carbon/',
       author = 'Nina Pavlich',
       author_email='nina@ninalp.com',

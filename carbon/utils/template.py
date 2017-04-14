@@ -27,7 +27,7 @@ def get_page_templates_raw(ignore_templates = None):
         ignore_templates = ()
 
     files = []
-    template_dirs = settings.TEMPLATE_DIRS
+    template_dirs = settings.TEMPLATES[0]['DIRS']
     for template_dir in template_dirs:
         for root, dirnames, filenames in os.walk(template_dir):
             for filename in fnmatch.filter(filenames, '*.html'):
@@ -42,7 +42,7 @@ def get_page_templates(ignore_templates = None):
     raw_templates = get_page_templates_raw(ignore_templates)
     output = []
 
-    template_dirs = settings.TEMPLATE_DIRS
+    template_dirs = settings.TEMPLATES[0]['DIRS']
     for template_dir in template_dirs:
         
         def name(n):
@@ -59,7 +59,7 @@ def get_page_templates(ignore_templates = None):
 def get_all_templates():
    
     template_files = []
-    for template_dir in (settings.TEMPLATE_DIRS + app_template_dirs):
+    for template_dir in (settings.TEMPLATES[0]['DIRS'] + app_template_dirs):
         for dir, dirnames, filenames in os.walk(template_dir):
             for filename in filenames:
                 template_files.append(os.path.join(dir, filename))

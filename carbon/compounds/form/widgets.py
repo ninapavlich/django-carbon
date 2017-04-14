@@ -41,6 +41,12 @@ class BaseFormInput(object):
 
 		return template.render(context)
 
+class BaseMultipleChoiceFormInput(BaseFormInput):
+
+	def __init__(self, model_field, attrs=None, choices=()):
+		super(BaseMultipleChoiceFormInput, self).__init__(model_field, attrs)
+
+		self.choices = list(choices)
 
 class SingleLineText(BaseFormInput, BaseTextInput):
 	input_type = 'text'
@@ -91,7 +97,7 @@ class Checkbox(BaseFormInput, BaseCheckboxInput):
 			final_attrs['value'] = force_text(value)
 		return self.render_input(final_attrs, context)
 
-class Select(BaseFormInput, BaseSelect):
+class Select(BaseMultipleChoiceFormInput, BaseSelect):
 	def render(self, field, context=None, attrs=None):
 		self.bound_field = field
 		value = field.value()
@@ -101,7 +107,7 @@ class Select(BaseFormInput, BaseSelect):
 
 		return self.render_input(final_attrs, context)
 
-class SelectMultiple(BaseFormInput, BaseSelectMultiple):
+class SelectMultiple(BaseMultipleChoiceFormInput, BaseSelectMultiple):
 	def render(self, field, context=None, attrs=None):
 		self.bound_field = field
 		value = field.value()
