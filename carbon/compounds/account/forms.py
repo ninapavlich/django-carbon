@@ -4,12 +4,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, ReadOnlyPasswordHashField
 from django.contrib.auth.forms import PasswordResetForm as BasePasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.models import get_current_site
 from django.forms import extras
 from django.utils.encoding import force_bytes
 from django.utils.translation import ugettext_lazy as _
 from django.utils.http import urlsafe_base64_encode
-
+try:
+    from django.contrib.sites.models import get_current_site
+except ImportError:
+    from django.contrib.sites.shortcuts import get_current_site
 
 from ckeditorfiles.widgets import CKEditorWidget
 

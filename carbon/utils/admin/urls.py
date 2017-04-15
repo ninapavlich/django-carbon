@@ -1,5 +1,5 @@
 from django.conf.urls.static import static
-from django.conf.urls import patterns, url, include
+from django.conf.urls import include, url
 
 from django.views.generic import TemplateView
 
@@ -8,7 +8,7 @@ from django.contrib.admindocs import views
 from .views import *
 from .views_admindocs import *
 
-urlpatterns = patterns('',
+urlpatterns = [
     
     
     url(r'^admin/utils/cache/clear/', clear_cache, name="clear-server-cache"),
@@ -26,4 +26,4 @@ urlpatterns = patterns('',
 
     url(r'^error_maintenance/', TemplateView.as_view(template_name="maintenance.html"), name="error_maintenance_preview" ),    
     
-)
+]

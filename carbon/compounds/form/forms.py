@@ -5,7 +5,8 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage, DefaultStorage
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.utils.html import escape
-from django.utils.module_loading import import_by_path
+from django.utils.module_loading import import_string
+
 
 from ckeditorfiles.widgets import CKEditorInlineWidget
 from ckeditorfiles.widgets import CKEditorWidget
