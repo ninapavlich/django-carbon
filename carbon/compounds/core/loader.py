@@ -5,10 +5,14 @@ Wrapper for loading templates from the filesystem.
 import io
 
 from django.core.exceptions import SuspiciousFileOperation
-from django.template.base import TemplateDoesNotExist
+from django.template import TemplateDoesNotExist
 from django.utils._os import safe_join
 from django.template import Template as DjangoTemplate
-from django.template.loader import BaseLoader
+try:
+    from django.template.loaders.base import Loader as BaseLoader
+except ImportError:  # Django < 1.9
+    from django.template.loader import BaseLoader
+
 
 from .models import Template
 
@@ -37,9 +41,9 @@ class DBTemplateLoader(BaseLoader):
     load_template_source.is_usable = True
 
 
-    #HACK -- argument incompatibility
-    def __init__(self, *args):
-        kwargs = {}
-        super(DBTemplateLoader, self).__init__(self, *args, **kwargs) 
+    # #HACK -- argument incompatibility
+    # def __init__(self, *args):
+    #     kwargs = {}
+    #     super(DBTemplateLoader, self).__init__(self, *args, **kwargs) 
 
     
