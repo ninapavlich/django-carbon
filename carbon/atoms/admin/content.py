@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 from carbon.atoms.models.content import PublishableAtom
 
@@ -82,8 +83,8 @@ class BaseContentAdmin(admin.ModelAdmin):
         js = ('animations.js', 'actions.js')
 
     def admin_hierarchy(self, obj):
-        return obj.admin_hierarchy
-    admin_hierarchy.allow_tags = True
+        return mark_safe(obj.admin_hierarchy)
+    
     
     autocomplete_lookup_fields = {
         'fk': ('image', 'published_by', 'template'),
@@ -274,11 +275,10 @@ class BaseSlideInlineAdmin(admin.TabularInline):
         if obj.slide_image:
             try:
                 edit_url = obj.slide_image.edit_item_url
-                return "<img src='%s' alt='%s preview'/><br /><a href='%s' >Edit Image &gt;</a>"%(obj.slide_image.thumbnail.url, obj.slide_image.title, edit_url)
+                return mark_safe("<img src='%s' alt='%s preview'/><br /><a href='%s' >Edit Image &gt;</a>"%(obj.slide_image.thumbnail.url, obj.slide_image.title, edit_url))
             except:
                 return ""
         return ''
-    preview.allow_tags = True
 
 
     readonly_fields = ('preview',)

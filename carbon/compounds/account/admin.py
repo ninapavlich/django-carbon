@@ -1,3 +1,4 @@
+from django.utils.safestring import mark_safe
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import ugettext_lazy as _
@@ -16,11 +17,11 @@ class UserAdmin(ContribUserAdmin):
     def preview(self, obj):
         if obj.image:
             try:
-                return "<img src='%s' alt='%s preview'/>"%(obj.image.thumbnail_url, obj.image.title)
+                return mark_safe("<img src='%s' alt='%s preview'/>"%(obj.image.thumbnail_url, obj.image.title))
             except:
                 return ""
         return ''
-    preview.allow_tags = True
+    
 
     autocomplete_lookup_fields = {
         'fk': ['image',],
@@ -101,11 +102,10 @@ class UserGroupMemberInGroupAdmin(TabularInlineOrderable):
     def edit_member_link(self, obj):
         if obj.user:
             try:
-                return "<a href='%s'>Edit User></a>"%(obj.user.edit_item_url)
+                return mark_safe("<a href='%s'>Edit User></a>"%(obj.user.edit_item_url))
             except:
                 return ""
         return ''
-    edit_member_link.allow_tags = True
 
     fk_name = 'group'
     autocomplete_lookup_fields = {
@@ -122,11 +122,10 @@ class UserGroupMemberInUserAdmin(admin.TabularInline):
     def all_members_link(self, obj):
         if obj.group:
             try:
-                return "<a href='%s'>See All Members ></a>"%(obj.group.edit_item_url)
+                return mark_safe("<a href='%s'>See All Members ></a>"%(obj.group.edit_item_url))
             except:
                 return ""
         return ''
-    all_members_link.allow_tags = True
 
     fk_name = 'user'
     autocomplete_lookup_fields = {

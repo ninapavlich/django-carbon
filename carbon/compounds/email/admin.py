@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
@@ -78,8 +79,8 @@ class EmailReceiptAdmin(VersionAdmin, BaseVersionableAdmin):
 
     def rendered_html_iframe(self, obj):
         url = obj.get_rendered_url()
-        return '<iframe src="%s" style="width: 700px; height: 800px" ></iframe>'%( url )
-    rendered_html_iframe.allow_tags = True
+        return mark_safe('<iframe src="%s" style="width: 700px; height: 800px" ></iframe>'%( url ))
+    
 
     autocomplete_lookup_fields = {
         'fk': ('category'),

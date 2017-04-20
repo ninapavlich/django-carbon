@@ -11,6 +11,7 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 try:
     from django.apps import apps
     get_model = apps.get_model
@@ -65,11 +66,11 @@ class VersionableAtom(models.Model):
         if self.pk:            
             try:
                 url = self.edit_item_url
-                return '<a href="%s" %s>Edit Item &gt;</a>'%(url, style)
+                return mark_safe('<a href="%s" %s>Edit Item &gt;</a>'%(url, style))
             except:
-                return '<span %s>&nbsp;</span>'%(style)
-        return '<span %s>&nbsp;</span>'%(style)   
-    edit_item.allow_tags = True    
+                return mark_safe('<span %s>&nbsp;</span>'%(style))
+        return mark_safe('<span %s>&nbsp;</span>'%(style))
+    
 
     @property
     def is_edited(self):
@@ -223,11 +224,11 @@ class HierarchicalAtom(models.Model):
             
             try:
                 url = self.edit_parent_url
-                return '<a href="%s" %s>&lt; Edit Parent</a>'%(url, style)
+                return mark_safe('<a href="%s" %s>&lt; Edit Parent</a>'%(url, style))
             except:
-                return '<span %s>&nbsp;</span>'%(style)
-        return '<span %s>&nbsp;</span>'%(style)
-    edit_parent.allow_tags = True
+                return mark_safe('<span %s>&nbsp;</span>'%(style))
+        return mark_safe('<span %s>&nbsp;</span>'%(style))
+    
 
     def get_hierarchy(self):
         if self.parent:
@@ -523,13 +524,10 @@ class AddressibleAtom(TitleAtom):
             
             try:
                 url = self.edit_template_url
-                return '<a href="%s" %s>Edit Template &gt;</a>'%(url, style)
+                return mark_safe('<a href="%s" %s>Edit Template &gt;</a>'%(url, style))
             except:
-                return '<span %s>&nbsp;</span>'%(style)
-        return '<span %s>&nbsp;</span>'%(style)
-    edit_template.allow_tags = True
-   
-    
+                return mark_safe('<span %s>&nbsp;</span>'%(style))
+        return mark_safe('<span %s>&nbsp;</span>'%(style))
     
 
     def save(self, *args, **kwargs):

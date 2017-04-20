@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
@@ -272,8 +273,8 @@ class FieldEntryInline(admin.TabularInline):
     #model = FieldEntry    
 
     def rendered_value(self, obj):
-        return obj.get_rendered_value()
-    rendered_value.allow_tags = True
+        return mark_safe(obj.get_rendered_value())
+
     
 
 

@@ -15,6 +15,7 @@ from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.utils.http import urlencode
 from django.views.decorators.csrf import csrf_protect
+from django.utils.safestring import mark_safe
 
 
 from .content import *
@@ -177,9 +178,8 @@ class FolderTagAdmin(admin.ModelAdmin):
 
         for tag in all_tags:
             output += ('<a href="?tags__id__exact=%s">%s</a> '%(tag.pk, tag.title))
-        return output
+        return mark_safe(output)
 
-    tag_list.allow_tags = True
         
 
     def get_queryset(self, request):
@@ -299,11 +299,10 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
     def preview(self, obj):
         if obj.image:
             try:
-                return "<img src='%s' alt='%s preview'/>"%(obj.thumbnail.url, obj.title)
+                return mark_safe("<img src='%s' alt='%s preview'/>"%(obj.thumbnail.url, obj.title))
             except:
                 return ""
         return ''
-    preview.allow_tags = True
 
     
 
@@ -314,8 +313,8 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
                 image_variant_name = variant.replace("_", " ").title()
                 base_image +=  '<a href="%s" target="_blank">%s (%spx x %spx)</a><br />'%(obj.get_variant_url(variant), image_variant_name, obj.get_variant_width(variant), obj.get_variant_height(variant))
 
-            return base_image
-    image_variants.allow_tags = True
+            return mark_safe(base_image)
+    
 
     def image_variants_links(self, obj):
 
@@ -325,15 +324,13 @@ class BaseImageAdmin(BaseMedia, BaseVersionableAdmin):
                 image_variant_name = variant.replace("_", " ").title()
                 base_image +=  '<a href="%s" target="_blank">%s</a><br />'%(obj.get_variant_url(variant), image_variant_name)
 
-            return base_image
-    image_variants_links.allow_tags = True
+            return mark_safe(base_image)
+    
 
     def dimensions(self, obj):
         if obj.image:
-            return 'Original Dimensions: %sx%s Size: %s'%(obj.image_width, obj.image_height, obj.display_size)
-
-            return base_image
-    dimensions.allow_tags = True
+            return mark_safe('Original Dimensions: %sx%s Size: %s'%(obj.image_width, obj.image_height, obj.display_size))
+            return mark_safe(base_image)
 
 
     readonly_fields = (
@@ -419,9 +416,8 @@ class BaseSecureMediaAdmin(BaseMediaAdmin):
         duration = 120
         url = obj.get_secure_url(duration)
         if url:
-            return "<a href='%s'>Download</a><br /><br />This link will expire after %s seconds.</a>"%(url, duration)
+            return mark_safe("<a href='%s'>Download</a><br /><br />This link will expire after %s seconds.</a>"%(url, duration))
         return ''
-    secure_url.allow_tags = True
 
     readonly_fields = (
         "version", "created_date", "created_by", "modified_date", "modified_by",

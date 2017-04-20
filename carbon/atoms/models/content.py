@@ -8,6 +8,7 @@ from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -264,12 +265,11 @@ class HasImageAtom(models.Model):
         if self.image:
             try:
                 url = self.image_preview_url
-                return "<img src='%s' alt='%s' />"%(url, self.image.alt)
+                return mark_safe("<img src='%s' alt='%s' />"%(url, self.image.alt))
             except:
                 return "Error displaying image"
         else:
-            return "-- No image --"
-    image_preview.allow_tags = True     
+            return "-- No image --"     
 
     class Meta:
         abstract = True        

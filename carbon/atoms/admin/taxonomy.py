@@ -1,12 +1,12 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from .content import *
 
 class BaseTagAdmin(BaseContentAdmin):
 
     def admin_hierarchy(self, obj):
-        return obj.admin_hierarchy
-    admin_hierarchy.allow_tags = True
+        return mark_safe(obj.admin_hierarchy)
 
     autocomplete_lookup_fields = {
         'fk': ('template','image'),
@@ -100,8 +100,8 @@ class BaseTagAdmin(BaseContentAdmin):
 class BaseSimplifiedTagAdmin(BaseContentAdmin):
 
     def admin_hierarchy(self, obj):
-        return obj.admin_hierarchy
-    admin_hierarchy.allow_tags = True
+        return mark_safe(obj.admin_hierarchy)
+    
 
     list_display = ( "admin_hierarchy", "path",  "title", "publication_status",)
     list_display_links = ( "admin_hierarchy", "path", "title",)

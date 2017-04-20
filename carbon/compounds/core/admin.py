@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
+from django.utils.safestring import mark_safe
 
 from carbon.atoms.admin.content import *
 from carbon.atoms.admin.taxonomy import *
@@ -45,8 +46,8 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     def archived_versions(self, obj):
         url = obj.get_archived_file_url(obj.version, True)
-        return "You can download archived versions using this URL schema:<br /><a href='%s' target='_blank'>%s</a>"%(url, url)
-    archived_versions.allow_tags = True
+        return mark_safe("You can download archived versions using this URL schema:<br /><a href='%s' target='_blank'>%s</a>"%(url, url))
+    
 
     def rerender(modeladmin, request, queryset):
         for object in queryset:
@@ -165,8 +166,8 @@ class JSResourceAdmin(BaseFrontendResourceAdmin):
 class BaseFrontendResourceInline(admin.StackedInline):
 
     def edit_item(self, obj):
-        return "<a href='%s' target='_blank'>See Item Details and Revision History></a>"%(obj.edit_item_url)
-    edit_item.allow_tags = True
+        return mark_safe("<a href='%s' target='_blank'>See Item Details and Revision History></a>"%(obj.edit_item_url))
+    
     #fields = ('order','title', 'compiler','file_source_url','edit_item',)
     readonly_fields = BaseVersionableTitleAdmin.readonly_fields + ('edit_item',)
     ordering = ("order",)
@@ -346,14 +347,12 @@ class LegacyURLRefererInline(admin.TabularInline):
 class LegacyURLAdmin(BaseVersionableAdmin):
 
     def visit_old_link(self, obj):
-        return "<a href='%s%s' target='_blank'>Visit Old Link</a>"%(settings.LEGACY_URL_ARCHIVE_DOMAIN, obj.url)
-    visit_old_link.allow_tags = True
-
+        return mark_safe("<a href='%s%s' target='_blank'>Visit Old Link</a>"%(settings.LEGACY_URL_ARCHIVE_DOMAIN, obj.url))
+    
 
     def test_redirect(self, obj):
-        return "<a href='%s' target='_blank'>Test Redirect</a>"%(obj.url)
-    test_redirect.allow_tags = True
-
+        return mark_safe("<a href='%s' target='_blank'>Test Redirect</a>"%(obj.url))
+    
     
     core_fields = (
         ('url'),
