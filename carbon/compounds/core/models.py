@@ -403,12 +403,28 @@ class Template(VersionableAtom, TitleAtom):
 
     def save(self, *args, **kwargs):
 
+        template_content_changed = False
+        original = None
+        if self.pk is not None:
+            model = type(self)
+            original = model.objects.get(pk=self.pk)
+
         #Clear html template if custom content is defined
         if self.custom_template != None and self.custom_template != '':
             self.file_template = None
 
+        if original != None and original.custom_template != self.custom_template:
+            template_content_changed = True
+
         super(Template, self).save(*args, **kwargs)
 
+        if template_content_changed == True:
+            #If template has changed, clear cache key
+            from django.core.cache import cache
+            from carbon.utils.template import get_template_cache_key
+            cache_key = get_template_cache_key(self.slug)
+            cache.delete(cache_key)
+        
 
     class Meta:
         ordering = ['title']

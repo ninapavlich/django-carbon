@@ -50,23 +50,24 @@ class FormEntryForm(forms.ModelForm):
         super(FormEntryForm, self).__init__(*args, **kwargs)
 
         self.fields['form_schema'].initial = self.form_schema
-        
-        self.model_form_fields = self.form_schema.get_all_fields()
-        
-        for model_field in self.model_form_fields:
-            form_field = model_field.get_form_field()
-            key = self.form_field_prefix+model_field.slug
-            self.fields[key] = form_field
-            self.form_fields.append(form_field)
+
+        if self.form_schema:
+            self.model_form_fields = self.form_schema.get_all_fields()
+            
+            for model_field in self.model_form_fields:
+                form_field = model_field.get_form_field()
+                key = self.form_field_prefix+model_field.slug
+                self.fields[key] = form_field
+                self.form_fields.append(form_field)
 
 
-        #Auto-populate form fields with get values if applicable
-        is_get = self.request.method=="GET"
-        if is_get and self.auto_populate_get_values:
-            for key in self.request.GET:
-                has_corresponding_form_field = key in self.fields
-                if has_corresponding_form_field:
-                    self.fields[key].initial = self.request.GET[key]
+            #Auto-populate form fields with get values if applicable
+            is_get = self.request.method=="GET"
+            if is_get and self.auto_populate_get_values:
+                for key in self.request.GET:
+                    has_corresponding_form_field = key in self.fields
+                    if has_corresponding_form_field:
+                        self.fields[key].initial = self.request.GET[key]
 
         
         

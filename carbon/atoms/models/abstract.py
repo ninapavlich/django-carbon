@@ -428,7 +428,7 @@ class AddressibleAtom(TitleAtom):
 
         try: 
             model = type(self)
-            model._meta.get_field_by_name('parent')
+            model._meta.get_field('parent')
             has_parent = True 
         except models.FieldDoesNotExist:
             has_parent = False
@@ -447,7 +447,7 @@ class AddressibleAtom(TitleAtom):
 
         try: 
             model = type(self)
-            model._meta.get_field_by_name('parent')
+            model._meta.get_field('parent')
             has_parent = True 
         except models.FieldDoesNotExist:
             has_parent = False
@@ -462,7 +462,7 @@ class AddressibleAtom(TitleAtom):
 
         try: 
             model = type(self)
-            model._meta.get_field_by_name('parent')
+            model._meta.get_field('parent')
             has_parent = True 
         except models.FieldDoesNotExist:
             has_parent = False
@@ -477,7 +477,7 @@ class AddressibleAtom(TitleAtom):
 
         try: 
             model = type(self)
-            model._meta.get_field_by_name('parent')
+            model._meta.get_field('parent')
             has_parent = True 
         except models.FieldDoesNotExist:
             has_parent = False
@@ -540,7 +540,7 @@ class AddressibleAtom(TitleAtom):
         
         try: 
             model = type(self)
-            model._meta.get_field_by_name('parent')
+            model._meta.get_field('parent')
             has_parent = True 
         except models.FieldDoesNotExist:
             has_parent = False
