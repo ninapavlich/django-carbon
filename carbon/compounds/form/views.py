@@ -110,10 +110,13 @@ class CreateFormEntryMixin(FormSignalOperator):
 
     def get_context_data(self, **kwargs):
         context = super(CreateFormEntryMixin, self).get_context_data(**kwargs)
+        context['form'] = None
+        context['has_form'] = False
         context['form_entry_object'] = self.form_entry_object
         context['form_schema'] = self.form_schema
 
         if hasattr(self, 'form'):
+            context['has_form'] = True
             context['form'] = self.form
         return context
 
