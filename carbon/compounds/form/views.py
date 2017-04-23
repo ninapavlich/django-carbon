@@ -7,7 +7,7 @@ from django.http import QueryDict
 
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormMixin, ProcessFormView
-from django.template import loader, Context, RequestContext, Template
+from django.template import loader, Context, Template
 from django.template.response import SimpleTemplateResponse
 
 from carbon.atoms.views.abstract import *

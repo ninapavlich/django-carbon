@@ -30,16 +30,15 @@ class BaseFormInput(object):
 			self.attrs = {}
 
 	def render_input(self, context_data, context=None):
-		if context==None:
-			context = Context(context_data)
+		# if context==None:
+		# 	context = Context(context_data)
 
-
-		context['model_field'] = self.model_field
-		context['field'] = self.bound_field
+		context_data['model_field'] = self.model_field
+		context_data['field'] = self.bound_field
 
 		template = loader.get_template(self.file_template)
 
-		return template.render(context)
+		return template.render(context_data)
 
 class BaseMultipleChoiceFormInput(BaseFormInput):
 
@@ -59,7 +58,12 @@ class SingleLineText(BaseFormInput, BaseTextInput):
 		name = field.html_name
 		if value is None:
 			value = ''
-		final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+		
+		if not attrs:
+			attrs = {}
+		attrs['type'] = self.input_type
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 		if value != '':
 			# Only add the 'value' attribute if a value is non-empty.
 			final_attrs['value'] = force_text(self._format_value(value))        

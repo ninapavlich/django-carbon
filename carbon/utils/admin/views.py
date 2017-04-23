@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 from django.core.validators import URLValidator
 from django.http import HttpResponse, Http404, HttpResponseServerError, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 

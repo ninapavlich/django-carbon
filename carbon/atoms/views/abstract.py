@@ -4,7 +4,7 @@ from django.core.paginator import Paginator, InvalidPage
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseForbidden, HttpResponsePermanentRedirect
-from django.template import loader, Context, RequestContext, Template
+from django.template import loader, Context, Template
 from django.template.response import SimpleTemplateResponse
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
