@@ -80,7 +80,10 @@ class MultiLineText(BaseFormInput, BaseTextarea):
 
 		if value is None:
 			value = ''
-		final_attrs = self.build_attrs(attrs, name=name)
+		if not attrs:
+			attrs = {}
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 		return self.render_input(final_attrs, context)
 
 class Checkbox(BaseFormInput, BaseCheckboxInput):
@@ -93,7 +96,11 @@ class Checkbox(BaseFormInput, BaseCheckboxInput):
 		value = field.value()
 		name = field.html_name
 
-		final_attrs = self.build_attrs(attrs, type='checkbox', name=name)
+		if not attrs:
+			attrs = {}
+		attrs['type'] = 'checkbox'
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 		if self.check_test(value):
 			final_attrs['checked'] = 'checked'
 		if not (value is True or value is False or value is None or value == ''):
@@ -107,7 +114,10 @@ class Select(BaseMultipleChoiceFormInput, BaseSelect):
 		value = field.value()
 		name = field.html_name
 
-		final_attrs = self.build_attrs(attrs, name=name)
+		if not attrs:
+			attrs = {}
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 
 		return self.render_input(final_attrs, context)
 
@@ -117,7 +127,10 @@ class SelectMultiple(BaseMultipleChoiceFormInput, BaseSelectMultiple):
 		value = field.value()
 		name = field.html_name
 
-		final_attrs = self.build_attrs(attrs, name=name)
+		if not attrs:
+			attrs = {}
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 
 		return self.render_input(final_attrs, context)
 
@@ -133,7 +146,8 @@ class ClearableFile(BaseFormInput, BaseClearableFileInput):
 		value = field.value()
 		name = field.html_name
 
-		final_attrs = self.build_attrs(attrs, name=name)
+		attrs['name'] = name
+		final_attrs = self.build_attrs(attrs)
 
 		return self.render_input(final_attrs, context)   
 

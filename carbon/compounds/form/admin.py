@@ -118,7 +118,7 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
 
     additional_content_fields = (
         ('publication_status'),
-        ('image_preview','image'),
+        # ('image_preview','image'),
         'template',
         'synopsis',
         'content',
@@ -127,12 +127,12 @@ class FormAdmin(VersionAdmin, BaseContentAdmin):
     )
 
     autocomplete_lookup_fields = {
-        'fk': ('image', 'published_by', 'template', 'submit_template', 
+        'fk': ( 'published_by', 'template', 'submit_template', 
             'email_admin_on_submission_template', 'email_user_on_submission_template',
             'email_admin_on_submission_category', 'email_user_on_submission_category'),
         'm2m': ()
     }
-    raw_id_fields = ( 'image', 'published_by', 'template', 'submit_template', 
+    raw_id_fields = (  'published_by', 'template', 'submit_template', 
         'email_admin_on_submission_template', 'email_user_on_submission_template',
         'email_admin_on_submission_category', 'email_user_on_submission_category')
 

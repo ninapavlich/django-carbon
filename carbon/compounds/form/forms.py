@@ -81,6 +81,16 @@ class FormEntryForm(forms.ModelForm):
         value = escape(value)
         return value
 
+
+    def _raw_value(self, fieldname):
+        """
+        Returns the raw_value for a particular field name. This is just a
+        convenient wrapper around widget.value_from_datadict.
+        """
+        field = self.fields[fieldname]
+        prefix = self.add_prefix(fieldname)
+        return field.widget.value_from_datadict(self.data, self.files, prefix)
+
     def _clean_fields(self):
         
         super(FormEntryForm, self)._clean_fields()
@@ -88,7 +98,9 @@ class FormEntryForm(forms.ModelForm):
         for field_key in self.fields:
             if self.form_field_prefix in field_key:
                 field = self.fields[field_key]
+                
                 raw_value = self._raw_value(field_key)
+                
             
                 try:
                     field.widget.model_field.validate(raw_value, self)
