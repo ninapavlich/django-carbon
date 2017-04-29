@@ -12,6 +12,7 @@ import codecs
 import csv
 import httplib2
 from bs4 import BeautifulSoup
+import logging
 
 try:
     from cStringIO import StringIO
@@ -41,7 +42,8 @@ from django.contrib.contenttypes.models import ContentType
 
 
 #CSS/JS libs
-from slimit import minify
+# from slimit import minify
+from jsmin import jsmin
 from csscompressor import compress
 import sass
 
@@ -51,7 +53,7 @@ from carbon.utils.template import get_page_templates, get_page_templates_raw, ge
 from carbon.atoms.models.abstract import *
 from carbon.atoms.models.content import *
 
-
+logger = logging.getLogger()
 
 class LegacyURLReferer(VersionableAtom):
 
@@ -121,7 +123,9 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
                 url = self.content_object.get_absolute_url()
                 return url
             except:
-                print "ERROR RETRIEVING ABSOLUTE URL From %s"%(self.content_object)         
+
+                error_message = "ERROR RETRIEVING ABSOLUTE URL From %s"%(self.content_object)         
+                logger.warn(error_message)
         
         return None
 
@@ -453,8 +457,9 @@ def title_file_name( instance, filename ):
             instance.file_minified.storage.delete(full_path)
     
     except Exception, err:
-        print "Warning: Error deleting previous file contents"
-        
+        error_message = "Warning: Error deleting previous file contents"
+        logger.warn(error_message)
+
     return full_path
 
 
@@ -530,8 +535,9 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             try:
                 minified_source = self.minify(source)
             except Exception, err:
-                self.error_source_content = 'Error minifying %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
-                minified_source = self.generated_file_minified
+                self.error_source_content = u'Error minifying %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
+                logger.error(self.error_source_content)
+                minified_source = source
 
             is_different = self.generated_file_minified != minified_source
 
@@ -555,8 +561,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
                 self.file_minified.save(minified_name, minified_file, save=save_file)
 
                 subfolder = self.__class__.__name__.lower()
-                archived_source_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, source_name)
-                archived_minifed_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, minified_name)
+                archived_source_path = u'/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, source_name)
+                archived_minifed_path = u'/%s/%s/archive/%s/%s'%(subfolder, self.slug, self.version, minified_name)
                 self.archive_file(archived_source_path, source)
                 self.archive_file(archived_minifed_path, minified_source)
 
@@ -581,8 +587,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
         subfolder = self.__class__.__name__.lower()
         source_name = self.get_file_name(minified)
-        source_path = '/%s/%s/archive/%s/%s'%(subfolder, self.slug, version, source_name)
-        url = "http://%s.s3.amazonaws.com%s" % (settings.AWS_STORAGE_BUCKET_NAME, source_path)
+        source_path = u'/%s/%s/archive/%s/%s'%(subfolder, self.slug, version, source_name)
+        url = u"http://%s.s3.amazonaws.com%s" % (settings.AWS_STORAGE_BUCKET_NAME, source_path)
         return url
 
     def get_url(self, minified):
@@ -659,7 +665,7 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
             rendered, success, error = child.render()
             if not success:
                 all_success = False
-                all_errors += "Error in item %s:\n%s\n\n"%(child, error)
+                all_errors += u"Error in item %s:\n%s\n\n"%(child, error)
                 
             
             #Convert rendered content to unicode UTF-8
@@ -722,7 +728,9 @@ class JSPackage(BaseFrontendPackage):
 
     def minify(self, source):
         #Override in subclass
-        return minify(source, mangle=True, mangle_toplevel=True)
+        # return minify(source, mangle=True, mangle_toplevel=True)
+        return jsmin(source)
+        
 
     # def get_children(self):
     #     return JSResource.objects.filter(parent=self).order_by('order')
@@ -755,10 +763,10 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
             try:
                 object_type = type(self.parent).__name__
                 url = reverse('admin:%s_%s_change' %(self.parent._meta.app_label,  self.parent._meta.model_name),  args=[self.parent.id] )
-                return '<a href="%s" %s>&lt; Edit Parent</a>'%(url, style)
+                return u'<a href="%s" %s>&lt; Edit Parent</a>'%(url, style)
             except:
-                return '<span %s>&nbsp;</span>'%(style)
-        return '<span %s>&nbsp;</span>'%(style)
+                return u'<span %s>&nbsp;</span>'%(style)
+        return u'<span %s>&nbsp;</span>'%(style)
 
     def render(self):
         source, success, error_message = self.get_source()
@@ -854,28 +862,28 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         return False
 
     def get_parent_temp_folder(self):
-        subfolder = '%s_%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()))
-        directory = "/tmp/%s/%s"%(subfolder, self.parent.slug)   
+        subfolder = u'%s_%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()))
+        directory = u"/tmp/%s/%s"%(subfolder, self.parent.slug)   
         return directory 
 
     def get_resource_temp_name(self):
-        return "%s.%s"%(self.slug, self.get_extension())
+        return u"%s.%s"%(self.slug, self.get_extension())
 
     def get_resource_temp_folder(self):
-        subfolder = '%s_%s/%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()), self.parent.slug)
-        directory = "/tmp/%s"%(subfolder)   
+        subfolder = u'%s_%s/%s'%((self.__class__.__name__).lower(), slugify(settings.SITE_TITLE.lower()), self.parent.slug)
+        directory = u"/tmp/%s"%(subfolder)   
         return directory 
 
     def get_package_download_folder(self):
-        directory = "%s/downloaded/%s"%(self.get_parent_temp_folder(), self.slug)   
+        directory = u"%s/downloaded/%s"%(self.get_parent_temp_folder(), self.slug)   
         return directory
 
     def get_package_original_source_folder(self):
-        directory = "%s/%s"%(self.get_package_download_folder(), self.file_source_path)   
+        directory = u"%s/%s"%(self.get_package_download_folder(), self.file_source_path)   
         return directory
 
     def get_package_source_folder(self):
-        directory = "%s/%s"%(self.get_resource_temp_folder(), self.slug)   
+        directory = u"%s/%s"%(self.get_resource_temp_folder(), self.slug)   
         return directory        
     
     def get_src_directories(self):
@@ -974,7 +982,7 @@ class CSSResource(BaseFrontendResource):
                     def insert_comments(matchobj):
                       filenames = re.findall(r'"(.*?)"', matchobj.group(0))
                       filename = ' '.join(filenames)
-                      return '\n\n/* --- IMPORT: %s --- */\n%s'%(filename, matchobj.group(0))
+                      return u'\n\n/* --- IMPORT: %s --- */\n%s'%(filename, matchobj.group(0))
 
                     import_comments_string = re.sub(r'@import "(.*?)"', insert_comments, import_comments_string)
 
@@ -982,7 +990,7 @@ class CSSResource(BaseFrontendResource):
                     return (compiled, success, error)
 
                 except Exception, err:
-                    error = 'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
+                    error = u'Error compiling %s: %s - %s'%(self.title, traceback.format_exc(), sys.exc_info()[0])
                     print error
                     success = False
                     return (error, success, error)
@@ -1036,7 +1044,7 @@ def write_to_file(filename, directory, content):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    file_path = "%s/%s"%(directory, filename)
+    file_path = u"%s/%s"%(directory, filename)
     if not os.path.exists(file_path):
         open(file_path, 'w').close()
 
@@ -1045,19 +1053,20 @@ def write_to_file(filename, directory, content):
         f = codecs.open(file_path, 'w+',encoding='utf-8')
         f.write(content)
     except Exception, err:
-        error_message = 'Error storing file %s: %s - %s'%(file_path, traceback.format_exc(), sys.exc_info()[0])
+        error_message = u'Error storing file %s: %s - %s'%(file_path, traceback.format_exc(), sys.exc_info()[0])
+        logger.error(error_message)
         print error_message
 
 def get_file_contents(filename):
     if not os.path.exists(filename):
-        return (None, False, "Error: File %s doesn't exist"%(filename))
+        return (None, False, u"Error: File %s doesn't exist"%(filename))
      
     try:
         with open(filename, 'r') as content_file:
             content = content_file.read()       
             return (content, True, None)
     except Exception, err:
-        error_message = 'Error getting file contents %s: %s - %s'%(filename, traceback.format_exc(), sys.exc_info()[0])
+        error_message = u'Error getting file contents %s: %s - %s'%(filename, traceback.format_exc(), sys.exc_info()[0])
         return (None, False, error_message)
 
 def get_package_contents(url, target_dir):
@@ -1089,7 +1098,8 @@ def get_package_contents(url, target_dir):
         try:
             zf = zipfile.ZipFile(name)
         except zipfile.error, e:
-            print "Bad zipfile (from %r): %s" % (url, e)
+            error_message = u"Bad zipfile (from %r): %s" % (url, e)
+            logger.error(error_message)
             return
         zf.extractall(target_dir)
 
@@ -1108,18 +1118,20 @@ def copy_directory(src, dest):
         except shutil.Error as e:
             success = False
             error = 'Directory not removed. Error: %s' % e
-
+            logger.error(error)
     try:
         shutil.copytree(src, dest)
     # Directories are the same
     except shutil.Error as e:
         success = False
         error = 'Directory not copied. Error: %s' % e
+        logger.error(error)
 
     # Any error saying that the directory doesn't exist
     except OSError as e:
         success = False
         error = 'Directory not copied. Error: %s' % e
+        logger.error(error)
 
     return (success, error)
 
