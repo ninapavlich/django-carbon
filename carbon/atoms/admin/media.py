@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse_lazy, resolve
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.utils.http import urlencode
@@ -204,7 +204,6 @@ class FolderTagAdmin(admin.ModelAdmin):
             count = len(queryset)
             for item in queryset:
                 item.folder = folder
-                print 'set folder to %s on %s'%(item.folder, item)
                 item.save()
 
             if folder:
@@ -226,13 +225,12 @@ class FolderTagAdmin(admin.ModelAdmin):
 
         else:
 
-            return render_to_response('admin/media/move_to_folder.html', 
-            {
+            context = {
                 'queryset': queryset, 
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'folders':self.get_all_folders()
-            }, 
-            context_instance=RequestContext(request))
+            } 
+            return render(request, 'admin/media/move_to_folder.html', context)
 
         move_to_folder.short_description = "Move to folder..."
 
@@ -258,13 +256,12 @@ class FolderTagAdmin(admin.ModelAdmin):
 
         else:
 
-            return render_to_response('admin/media/tag_items.html', 
-            {
+            context = {
                 'queryset': queryset, 
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
                 'tags':self.get_all_tags()
-            }, 
-            context_instance=RequestContext(request))
+            }
+            return render(request, 'admin/media/tag_items.html', context)
 
         tag_items.short_description = "Tag items..."
 
