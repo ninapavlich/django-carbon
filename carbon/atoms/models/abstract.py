@@ -86,6 +86,7 @@ class VersionableAtom(models.Model):
 
 
     def get_children(self):
+        print 'A here'
         return self.abstract_children
 
 
@@ -458,6 +459,19 @@ class AddressibleAtom(TitleAtom):
         else:
             return "/%s/%s/" % (str(self.order).zfill(4), self.slug)
 
+    def update_child_paths(self):
+        children = self.get_children()
+        [p.save() for p in children]
+
+    def has_path_changed(self, original):
+        path_has_changed = False
+        if original != None:
+            if (original.path != self.path):
+                path_has_changed = True
+            elif (original.hierarchy != self.hierarchy):
+                path_has_changed = True
+        return path_has_changed
+
     @property
     def admin_hierarchy_display(self):
 
@@ -567,21 +581,15 @@ class AddressibleAtom(TitleAtom):
 
         self.path = self.generate_path()
 
-        
-
         self.hierarchy = self.build_hierarchy_path()
 
-        path_has_changed = False
-        if original != None:
-            if (original.path != self.path):
-                path_has_changed = True
-
-
+        path_has_changed = self.has_path_changed(original)
+        
         super(AddressibleAtom, self).save(*args, **kwargs)
 
         #If path has changed, notify children
         if path_has_changed:
-            [p.save() for p in self.get_children()]
+            self.update_child_paths()
 
 
 
