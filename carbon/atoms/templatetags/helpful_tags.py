@@ -43,6 +43,20 @@ def url_add_query(context, **kwargs):
 
     return path[:-1]
 
+@register.simple_tag(takes_context=True)
+def url_remove_query(context, name):
+    request = context.get('request')
+
+    get = request.GET.copy()
+    if name in get:
+        del get[name]
+    
+    path = '%s?' % request.path
+    for query, val in get.items():
+        path += '%s=%s&' % (query, val)
+
+    return path[:-1]    
+
 @register.assignment_tag(takes_context=True)
 def get_query_string(context):
     request = context.get('request')

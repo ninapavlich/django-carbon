@@ -21,17 +21,17 @@
                 {% else %}
                 {% get_changelist_url cl.model_admin as top_url %}
                 {% get_query_string as query_string %}
-                <div><a href="{{top_url}}{{query_string}}">&larr; All folders</a></div>
+                <div><a href="{% url_remove_query 'folder' %}">&larr; All folders</a></div>
                 {% endif %}
             </div>
             <div class="pull-left">
                 
-                <div>Showing items in {{current_folder.title_path}}</div>
+                <div>Showing items in {{current_folder.title_path}} {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
                 {% else %}
                     {% if ignore_folders %}
-                    <div>Showing items across all folders</div>
+                    <div>Showing items across all folders {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
                     {% else %}
-                    <div>Showing items at the top level, that aren't in a folder</div>
+                    <div>Showing items at the top level, that aren't in a folder {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
                     {% endif %}
                 {% endif %}
             </div>

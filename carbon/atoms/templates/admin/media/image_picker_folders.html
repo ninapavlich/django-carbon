@@ -17,8 +17,7 @@
                 {% if current_folder.parent %}
                 <div><a href="{% url_add_query folder=current_folder.parent.pk %}">&larr; Go back to {{current_folder.parent.title}}</a></div>
                 {% else %}
-                {% get_query_string as query_string %}
-                <div><a href="{{top_url}}{{query_string}}">&larr; All folders</a></div>
+                <div><a href="{% url_remove_query 'folder' %}">&larr; All folders</a></div>
                 {% endif %}
             </div>
             <div class="pull-left">
