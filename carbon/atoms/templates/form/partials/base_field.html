@@ -1,14 +1,13 @@
 {% load i18n %}
 
 <div class="{% spaceless %}form-field form-field-type-{{model_field.type}} form-field-name-{{ field.name }}
-{% if model_field.required %}required{% endif %} 
+{% if model_field.is_required %}required{% endif %} 
 
-{% if request.POST %}
-{% if field.errors %}invalid {% else %}valid {% endif %}
-{% endif %}
+{% if field.errors %}invalid {% endif %}
 
 {% if model_field.icon %}has-icon {% endif %}
 {% if model_field.extra_css_classes %}{{model_field.extra_css_classes}} {% endif %}
+
 
 {% endspaceless %}">
     

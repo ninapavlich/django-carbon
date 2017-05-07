@@ -86,13 +86,13 @@ def get_form_field_input_type_by_type(type):
 		return 'file'
 
 	elif type == FormField.DATE:
-		return 'text'
+		return 'date'
 
 	elif type == FormField.TIME:
-		return 'text'
+		return 'time'
 
 	elif type == FormField.DATE_TIME:
-		return 'text'
+		return 'datetime-local'
 
 	elif type == FormField.SCORE:
 		return 'number'

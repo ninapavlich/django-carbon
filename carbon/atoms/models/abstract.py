@@ -86,7 +86,6 @@ class VersionableAtom(models.Model):
 
 
     def get_children(self):
-        print 'A here'
         return self.abstract_children
 
 

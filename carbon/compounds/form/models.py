@@ -195,6 +195,9 @@ class Form(ContentMolecule):
                     raise ImproperlyConfigured( "User recipient field not found" )
                 
                 user_email_entry = entry.get_entry_by_slug(user_email_field.slug)
+                email = user_email_entry.value
+                print 'ENTRY: %s'%(user_email_entry)
+                print email
                 if user_email_entry:
                     if not self.email_user_on_submission_template:
                         raise ImproperlyConfigured( "Form is set to email user on submission, but email user template not specified" )
@@ -202,7 +205,7 @@ class Form(ContentMolecule):
                     if not self.email_user_on_submission_category:
                         raise ImproperlyConfigured( "Form is set to email user on submission, but email user category not specified" )
 
-                    self.email_user_on_submission_template.send_email_message(user_email_field, 
+                    self.email_user_on_submission_template.send_email_message(email, 
                             self.email_user_on_submission_category, context)
 
     def get_admin_emails(self):
@@ -403,7 +406,12 @@ class Validation(models.Model):
               raise ValidationError(_("Please enter a value of %s or less"%(self.max_value)))
 
             if self.type == FormField.DATE or self.type == FormField.DATE_TIME:
-              date = parsedate(value).date()
+
+              try:
+                date = parsedate(value).date()
+              except:
+                date = None
+                
               if self.min_date and not date >= self.min_date:
                 raise ValidationError(_("Please enter a date of %s or later"%(self.min_date)))
               if self.max_date and not date <= self.max_date:
