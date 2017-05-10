@@ -65,6 +65,11 @@ class MediaTag(TagMolecule):
     class Meta:
         abstract = True
 
+    def __unicode__(self):
+        if self.parent:
+            return "%s / %s"%(self.parent, self.title)
+        return self.title
+
 class MediaFolder(CategoryMolecule):
     publish_by_default = True
     # item_class = None
@@ -74,6 +79,11 @@ class MediaFolder(CategoryMolecule):
     
     class Meta:
         abstract = True
+
+    def __unicode__(self):
+        if self.parent:
+            return "%s / %s"%(self.parent, self.title)
+        return self.title
 
 
 class Image(ImageMolecule):

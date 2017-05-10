@@ -132,7 +132,8 @@ class BaseFrontendResourceAdmin(VersionAdmin, BaseVersionableTitleAdmin):
         ('edit_parent',),
         ('title','slug'),
         ('compiler',),
-        ('file_source_url'),        
+        ('file_source_url'),  
+        ('file_source_path')      
     )
     source_fields = (
         'custom_source',

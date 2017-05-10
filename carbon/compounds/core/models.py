@@ -904,6 +904,7 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
             original = self.__class__.objects.get(pk=self.pk)
         else:
             original = None
+            source_has_changed = True
 
         if original:
 
@@ -1038,6 +1039,16 @@ class JSResource(BaseFrontendResource):
 
     class Meta:
         abstract = True
+
+@receiver(models.signals.post_delete, sender=CSSResource)
+def delete_file(sender, instance, *args, **kwargs):
+    if instance.parent:
+        instance.parent.request_render()
+
+@receiver(models.signals.post_delete, sender=JSResource)
+def delete_file(sender, instance, *args, **kwargs):
+    if instance.parent:
+        instance.parent.request_render()        
 
 
 def write_to_file(filename, directory, content):
