@@ -164,6 +164,9 @@ class LegacyURL(VersionableAtom, AddressibleAtom):
                     url             = row[1]
                     referer         = row[2]
                     
+                    if settings.DEBUG:
+                        print u"Importing %s"%(url)
+
                     if legacy_domain in url or legacy_domain_ssl in url:
                         
                         is_allowed = True

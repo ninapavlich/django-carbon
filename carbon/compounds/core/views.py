@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 from django.views.generic import DetailView
@@ -50,8 +50,10 @@ def admin_import_links( request ):
     
 
     # Render list page with the documents and the form
-    return render_to_response(
-        'admin/page/import_legacy_urls.html',
-        {'form': form},
-        context_instance=RequestContext(request)
-    )    
+    # return render_to_response(
+    #     'admin/page/import_legacy_urls.html',
+    #     {'form': form},
+    #     context_instance=RequestContext(request)
+    # )  
+    # Render list page with the documents and the form
+    return render(request, 'admin/page/import_legacy_urls.html', {'form': form})  
