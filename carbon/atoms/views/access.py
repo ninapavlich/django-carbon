@@ -28,6 +28,11 @@ class BaseAccessView(SingleObjectMixin):
             return [self.access_login_template]
         return super(BaseAccessView, self).get_template_names()
 
+    def render_to_response(self, context, **response_kwargs):
+        if self.object.is_authorized(self.request) == False:
+            response_kwargs.setdefault('status', 401)
+        return super(BaseAccessView, self).render_to_response(context, **response_kwargs)
+
 class AccessKeyView(BaseAccessView):
     access_key_error_message = "Please enter a valid access key"
     def is_request_authorized(self, request):
