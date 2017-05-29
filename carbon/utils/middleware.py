@@ -43,8 +43,7 @@ def access_denied(request, template_name='403.html'):
   t = django.template.loader.get_template(template_name)
   template_values = {}
   template_values['request'] = request
-  return django.http.HttpResponseForbidden(
-      t.render(django.template.RequestContext(request, template_values)))
+  return django.http.HttpResponseForbidden( t.render(template_values, request) )
 
 
 def fallback_403(request):
@@ -79,8 +78,7 @@ def access_denied(request, template_name='403.html'):
   t = django.template.loader.get_template(template_name)
   template_values = {}
   template_values['request'] = request
-  return django.http.HttpResponseForbidden(
-      t.render(django.template.RequestContext(request, template_values)))
+  return django.http.HttpResponseForbidden( t.render( template_values, request ) )
 
 
 
