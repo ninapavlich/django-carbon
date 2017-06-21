@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
+from django.utils.html import strip_tags
 
 from carbon.utils.slugify import unique_slugify
 from carbon.utils.template import get_page_templates, get_page_templates_raw
@@ -239,10 +240,16 @@ class ContentAtom(models.Model):
     synopsis = models.TextField(_('synopsis'), help_text=help['synopsis'], null=True, blank=True)
 
     def get_synopsis(self):
+
         if self.synopsis and self.synopsis != '':
             return self.synopsis
         elif self.content and self.content != '':
-            return Truncator(self.content).words(self.auto_synopsis_length, html=self.auto_synopsis_html)
+            if self.auto_synopsis_html:
+                truncated = Truncator(self.content).words(self.auto_synopsis_length, html=True).strip()
+            else:
+                truncated = Truncator(strip_tags(self.content)).words(self.auto_synopsis_length, html=True).strip()
+            
+            return truncated
         return ''          
 
     class Meta:
