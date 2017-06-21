@@ -781,7 +781,11 @@ class FormEntry(VersionableAtom):
         for field_entry in field_entries:
             field_entry_hash[field_entry.form_field.slug] = field_entry
 
-        input_fields = self.form_schema.get_input_fields()
+        schema = self.form_schema
+        if schema:
+            input_fields = schema.get_input_fields()
+        else:
+            input_fields = []
 
         #POPULATE KEY/VALUE PAIR:
         fields = []
