@@ -229,6 +229,7 @@ class SocialSharingAtom(models.Model):
 
 class ContentAtom(models.Model):
     auto_synopsis_length = 30
+    auto_synopsis_html = True
     help = {
         'content': "",
         'synopsis': ""
@@ -241,8 +242,8 @@ class ContentAtom(models.Model):
         if self.synopsis and self.synopsis != '':
             return self.synopsis
         elif self.content and self.content != '':
-            return Truncator(self.content).words(self.auto_synopsis_length, html=True)
-        return ''            
+            return Truncator(self.content).words(self.auto_synopsis_length, html=self.auto_synopsis_html)
+        return ''          
 
     class Meta:
         abstract = True
