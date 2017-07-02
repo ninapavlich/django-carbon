@@ -12,7 +12,7 @@ from carbon.atoms.admin.content import BaseVersionableAdmin, BaseVersionableTitl
 
 # from .models import *
 from .forms import *
-
+from .models import compile_on_save
 
 
 class TemplateAdmin(VersionAdmin, BaseVersionableAdmin):
@@ -99,19 +99,25 @@ class BaseFrontendPackageAdmin(VersionAdmin, BaseVersionableTitleAdmin):
 
     def response_change(self, request, object):
         response = super(BaseFrontendPackageAdmin, self).response_change(request, object)
-        object.render()
 
-        if object.error_source_content != None:
-            messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+        if compile_on_save == True:
+            object.render()
+            if object.error_source_content != None:
+                messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+        else:
+            messages.add_message(request, messages.INFO, 'Files have been saved and will be compiled and updated shortly.')
 
         return response
 
     def response_add(self, request, object):
         response = super(BaseFrontendPackageAdmin, self).response_add(request, object)
-        object.render()
-
-        if object.error_source_content != None:
-            messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+        
+        if compile_on_save == True:
+            object.render()
+            if object.error_source_content != None:
+                messages.add_message(request, messages.ERROR, 'An error was encountered when rendering %s: %s'%(object.title, object.error_source_content))
+        else:
+            messages.add_message(request, messages.INFO, 'Files have been saved and will be compiled and updated shortly.')
 
         return response
 

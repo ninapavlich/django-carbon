@@ -55,6 +55,14 @@ from carbon.atoms.models.content import *
 
 logger = logging.getLogger()
 
+try:
+    compile_on_save = settings.COMPILE_FRONTEND_PACKAGE_ON_SAVE
+except:
+    compile_on_save = True
+
+
+
+
 class LegacyURLReferer(VersionableAtom):
 
     help = {
