@@ -1,7 +1,12 @@
+import re
+
 from django.utils.safestring import mark_safe
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
 from django.utils.translation import ugettext_lazy as _
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
+
 
 from .forms import *
 # from .models import User, Organization
@@ -11,7 +16,7 @@ from django_inline_wrestler.admin import TabularInlineOrderable
 
 from carbon.atoms.admin.content import BaseVersionableAdmin, BaseVersionableTitleAdmin
 
-
+sensitive_post_parameters_m = method_decorator(sensitive_post_parameters())
 
 class UserAdmin(ContribUserAdmin):
     def preview(self, obj):
@@ -67,6 +72,12 @@ class UserAdmin(ContribUserAdmin):
     readonly_fields = ContribUserAdmin.readonly_fields + ('preview',)
     #'last_login','date_joined', 'impersonate_user'
 
+    
+
+    @sensitive_post_parameters_m
+    def user_change_password(self, request, id, form_url=''):
+        id_cleaned = re.sub('[^0-9]+', '', id)
+        return super(UserAdmin, self).user_change_password(request, id_cleaned, form_url)
 
 
 
