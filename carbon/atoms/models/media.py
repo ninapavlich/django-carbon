@@ -640,13 +640,13 @@ def base_remove_document_file_from_s3(sender, instance, using, model_name, **kwa
         delete_file_on_delete = False
 
     model = get_model(model_name.split('.')[0], model_name.split('.')[1])
-    path_sharing_objects = model.objects.filter(media_file=instance.media_file)
+    path_sharing_objects = model.objects.filter(file=instance.file)
     path_sharing_objects_that_arent_this = [object for object in path_sharing_objects if object != instance]
     exists_in_separate_object = len(path_sharing_objects_that_arent_this) > 0
 
     if exists_in_separate_object==False and delete_file_on_delete:
         try:
-            instance.media_file.delete(save=False)  
+            instance.file.delete(save=False)  
         except:
             pass            
 
