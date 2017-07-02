@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import os
 import errno
 import re
@@ -538,6 +539,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         if force==False and self.needs_render==False and self.error_source_content==None:
             return
 
+        start = time.time()
+
         source, success, error_message = self.get_source()
 
         if success:
@@ -585,6 +588,10 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         else:
             # print 'error, dont save'
             self.error_source_content = error_message
+
+        duration = (time.time() - start)
+        if settings.DEBUG:
+            print u"--- BaseFrontendPackage.render() for %s completed in %sms"%(self, duration)
 
         self.save()
 
@@ -659,6 +666,8 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         return source
 
     def get_source(self):
+        start = time.time()
+
         children = self.get_children()
 
 
@@ -673,7 +682,12 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
         all_errors = ''
         for child in children:
             # print '\n\n'
+
+            child_start = time.time()
             rendered, success, error = child.render()
+            child_duration = (time.time() - child_start)
+            if settings.DEBUG:
+                print u"--- BaseFrontendResource.get_source() for %s completed in %sms"%(child, child_duration)
             if not success:
                 all_success = False
                 all_errors += u"Error in item %s:\n%s\n\n"%(child, error)
@@ -693,6 +707,10 @@ class BaseFrontendPackage(VersionableAtom, TitleAtom):
 
         # unicode_src = source.decode('ascii')
         # utf8_src = unicode_src.encode('utf-8')
+
+        duration = (time.time() - start)
+        if settings.DEBUG:
+            print u"--- BaseFrontendPackage.get_source() for %s completed in %sms"%(self, duration)
 
         return (source, all_success, all_errors)
 
@@ -796,6 +814,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
         
 
     def get_source(self):
+        
+
         if self.custom_source:
             return (self.custom_source, True, None)
         elif self.file_source_url:
@@ -828,7 +848,8 @@ class BaseFrontendResource(VersionableAtom, TitleAtom, OrderedItemAtom):
                 response = urllib2.urlopen(self.file_source_url)
                 http_source = response.read()
                 return (http_source, True, None)
-
+        
+        
         return ('', True, None)
 
     def store_raw_file(self):

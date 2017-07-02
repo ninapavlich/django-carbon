@@ -59,7 +59,7 @@ class Command(BaseCommand):
                 except:
                     print "Error parsing %s. Use format <type>.<pk> - For example: css.1 or js.99"
 
-        if len(update_list) > 0;
+        if len(update_list) > 0:
             if settings.DEBUG:
                 print u'Going to  updates %s resources'%(len(update_list))
             for item in update_list:
