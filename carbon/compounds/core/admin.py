@@ -388,6 +388,8 @@ class LegacyURLAdmin(BaseVersionableAdmin):
     )
     readonly_fields = BaseVersionableAdmin.readonly_fields + ('path','visit_old_link','test_redirect')
 
+    search_fields = ['url', 'path_override', 'path']
+
     # inlines = [LegacyURLRefererInline]    
 
 # admin.site.register(Template, TemplateAdmin)
