@@ -69,7 +69,7 @@ def get_edit_url(context, object):
     return None
 
 @register.assignment_tag(takes_context=True)
-def get_object_cache_key(object, extra_cache_context=None):
+def get_object_cache_key(context, object, extra_cache_context=None):
 
     try:
         # Store a unique key for the object app, model and ID
