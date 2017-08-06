@@ -68,6 +68,21 @@ def get_edit_url(context, object):
         return None
     return None
 
+@register.filter
+def get_object_cache_key(object):
+
+    try:
+        # Store a unique key for the object app, model and ID
+        object_key = u'%s.%s.%s' % (object.__class__._meta.app_label, object.__class__._meta.model_name, object.pk)
+
+        # Combine this key with the last modified date
+        modified_date = '' if not hasattr(object, "modified_date") else object.modified_date
+
+        key = u'%s:%s' % (object_key, modified_date)
+        return key
+    except:
+        return str(object)
+
 
 #TODO -- figure out a way to make this check if user is admin before returning url
 @register.filter(is_safe=True)
