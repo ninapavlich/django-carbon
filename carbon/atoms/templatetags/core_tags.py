@@ -68,17 +68,20 @@ def get_edit_url(context, object):
         return None
     return None
 
-@register.filter
-def get_object_cache_key(object):
+@register.assignment_tag(takes_context=True)
+def get_object_cache_key(object, extra_cache_context=None):
 
     try:
         # Store a unique key for the object app, model and ID
         object_key = u'%s.%s.%s' % (object.__class__._meta.app_label, object.__class__._meta.model_name, object.pk)
 
+        if not extra_cache_context:
+            extra_cache_context = ''
+
         # Combine this key with the last modified date
         modified_date = '' if not hasattr(object, "modified_date") else object.modified_date
 
-        key = u'%s:%s' % (object_key, modified_date)
+        key = u'%s:%s:%s' % (object_key, extra_cache_context, modified_date)
         return key
     except:
         return str(object)
