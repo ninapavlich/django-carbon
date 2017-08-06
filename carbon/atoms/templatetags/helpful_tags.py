@@ -219,3 +219,8 @@ def data_verbose(boundField):
 @register.assignment_tag()
 def get_sorted(list, attribute, reverse=False):
     return sorted(list, key=lambda x: getattr(x, attribute), reverse=reverse)
+
+
+@register.simple_tag()
+def get_cache_duration():
+    return settings.CACHE_DURATION    
