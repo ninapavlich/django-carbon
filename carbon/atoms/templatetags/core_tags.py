@@ -103,7 +103,9 @@ def edit_attribute(object):
 def get_js_package(slug, minified=False):
     model = get_model('core', 'JSPackage')
     try:
-        item = model.objects.get(slug=slug)
+        item = model.objects.defer("generated_file_minified", "generated_file_source").get(slug=slug)
+
+
     except:
         item = None
 
@@ -115,7 +117,7 @@ def get_js_package(slug, minified=False):
 def get_js_source(slug, minified=False):
     model = get_model('core', 'JSPackage')
     try:
-        item = model.objects.get(slug=slug)
+        item = model.objects.only("generated_file_source", "generated_file_minified").get(slug=slug)
     except:
         item = None
 
@@ -131,7 +133,7 @@ def get_js_source(slug, minified=False):
 def get_css_package(slug, minified=False):
     model = get_model('core', 'CSSPackage')
     try:
-        item = model.objects.get(slug=slug)
+        item = model.objects.defer("generated_file_minified", "generated_file_source").get(slug=slug)
     except:
         item = None
 
@@ -139,13 +141,17 @@ def get_css_package(slug, minified=False):
         return item.get_url(minified)
     return ''   
 
+
+
+
 @register.assignment_tag()
 def get_css_source(slug, minified=False):
     model = get_model('core', 'CSSPackage')
     try:
-        item = model.objects.get(slug=slug)
+        item = model.objects.only("generated_file_minified", "generated_file_source").get(slug=slug)
     except:
         item = None
+
 
     if item:
         if minified:
