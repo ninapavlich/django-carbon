@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import urlparse
+from urlparse import urlparse
 
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
@@ -19,12 +19,28 @@ class LegacyURLMiddleware(object):
         if response.status_code != 404:
             return response
 
+
+        full_path = request.get_full_path()
+        
         try:
-            full_path = request.get_full_path()
-            legacy_url_model = get_model(settings.LEGACY_URL_MODEL.split('.')[0], settings.LEGACY_URL_MODEL.split('.')[1])
-            all_legacy_urls = legacy_url_model.objects.all()
+            
+            legacy_url_model = get_model(settings.LEGACY_URL_MODEL.split('.')[0], settings.LEGACY_URL_MODEL.split('.')[1])    
+            legacy_url = legacy_url_model.objects.get(url=full_path)
+
+        except:
+            pass
+
+        try:
             legacy_url = legacy_url_model.objects.get(url=full_path)
             return HttpResponsePermanentRedirect(legacy_url.path)
+        except:
+            pass
+
+        try:
+            parsed = urlparse(full_path)
+            legacy_url = legacy_url_model.objects.get(url=parsed.path)
+            
+            return HttpResponsePermanentRedirect(u'%s?%s'%(legacy_url.path, parsed.query))
         except:
             pass
 
