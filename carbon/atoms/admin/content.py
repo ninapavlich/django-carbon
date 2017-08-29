@@ -140,6 +140,7 @@ class BaseContentAdmin(admin.ModelAdmin):
     )
 
     seo_fields = (
+        'page_meta_title',
         'page_meta_description',
         'page_meta_keywords',
         ('is_searchable','in_sitemap'),
