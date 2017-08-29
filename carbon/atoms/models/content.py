@@ -96,6 +96,7 @@ class PublishableAtom(models.Model):
 class SEOAtom(models.Model):
    
     help = {
+        'page_meta_title':"An override title to be used in the page meta tag.",
         'page_meta_description': "A short description of the page, used for SEO and not displayed to the user; aim for 150-160 characters.",
         'page_meta_keywords': "A short list of keywords of the page, used for SEO and not displayed to the user; aim for 150-160 characters.",
         'is_searchable': "Allow search engines to index this object and display in sitemap.",
@@ -124,6 +125,8 @@ class SEOAtom(models.Model):
     )
 
     #SEO
+    page_meta_title = models.CharField(_('Meta Page Title'), 
+        max_length=2000, blank=True, help_text=help['page_meta_title'])
     page_meta_description = models.CharField(_('Meta Description'), 
         max_length=2000, blank=True, help_text=help['page_meta_description'])
     page_meta_keywords = models.CharField(_('Meta Page Keywords'), 
