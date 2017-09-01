@@ -1,3 +1,5 @@
+import itertools
+
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -410,9 +412,11 @@ class CategoryMolecule(HierarchicalAtom, ContentMolecule):
             raise NotImplementedError('Class should specify an item_class or item_classes value')
         
         if self.item_classes:
-            [item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order') for item_class in self.item_classes]
+            item_list = [list(item_class.objects.published().filter(**{ self.category_property_name: self }).order_by('order')) for item_class in self.item_classes]
+            item_list = list(itertools.chain.from_iterable(item_list))
+            return item_list
         else:
-            return self.item_class.objects.published().filter(**{ self.tag_property_name: self }).order_by('order')
+            return self.item_class.objects.published().filter(**{ self.category_property_name: self }).order_by('order')
 
     def get_children(self):
         return self.category_children

@@ -1,4 +1,5 @@
 import pytz
+import itertools
 
 from django.db import models
 from django.conf import settings
@@ -75,6 +76,21 @@ class MediaFolder(CategoryMolecule):
     # item_class = None
     # item_classes = None
     # category_property_name = 'folder'
+
+
+
+    def get_items(self):
+        #OVERRIDE TO remove published() manager
+        if not self.item_class and not self.item_classes:
+            raise NotImplementedError('Class should specify an item_class or item_classes value')
+        
+        
+        if self.item_classes:
+            item_list = [list(item_class.objects.filter(**{ self.category_property_name: self }).order_by('order')) for item_class in self.item_classes]
+            item_list = list(itertools.chain.from_iterable(item_list))
+            return item_list
+        else:
+            return self.item_class.objects.filter(**{ self.category_property_name: self }).order_by('order')
 
     
     class Meta:
