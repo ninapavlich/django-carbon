@@ -1,7 +1,5 @@
 from django.template import Library
-from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.utils.safestring import mark_safe
 try:
     from django.apps import apps
     get_model = apps.get_model
@@ -14,10 +12,10 @@ register = Library()
 @register.assignment_tag()
 def get_user_groups():
 
-	app_label = settings.USER_GROUP_MODEL.split('.')[0]
-	object_name = settings.USER_GROUP_MODEL.split('.')[1]
-	model = get_model(app_label, object_name)
-	return model.objects.all()
+    app_label = settings.USER_GROUP_MODEL.split('.')[0]
+    object_name = settings.USER_GROUP_MODEL.split('.')[1]
+    model = get_model(app_label, object_name)
+    return model.objects.all()
 
 
 @register.assignment_tag()
@@ -27,7 +25,7 @@ def get_user_group_by_slug(slug):
     object_name = settings.USER_GROUP_MODEL.split('.')[1]
     model = get_model(app_label, object_name)
     try:
-        return model.objects.get(slug=slug)    
+        return model.objects.get(slug=slug)
     except:
         return None
 
@@ -40,6 +38,7 @@ def get_organizations():
     model = get_model(app_label, object_name)
     return model.objects.all()
 
+
 @register.assignment_tag()
 def get_organization_by_slug(slug):
 
@@ -47,6 +46,6 @@ def get_organization_by_slug(slug):
     object_name = settings.ORGANIZATION_MODEL.split('.')[1]
     model = get_model(app_label, object_name)
     try:
-        return model.objects.get(slug=slug)    
+        return model.objects.get(slug=slug)
     except:
-        return None                
+        return None

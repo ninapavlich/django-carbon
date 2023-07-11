@@ -2,8 +2,6 @@ from django.utils import timezone
 
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.generic import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse_lazy
 from django.utils.functional import cached_property
 from django.utils.html import strip_tags
@@ -19,6 +17,7 @@ from carbon.atoms.models.abstract import VersionableAtom
 
 from carbon.atoms.models.content import *
 
+
 class BlogTag(TagMolecule):
     publish_by_default = True
     # default_template = 'blog_tag'
@@ -31,7 +30,8 @@ class BlogTag(TagMolecule):
     def get_absolute_url(self):
         if self.is_external:
             return self.path_override
-        return reverse_lazy('blog_tag', kwargs = {'path': self.get_url_path() })   
+        return reverse_lazy('blog_tag', kwargs={'path': self.get_url_path()})
+
 
 class BlogCategory(CategoryMolecule):
     publish_by_default = True
@@ -46,7 +46,8 @@ class BlogCategory(CategoryMolecule):
     def get_absolute_url(self):
         if self.is_external:
             return self.path_override
-        return reverse_lazy('blog_category', kwargs = {'path': self.get_url_path() })   
+        return reverse_lazy('blog_category', kwargs={'path': self.get_url_path()})
+
 
 class BlogArticleRole(VersionableAtom):
     # url_domain = settings.BLOG_ARTICLE_DOMAIN
@@ -60,7 +61,7 @@ class BlogArticleRole(VersionableAtom):
     }
 
     try:
-        BLOG_ROLE_CHOICES = settings.BLOG_ROLE_CHOICES        
+        BLOG_ROLE_CHOICES = settings.BLOG_ROLE_CHOICES
     except:
         AUTHOR = 'author'
         EDITOR = 'editor'
@@ -71,13 +72,13 @@ class BlogArticleRole(VersionableAtom):
             (PUBLISHER, _("Publisher")),
         )
 
-    order = models.IntegerField(default=0, help_text=help['order'])   
-    
+    order = models.IntegerField(default=0, help_text=help['order'])
+
     # YOU GOTTA IMPLEMENT THIS:
     article = models.ForeignKey('blog.BlogArticle')
     user = models.ForeignKey(settings.BLOG_ROLE_USER_MODEL)
-    role = models.CharField(_('Role'), max_length=255, 
-        choices=BLOG_ROLE_CHOICES, help_text=help['role'])
+    role = models.CharField(_('Role'), max_length=255,
+                            choices=BLOG_ROLE_CHOICES, help_text=help['role'])
 
 
 class BlogArticle(ContentMolecule):
@@ -89,14 +90,14 @@ class BlogArticle(ContentMolecule):
 
     class Meta:
         abstract = True
-   
-    allow_comments = models.BooleanField(default=False, 
-        help_text=help['allow_comments'])
-  
+
+    allow_comments = models.BooleanField(default=False,
+                                         help_text=help['allow_comments'])
+
     related = models.ManyToManyField('self', blank=True, symmetrical=True)
     tags = models.ManyToManyField('blog.BlogTag', blank=True)
-    category = models.ForeignKey('blog.BlogCategory', blank=True, null=True, 
-        on_delete=models.SET_NULL)
+    category = models.ForeignKey('blog.BlogCategory', blank=True, null=True,
+                                 on_delete=models.SET_NULL)
 
     def build_path(self, path_attribute='slug', parent_path_attribute='path'):
 
@@ -108,18 +109,16 @@ class BlogArticle(ContentMolecule):
     def get_absolute_url(self):
         if self.is_external:
             return self.path_override
-        return reverse_lazy('blog_article', kwargs = {'path': self.get_url_path() }) 
-    
+        return reverse_lazy('blog_article', kwargs={'path': self.get_url_path()})
 
 
 class BlogComment(UserInputMolecule):
+
     class Meta:
         abstract = True
         ordering = ['created_date']
-   
 
     article = models.ForeignKey('blog.BlogArticle')
-
 
     in_response_to = models.ForeignKey('self', blank=True, null=True)
 
@@ -130,7 +129,7 @@ class BlogComment(UserInputMolecule):
         if not self.in_response_to:
             return 1
         else:
-            return self.in_response_to.level+1
+            return self.in_response_to.level + 1
 
     @cached_property
     def is_draft(self):
@@ -142,11 +141,11 @@ class BlogComment(UserInputMolecule):
 
     @cached_property
     def is_visible(self):
-        return self.is_published and self.is_flagged==False and self.is_rejected==False and self.is_deleted==False
+        return self.is_published and self.is_flagged is False and self.is_rejected is False and self.is_deleted is False
 
     @cached_property
     def is_flagged(self):
-        #if this has been manually approved, then its not flagged
+        # if this has been manually approved, then its not flagged
         if self.moderation_status == ModerationAtom.APPROVED:
             return False
         max_flags = 1 if not hasattr(settings, 'BLOG_MAX_FLAGS') else settings.BLOG_MAX_FLAGS
@@ -179,20 +178,19 @@ class BlogComment(UserInputMolecule):
     def get_vote_total(self):
         return self.get_upvotes_total() - self.get_downvotes_total()
 
-
     def vote(self, user, type):
         vote_model = get_model(settings.BLOG_COMMENT_VOTE_MODEL.split('.')[0], settings.BLOG_COMMENT_VOTE_MODEL.split('.')[1])
-        vote, vote_created = vote_model.objects.get_or_create(comment=self,voter=user)
+        vote, vote_created = vote_model.objects.get_or_create(comment=self, voter=user)
         vote.type = type
         vote.save()
 
     def get_votes(self, type):
         vote_model = get_model(settings.BLOG_COMMENT_VOTE_MODEL.split('.')[0], settings.BLOG_COMMENT_VOTE_MODEL.split('.')[1])
-        return vote_model.objects.filter(comment=self,type=type)
+        return vote_model.objects.filter(comment=self, type=type)
 
     def flag(self, user):
         flag_model = get_model(settings.BLOG_COMMENT_FLAG_MODEL.split('.')[0], settings.BLOG_COMMENT_FLAG_MODEL.split('.')[1])
-        flag, flag_created = flag_model.objects.get_or_create(comment=self,voter=user)
+        flag, flag_created = flag_model.objects.get_or_create(comment=self, voter=user)
         flag.type = UpvoteDownvoteFlagMolecule.FLAG
         flag.save()
 
@@ -207,14 +205,13 @@ class BlogComment(UserInputMolecule):
         if max_age_minutes == 0:
             return False
 
-        #TODO: wonder if i should use modified_date or created_date here...
         comment_age = timezone.now() - self.created_date
-        comment_age_minutes = (comment_age.days * (24*60)) + (comment_age.seconds/60)
+        comment_age_minutes = (comment_age.days * (24 * 60)) + (comment_age.seconds / 60)
 
         return comment_age_minutes <= max_age_minutes
 
     def attempt_to_update(self, new_content):
-        
+
         if self.can_update:
             self.content = new_content
             self.save()
@@ -230,7 +227,6 @@ class BlogComment(UserInputMolecule):
     def generate_title(self):
         words = 12 if not hasattr(settings, 'BLOG_COMMENT_AUTO_TITLE_LENGTH') else settings.BLOG_COMMENT_AUTO_TITLE_LENGTH
         return Truncator(self.content).words(words, html=True)
-        
 
     def save(self, *args, **kwargs):
         allow_html = False if not hasattr(settings, 'BLOG_COMMENT_ALLOW_HTML') else settings.BLOG_COMMENT_ALLOW_HTML
@@ -241,7 +237,7 @@ class BlogComment(UserInputMolecule):
         if max_words:
             self.content = Truncator(self.content).words(max_words, html=True)
 
-        is_new = True if not self.pk else False            
+        is_new = True if not self.pk else False
 
         super(BlogComment, self).save(*args, **kwargs)
 
@@ -260,38 +256,37 @@ class BlogComment(UserInputMolecule):
 
         if branch:
             list.append(branch)
-        comment_children = cls.objects.filter(parent=parent,in_response_to=branch)
+        comment_children = cls.objects.filter(parent=parent, in_response_to=branch)
         for child in comment_children:
-            list = cls._build_comment_tree(parent, level+1, list, child)
+            list = cls._build_comment_tree(parent, level + 1, list, child)
         return list
 
-
-
     @classmethod
-    def get_comments_for_parent(cls,parent, include_drafts=False, include_rejected=True):
+    def get_comments_for_parent(cls, parent, include_drafts=False, include_rejected=True):
         tree = cls._build_comment_tree(parent)
 
-        if include_drafts==False:
-            tree = [item for item in tree if item.moderation_status!=ModerationAtom.SUBMITTED]
+        if include_drafts is False:
+            tree = [item for item in tree if item.moderation_status != ModerationAtom.SUBMITTED]
             # comments = comments.exclude(moderation_status=ModerationAtom.SUBMITTED)
 
-        if include_rejected==False:
-            tree = [item for item in tree if item.moderation_status!=ModerationAtom.REJECTED]
+        if include_rejected is False:
+            tree = [item for item in tree if item.moderation_status != ModerationAtom.REJECTED]
             # comments = comments.exclude(moderation_status=ModerationAtom.REJECTED)
-
 
         return tree
 
+
 class BlogCommentVote(UpvoteDownvoteFlagMolecule):
+
     class Meta:
         abstract = True
-    
+
     comment = models.ForeignKey('blog.BlogComment')
 
+
 class BlogCommentFlag(UpvoteDownvoteFlagMolecule):
+
     class Meta:
         abstract = True
-    
-    comment = models.ForeignKey('blog.BlogComment')    
 
-
+    comment = models.ForeignKey('blog.BlogComment')

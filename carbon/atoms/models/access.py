@@ -1,14 +1,14 @@
 import uuid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.functional import cached_property
 
 from .abstract import *
+
 
 class AccessAtom(models.Model):
 
     help = {
-        'access':"Access level",
+        'access': "Access level",
     }
 
     OWNER = 10
@@ -20,13 +20,11 @@ class AccessAtom(models.Model):
         (READ, _("Can View")),
     )
 
-    access = models.IntegerField(choices=ACCESS_CHOICES, 
-        help_text=help['access'])
+    access = models.IntegerField(choices=ACCESS_CHOICES,
+                                 help_text=help['access'])
 
     class Meta:
         abstract = True
-
-
 
 
 # -- Level 4
@@ -34,32 +32,31 @@ class AccessKeyAtom(models.Model):
     auto_generate_key = True
 
     help = {
-        'access_key':"Require access key to access this page.",
+        'access_key': "Require access key to access this page.",
     }
 
-    access_key = models.CharField(_("key"), max_length=50, blank=True, 
-        null=True, unique=True, help_text=help['access_key'])
+    access_key = models.CharField(_("key"), max_length=50, blank=True,
+                                  null=True, unique=True, help_text=help['access_key'])
 
     class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
-        
+
         if self.auto_generate_key and not self.access_key:
-            self.access_key = uuid.uuid1().hex 
+            self.access_key = uuid.uuid1().hex
 
         super(AccessKeyAtom, self).save(*args, **kwargs)
 
-
     def get_access_key_session_key(self):
-        return u'%s_access_key'%(self.uuid)
+        return u'%s_access_key' % (self.uuid)
 
     def is_authorized(self, request):
 
         if(self.access_key):
             stored_password = request.session.get(self.get_access_key_session_key(), None)
             return stored_password == self.access_key
-        
+
         return True
 
     def test_key(self, access_key):
@@ -74,11 +71,10 @@ class AccessKeyAtom(models.Model):
         request.session[self.get_access_key_session_key()] = None
 
 
-
 class AccessibleAtom(models.Model):
 
     help = {
-        'require_registered_user' : "Require logged in user" 
+        'require_registered_user': "Require logged in user"
     }
 
     # OPEN = 1
@@ -96,57 +92,53 @@ class AccessibleAtom(models.Model):
     #     (CUSTOM, _("Custom")),
     # )
 
+    require_registered_user = models.BooleanField(_("Required Registered Users"),
+                                                  default=False, help_text=help['require_registered_user'])
 
-    require_registered_user = models.BooleanField( _("Required Registered Users"), 
-        default = False, help_text=help['require_registered_user'])
+    # THOUGHT: Not sure if I love this design
+    user_whitelist = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                            blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_user')
 
+    user_blacklist = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                            blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_user')
 
-    #THOUGHT: Not sure if I love this design
-    user_whitelist = models.ManyToManyField(settings.AUTH_USER_MODEL, 
-        blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_user')
+    groups_whitelist = models.ManyToManyField('auth.Group',
+                                              blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_groups')
 
-    user_blacklist = models.ManyToManyField(settings.AUTH_USER_MODEL, 
-        blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_user')
-
-    groups_whitelist = models.ManyToManyField('auth.Group', 
-        blank=True, null=True, related_name='%(app_label)s_%(class)s_whitelist_groups')
-
-    groups_blacklist = models.ManyToManyField('auth.Group', 
-        blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_groups')
+    groups_blacklist = models.ManyToManyField('auth.Group',
+                                              blank=True, null=True, related_name='%(app_label)s_%(class)s_blacklist_groups')
 
     class Meta:
         abstract = True
 
-
-
     def is_authorized(self, request):
-        
-        if self.require_registered_user: 
+
+        if self.require_registered_user:
             if not request.user or not request.user.is_authenticated():
                 return False
 
         if len(self.object.groups_whitelist.all()) > 0:
-            #make sure user is allowed
-            #TODO
+            # make sure user is allowed
+            # TODO
             return False
 
         if len(self.object.groups_blacklist.all()) > 0:
-            #make sure user is allowed 
-            #TODO
-            return False       
+            # make sure user is allowed
+            # TODO
+            return False
 
         if len(self.user_whitelist.all()) > 0:
             if not request.user or not request.user.is_authenticated() \
-            or not request.user in user_whitelist:
+                    or not request.user in user_whitelist:
                 return False
 
         if len(self.user_blacklist.all()) > 0:
             if not request.user or not request.user.is_authenticated() \
-            or request.user in user_blacklist:
+                    or request.user in user_blacklist:
                 return False
 
         return True
 
     def custom_access_allowed(self, request):
-        #OVERRIDE IN SUBCLASS
+        # OVERRIDE IN SUBCLASS
         return True

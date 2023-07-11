@@ -18,18 +18,19 @@ from carbon.atoms.admin.content import BaseVersionableAdmin, BaseVersionableTitl
 
 sensitive_post_parameters_m = method_decorator(sensitive_post_parameters())
 
+
 class UserAdmin(ContribUserAdmin):
+
     def preview(self, obj):
         if obj.image:
             try:
-                return mark_safe("<img src='%s' alt='%s preview'/>"%(obj.image.thumbnail_url, obj.image.title))
+                return mark_safe("<img src='%s' alt='%s preview'/>" % (obj.image.thumbnail_url, obj.image.title))
             except:
                 return ""
         return ''
-    
 
     autocomplete_lookup_fields = {
-        'fk': ['image',],
+        'fk': ['image', ],
     }
     raw_id_fields = ('image',)
 
@@ -38,47 +39,43 @@ class UserAdmin(ContribUserAdmin):
     add_fieldsets = (
         ("User", {
             'classes': (),
-            'fields': ('email', 'password1', 'password2','first_name','last_name',)}
-        ),
+            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name',)}
+         ),
     )
 
     fieldsets = (
-        ('User', { 
+        ('User', {
             'fields': (
-                ("first_name","last_name"),
-                ('email','date_of_birth'),
+                ("first_name", "last_name"),
+                ('email', 'date_of_birth'),
                 'password',
                 'about',
-                ('preview','image')
+                ('preview', 'image')
             ),
-            'classes': ( 'grp-collapse grp-open', )
+            'classes': ('grp-collapse grp-open', )
         }),
         (_('CMS Permissions'), {
             'fields': (
                 ('is_active', 'is_staff',),
-                
+
                 'is_superuser',
                 ('groups')
             ),
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ('grp-collapse grp-closed', )
         }),
     )
 
-    list_display = ('preview','email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
-    list_display_links = ('preview','email','first_name','last_name')
+    list_display = ('preview', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser')
+    list_display_links = ('preview', 'email', 'first_name', 'last_name')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
     readonly_fields = ContribUserAdmin.readonly_fields + ('preview',)
-    #'last_login','date_joined', 'impersonate_user'
-
-    
 
     @sensitive_post_parameters_m
     def user_change_password(self, request, id, form_url=''):
         id_cleaned = re.sub('[^0-9]+', '', id)
         return super(UserAdmin, self).user_change_password(request, id_cleaned, form_url)
-
 
 
 class UserGroupAdmin(VersionAdmin, BaseVersionableTitleAdmin):
@@ -88,7 +85,7 @@ class UserGroupAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     form = UserGroupAdminForm
 
     core_fields = (
-        ('title','slug'),
+        ('title', 'slug'),
         ('synopsis'),
         ('content')
     )
@@ -96,55 +93,56 @@ class UserGroupAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     fieldsets = (
         ("Main Body", {
             'fields': core_fields,
-            'classes': ( 'grp-collapse grp-open', )
+            'classes': ('grp-collapse grp-open', )
         }),
-        
+
         ("Meta", {
             'fields': meta_fields,
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ('grp-collapse grp-closed', )
         })
     )
-    search_fields = ('title','admin_note', 'synopsis', 'content')
+    search_fields = ('title', 'admin_note', 'synopsis', 'content')
 
 
 class UserGroupMemberInGroupAdmin(TabularInlineOrderable):
-    #model = UserGroupMember
+    # model = UserGroupMember
 
     def edit_member_link(self, obj):
         if obj.user:
             try:
-                return mark_safe("<a href='%s'>Edit User></a>"%(obj.user.edit_item_url))
+                return mark_safe("<a href='%s'>Edit User></a>" % (obj.user.edit_item_url))
             except:
                 return ""
         return ''
 
     fk_name = 'group'
     autocomplete_lookup_fields = {
-        'fk': ['user',],
+        'fk': ['user', ],
     }
     raw_id_fields = ('user',)
-    fields = ('order','user','edit_member_link')
+    fields = ('order', 'user', 'edit_member_link')
     extra = 0
     readonly_fields = ('edit_member_link',)
 
+
 class UserGroupMemberInUserAdmin(admin.TabularInline):
-    #model = UserGroupMember
+    # model = UserGroupMember
 
     def all_members_link(self, obj):
         if obj.group:
             try:
-                return mark_safe("<a href='%s'>See All Members ></a>"%(obj.group.edit_item_url))
+                return mark_safe("<a href='%s'>See All Members ></a>" % (obj.group.edit_item_url))
             except:
                 return ""
         return ''
 
     fk_name = 'user'
     autocomplete_lookup_fields = {
-        'fk': ['group',],
+        'fk': ['group', ],
     }
     raw_id_fields = ('group',)
-    fields = ('group','all_members_link',)
-    extra = 0    
+    fields = ('group', 'all_members_link',)
+    extra = 0
     readonly_fields = ('all_members_link',)
 
 
@@ -153,7 +151,7 @@ class OrganizationAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     list_editable = ('order',)
 
     core_fields = (
-        ('title','slug'),
+        ('title', 'slug'),
         ('synopsis'),
         ('content')
     )
@@ -161,25 +159,22 @@ class OrganizationAdmin(VersionAdmin, BaseVersionableTitleAdmin):
     fieldsets = (
         ("Main Body", {
             'fields': core_fields,
-            'classes': ( 'grp-collapse grp-open', )
+            'classes': ('grp-collapse grp-open', )
         }),
-        
+
         ("Meta", {
             'fields': meta_fields,
-            'classes': ( 'grp-collapse grp-closed', )
+            'classes': ('grp-collapse grp-closed', )
         })
     )
-    search_fields = ('title','admin_note', 'synopsis', 'content')
-    
-    
+    search_fields = ('title', 'admin_note', 'synopsis', 'content')
+
 
 class SocialContactLinkInline(TabularInlineOrderable):
     # model = SocialContactLink
-    fk_name = 'user'    
-    fields = ('order','title','url','icon', 'css_classes', 'extra_attributes')
+    fk_name = 'user'
+    fields = ('order', 'title', 'url', 'icon', 'css_classes', 'extra_attributes')
     extra = 0
 
-# admin.site.register(Organization, OrganizationAdmin)    
+# admin.site.register(Organization, OrganizationAdmin)
 # admin.site.register(User, UserAdmin)
-
-

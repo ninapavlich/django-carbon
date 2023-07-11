@@ -1,20 +1,14 @@
 {% extends "admin/base_site.html" %}
-
 {% load i18n l10n media_admin_tags %}
-
 {% block title %}{% trans "Tag items..." %} | {% trans 'Django site admin' %}{% endblock %}
-
-
 {% block breadcrumbs %}
-    <ul>
-        <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-        <li>{% trans "Tag items..." %}</li>
-    </ul>
+<ul>
+    <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+    <li>{% trans "Tag items..." %}</li>
+</ul>
 {% endblock %}
-
 {% block content %}
-
- <style>
+<style>
     .grid{
         width:100%;
         overflow:hidden;
@@ -245,22 +239,14 @@
     }
     }
 
-</style> 
-
-
-
+</style>
 <form action="" method="post">{% csrf_token %}
-
-
     <fieldset class="grp-module">
         <h2 class="grp-collapse-handler">Tag {{queryset|length}} item(s) with...</h2>
-
-
         <div class="grp-row grp-cells-1 folder l-2c-fluid l-d-4">
             <div class="c-1">
                 <label class="required" for="id_folder">{% trans "Tag" %}</label>
             </div>
-
             <div class="c-2">
                 <select name="tag" id="id_tag">
                     {% for tag in tags %}
@@ -269,7 +255,6 @@
                 </select>
             </div>
         </div>
-
         <div style="margin:10px;padding:10px;clear:both;">
             <strong>The following items will be tagged...</strong>
             <ul class="grid">
@@ -282,25 +267,17 @@
                 </li>
                 {% endfor %}
             </ul>
-            
         </div>
-
         {% for obj in queryset %}
         <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
         {% endfor %}
-
         <input type="hidden" name="action" value="tag_items" />
         <input type="hidden" name="post" value="yes" />
-
-        
     </fieldset>
-    
     <footer class="grp-module grp-submit-row grp-fixed-footer">
-        <ul>            
-            <li><input type="submit" name="apply" class="grp-button" value="Apply Tag" /></li>            
+        <ul>
+            <li><input type="submit" name="apply" class="grp-button" value="Apply Tag" /></li>
         </ul>
     </footer>
-  
 </form>
-
 {% endblock %}

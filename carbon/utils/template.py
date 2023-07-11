@@ -1,8 +1,5 @@
-from os import path
-from glob import glob
 import os
 import fnmatch
-import re
 
 from django.conf import settings
 from django.core.cache import cache
@@ -21,9 +18,7 @@ except AttributeError:
     from django.template.loaders.app_directories import app_template_dirs
 
 
-
-
-def get_page_templates_raw(ignore_templates = None):
+def get_page_templates_raw(ignore_templates=None):
 
     if not ignore_templates:
         ignore_templates = ()
@@ -39,14 +34,15 @@ def get_page_templates_raw(ignore_templates = None):
 
     return files
 
-def get_page_templates(ignore_templates = None):
+
+def get_page_templates(ignore_templates=None):
 
     raw_templates = get_page_templates_raw(ignore_templates)
     output = []
 
     template_dirs = settings.TEMPLATES[0]['DIRS']
     for template_dir in template_dirs:
-        
+
         def name(n):
             return n.replace(template_dir, '')\
                 .replace('_', ' ')\
@@ -59,7 +55,7 @@ def get_page_templates(ignore_templates = None):
 
 
 def get_all_templates():
-   
+
     template_files = []
     for template_dir in (settings.TEMPLATES[0]['DIRS'] + app_template_dirs):
         for dir, dirnames, filenames in os.walk(template_dir):
@@ -68,8 +64,10 @@ def get_all_templates():
 
     return template_files
 
+
 def get_template_cache_key(template_pk_or_slug):
     return 'carbon_template_'+template_pk_or_slug
+
 
 def get_template_by_pk_or_slug(template_pk_or_slug):
 
@@ -79,29 +77,28 @@ def get_template_by_pk_or_slug(template_pk_or_slug):
         object_name = settings.TEMPLATE_MODEL.split('.')[1]
         model = get_model(app_label, object_name)
 
+        found_template = cache.get(get_template_cache_key(template_pk_or_slug))
 
-        found_template = cache.get( get_template_cache_key(template_pk_or_slug) )
-        
         if not found_template:
 
-            if isinstance( template_pk_or_slug, ( int, long ) ):
-                #try by pk
+            if isinstance(template_pk_or_slug, (int, long)):
+                # try by pk
                 try:
                     found_template = model.objects.get(pk=template_pk_or_slug)
                 except:
                     pass
 
             if found_template == None:
-                #try by slug
+                # try by slug
                 try:
                     found_template = model.objects.get(slug=template_pk_or_slug)
                 except:
                     pass
 
-            #TRY WITH DB PREFIX
+            # TRY WITH DB PREFIX
             prefix = 'template_'
             if found_template == None:
-                #try by slug
+                # try by slug
                 unprefixed_slug = template_pk_or_slug.replace(prefix, '')
                 try:
                     found_template = model.objects.get(slug=unprefixed_slug)
@@ -109,10 +106,8 @@ def get_template_by_pk_or_slug(template_pk_or_slug):
                     pass
 
             cache.set(get_template_cache_key(template_pk_or_slug), found_template, settings.CACHE_DURATION)
-            
+
     except:
         pass
 
-    
-
-    return found_template    
+    return found_template

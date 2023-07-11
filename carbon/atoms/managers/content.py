@@ -1,7 +1,6 @@
 from django.db import models
 
 
-
 class PublishableQueryset(models.query.QuerySet):
 
     DRAFT = 10
@@ -10,16 +9,17 @@ class PublishableQueryset(models.query.QuerySet):
     UNPUBLISHED = 40
 
     def published(self):
-        return self.filter(publication_status = PublishableQueryset.PUBLISHED)
+        return self.filter(publication_status=PublishableQueryset.PUBLISHED)
 
     def drafts(self):
-        return self.filter(publication_status__lte = PublishableQueryset.PUBLISHED)
+        return self.filter(publication_status__lte=PublishableQueryset.PUBLISHED)
 
     def unpublished(self):
-        return self.filter(publication_status = PublishableQueryset.UNPUBLISHED)
+        return self.filter(publication_status=PublishableQueryset.UNPUBLISHED)
 
 
 class PublishableManager(models.Manager):
+
     def get_queryset(self):
         return PublishableQueryset(self.model, using=self._db)
 
@@ -31,7 +31,6 @@ class PublishableManager(models.Manager):
 
     def drafts(self):
         return self.get_queryset().drafts()
-    
+
     def unpublished(self):
         return self.get_queryset().unpublished()
-

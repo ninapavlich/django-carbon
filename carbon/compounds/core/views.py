@@ -1,10 +1,6 @@
 from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import redirect, render
-from django.template import RequestContext
-from django.utils.translation import ugettext as _
-from django.views.generic import DetailView
-from django.views.generic.base import RedirectView
+from django.shortcuts import render
 
 try:
     from django.apps import apps
@@ -19,8 +15,7 @@ from .models import *
 from .forms import *
 
 
-def admin_import_links( request ):    
-    
+def admin_import_links(request):
 
     if not request.user or not request.user.is_staff:
         raise Http404()
@@ -35,25 +30,23 @@ def admin_import_links( request ):
             app_label = settings.LEGACY_URL_MODEL.split('.')[0]
             object_name = settings.LEGACY_URL_MODEL.split('.')[1]
             model = get_model(app_label, object_name)
-            
+
             results = model.import_links(import_file, request)
 
             messages.success(request, results)
 
         else:
             messages.warning(request, 'No .CSV file specified')
-       
+
     else:
         form = UploadFileForm()
         pass
-
-    
 
     # Render list page with the documents and the form
     # return render_to_response(
     #     'admin/page/import_legacy_urls.html',
     #     {'form': form},
     #     context_instance=RequestContext(request)
-    # )  
+    # )
     # Render list page with the documents and the form
-    return render(request, 'admin/page/import_legacy_urls.html', {'form': form})  
+    return render(request, 'admin/page/import_legacy_urls.html', {'form': form})

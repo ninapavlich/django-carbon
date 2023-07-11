@@ -7,27 +7,23 @@ To activate your index dashboard add the following to your settings.py::
 """
 
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
 
 from grappelli.dashboard import modules, Dashboard
-from grappelli.dashboard.modules import DashboardModule
 from grappelli.dashboard.utils import get_admin_site_name
-
-
 
 
 # class AdminTasksDashboardModule(DashboardModule):
 
 #     title = 'Admin Tasks'
 #     template = 'admin/admin_tasks.html'
-    
+
 #     def getActionMessage(self, item_count):
 #         if item_count == 0:
 #             return ""
 #         else:
 #             return "There are new admin tasks."
 
-    
+
 #     def getVerbPhrase(self, count):
 #         if count >= 1:
 #             return str(count)
@@ -38,11 +34,11 @@ from grappelli.dashboard.utils import get_admin_site_name
 #         if self._initialized:
 #             return
 #         new_children = []
-        
+
 #         unconnected_urls = LegacyURL.objects.needs_redirect()
 #         if len(unconnected_urls) > 0:
 #             new_children.append({
-#                 'title': "There are %s urls to be redirected"%(self.getVerbPhrase(len(unconnected_urls))), 
+#                 'title': "There are %s urls to be redirected"%(self.getVerbPhrase(len(unconnected_urls))),
 #                 'url': "/admin/site_admin/legacyurl/?_redirect_path=0",
 #                 "external":False,
 #             })
@@ -55,10 +51,9 @@ from grappelli.dashboard.utils import get_admin_site_name
 
 
 class BaseAdminDashboard(Dashboard):
-    
-    #sidebar_model
-    #main_model
-    
+
+    # sidebar_model
+    # main_model
 
     def init_with_context(self, context):
         site_name = get_admin_site_name(context)
@@ -78,9 +73,8 @@ class BaseAdminDashboard(Dashboard):
                 models=child_links,
                 css_classes=classes
             ))
-        
-        
-        classes = ['grp-closed'] if main_link_sets.count()>0 else []
+
+        classes = ['grp-closed'] if main_link_sets.count() > 0 else []
 
         # -- Django Admin
         self.children.append(modules.AppList(
@@ -90,8 +84,6 @@ class BaseAdminDashboard(Dashboard):
             css_classes=classes
         ))
 
-         
-
         sidebar_link_sets = self.sidebar_model.objects.all()
         for link_set in sidebar_link_sets:
 
@@ -99,9 +91,9 @@ class BaseAdminDashboard(Dashboard):
             child_links = link_set.get_children()
             for child_link in child_links:
                 children.append({
-                    'title':child_link.title,
-                    'url':child_link.url,
-                    'external':False
+                    'title': child_link.title,
+                    'url': child_link.url,
+                    'external': False
                 })
 
             # append another link list module for "support".
@@ -110,9 +102,7 @@ class BaseAdminDashboard(Dashboard):
                 column=2,
                 children=children
             ))
-        
 
-        
         # self.children.append(AdminTasksDashboardModule(
 
         #     _('Admin Tasks'),
@@ -127,5 +117,3 @@ class BaseAdminDashboard(Dashboard):
             collapsible=False,
             column=2,
         ))
-
-

@@ -1,27 +1,14 @@
-from django.conf import settings
-
 from django.core.paginator import Paginator, InvalidPage
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpResponse, Http404, HttpResponseRedirect, \
-    HttpResponseForbidden, HttpResponsePermanentRedirect
-from django.template import loader, Context, Template
-from django.template.response import SimpleTemplateResponse
+from django.http import HttpResponsePermanentRedirect, Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
-try:
-    from django.apps import apps
-    get_model = apps.get_model
-except:
-    from django.db.models.loading import get_model
-
 
 
 from .decorators import admins_skip_cache, users_skip_cache
 
-from carbon.utils.template import get_template_by_pk_or_slug
 
 class NonAdminCachableView(object):
 
@@ -29,11 +16,12 @@ class NonAdminCachableView(object):
     def dispatch(self, *args, **kwargs):
         return super(NonAdminCachableView, self).dispatch(*args, **kwargs)
 
+
 class NonUserCachableView(object):
 
     @method_decorator(users_skip_cache)
     def dispatch(self, *args, **kwargs):
-        return super(NonUserCachableView, self).dispatch(*args, **kwargs) 
+        return super(NonUserCachableView, self).dispatch(*args, **kwargs)
 
 
 class ObjectTemplateResponseMixin(object):
@@ -42,7 +30,7 @@ class ObjectTemplateResponseMixin(object):
     template_engine = None
     response_class = TemplateResponse
     content_type = None
-    
+
     def get_template_names(self):
         if self.object and self.object.template:
             return [self.object.template.slug]
@@ -70,10 +58,9 @@ class ObjectTemplateResponseMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(ObjectTemplateResponseMixin, self).get_context_data(**kwargs)
-        if hasattr(self, 'object') and self.object != None:
+        if hasattr(self, 'object') and self.object is not None:
             context['object_verbose_name'] = self.object._meta.verbose_name
             context['object_verbose_name_plural'] = self.object._meta.verbose_name_plural
-            
 
         return context
 
@@ -83,14 +70,14 @@ class ObjectTemplateResponseMixin(object):
 #   def get_template_names(self):
 #       if not self.template_slug:
 #           raise ImproperlyConfigured( "template_slug not defined.")
-        
+
 #       return [self.template_slug]
 
 
 class HasSiblingsView(object):
 
     def get_siblings(self):
-        
+
         try:
             return self.object.get_siblings()
         except:
@@ -104,18 +91,17 @@ class HasSiblingsView(object):
         self.next, self.previous = self.get_next_previous(self.siblings)
 
         return super(HasSiblingsView, self).get(request, *args, **kwargs)
-        
+
     def post(self, request, *args, **kwargs):
 
         self.siblings = self.get_siblings()
         self.next, self.previous = self.get_next_previous(self.siblings)
 
         return super(HasSiblingsView, self).post(request, *args, **kwargs)
-    
 
     def get_context_data(self, **kwargs):
         context = super(HasSiblingsView, self).get_context_data(**kwargs)
-        if self.siblings != None:
+        if self.siblings is not None:
             context['siblings'] = self.siblings
             context['next'] = self.next
             context['previous'] = self.previous
@@ -156,7 +142,7 @@ class HasChildrenView(HasSiblingsView):
             })
 
     def get_paginator(self, queryset, per_page, orphans=0,
-                        allow_empty_first_page=True, **kwargs):
+                      allow_empty_first_page=True, **kwargs):
         """
         Return an instance of the paginator for this view.
         """
@@ -180,10 +166,9 @@ class HasChildrenView(HasSiblingsView):
             self.object_list = children
             self.children = children
         except:
-             self.object_list = None 
+            self.object_list = None
 
         return super(HasChildrenView, self).get(request, *args, **kwargs)
-    
 
     def post(self, request, *args, **kwargs):
 
@@ -195,20 +180,13 @@ class HasChildrenView(HasSiblingsView):
             self.object_list = children
             self.children = children
         except:
-             self.object_list = None 
-
+            self.object_list = None
 
         return super(HasChildrenView, self).post(request, *args, **kwargs)
 
-
-    
-
-
-        
-
     def get_context_data(self, **kwargs):
         context = super(HasChildrenView, self).get_context_data(**kwargs)
-        if self.object_list != None:
+        if self.object_list is not None:
             paginator, page, queryset, is_paginated = self.paginate_queryset(self.object_list, self.paginate_by)
             context['paginator'] = paginator
             context['page_obj'] = page
@@ -222,11 +200,9 @@ class HasChildrenView(HasSiblingsView):
         return context
 
 
-
 class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
     object = None
     catch_404s = True
-    
 
     def get_template(self):
         return self.object.template
@@ -236,11 +212,11 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
         if not self.object:
             self.object = self.get_object()
 
-        if self.object.temporary_redirect != None and self.object.temporary_redirect != '':
-            return HttpResponseRedirect( self.object.temporary_redirect )
+        if self.object.temporary_redirect is not None and self.object.temporary_redirect != '':
+            return HttpResponseRedirect(self.object.temporary_redirect)
 
-        if self.object.permanent_redirect != None and self.object.permanent_redirect != '':
-            return HttpResponsePermanentRedirect( self.object.permanent_redirect )
+        if self.object.permanent_redirect is not None and self.object.permanent_redirect != '':
+            return HttpResponsePermanentRedirect(self.object.permanent_redirect)
 
     def post(self, request, *args, **kwargs):
 
@@ -248,13 +224,11 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
 
         return super(AddressibleView, self).post(request, *args, **kwargs)
 
-
     def get(self, request, *args, **kwargs):
-        
+
         self.handle(request)
 
         return super(AddressibleView, self).get(request, *args, **kwargs)
-
 
     def get_object_query(self, queryset, path):
         return queryset.filter(path=path).select_related('template').get()
@@ -265,25 +239,24 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
         else:
             path = self.request.path
 
-        #Make sure path starts and ends with slashes
+        # Make sure path starts and ends with slashes
         if not path.endswith("/"):
-            path = "%s/"%path
+            path = "%s/" % path
 
         if not path.startswith("/"):
-            path = "/%s"%path
+            path = "/%s" % path
 
         return path
 
-
     def get_object(self, queryset=None):
-        
+
         if self.object:
             return self.object
 
         path = self.get_query_path()
 
         queryset = self.get_queryset()
-        
+
         # search_path = path
         # if hasattr(self.model, 'url_domain') and self.model.url_domain:
         #     search_path = path.replace(self.model.url_domain, '')
@@ -292,10 +265,10 @@ class AddressibleView(ObjectTemplateResponseMixin, SingleObjectMixin):
             # print path
             # print queryset
             obj = self.get_object_query(queryset, path)
-            return obj 
+            return obj
         except:
             if self.catch_404s:
                 raise Http404(_("No %(verbose_name)s found matching the query") %
-                        {'verbose_name': queryset.model._meta.verbose_name})
+                              {'verbose_name': queryset.model._meta.verbose_name})
 
             return None

@@ -1,6 +1,5 @@
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.sites.models import Site
+from django.core.management.base import BaseCommand
 
 
 try:
@@ -28,7 +27,6 @@ class Command(BaseCommand):
             'args', metavar='type[.PrimaryKey]', nargs='*',
             help='Compile a specific resource using format <type>.<pk> - For example: css.1 or js.99',
         )
-        
 
     def handle(self, *app_labels, **options):
         update_list = []
@@ -45,7 +43,7 @@ class Command(BaseCommand):
             for label in app_labels:
                 try:
                     model_type, item_pk = label.split('.')
-                    
+
                     if model_type == 'css':
 
                         css_package = css_package_model.objects.get(pk=item_pk)
@@ -61,14 +59,13 @@ class Command(BaseCommand):
 
         if len(update_list) > 0:
             if settings.DEBUG:
-                print u'Going to  updates %s resources'%(len(update_list))
+                print u'Going to  updates %s resources' % (len(update_list))
             for item in update_list:
                 if settings.DEBUG:
-                    print u"-- Rendering %s"%(item)
+                    print u"-- Rendering %s" % (item)
                 item.render()
                 if settings.DEBUG:
                     print u"-- Rendering complete."
         else:
             if settings.DEBUG:
                 print u'Nothing to compile'
-                

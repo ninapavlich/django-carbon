@@ -26,8 +26,9 @@ def donottrack(request):
         return {'donottrack': request.donottrack}
     except AttributeError:
         raise AttributeError("'WSGIRequest' object has no attribute 'donottrack'"
-            " - 'donottrack.middleware.DoNotTrackMiddleware' must be in your"
-            " MIDDLEWARE_CLASSES")
+                             " - 'donottrack.middleware.DoNotTrackMiddleware' must be in your"
+                             " MIDDLEWARE_CLASSES")
+
 
 def site(request):
 
@@ -39,18 +40,18 @@ def site(request):
         return {
             'site': None
         }
-    
+
 
 def custom_settings(request):
     object = {}
 
     try:
 
-        all_settings = settings.CUSTOM_SETTINGS 
+        all_settings = settings.CUSTOM_SETTINGS
         for setting in all_settings:
             if hasattr(request, setting):
                 value = getattr(request, setting)
-                object[setting] = value         
+                object[setting] = value
     except:
         pass
 
@@ -61,5 +62,5 @@ def impersonating(request):
     object = {}
 
     return {
-            'impersonating': request.impersonating
-        }
+        'impersonating': request.impersonating
+    }

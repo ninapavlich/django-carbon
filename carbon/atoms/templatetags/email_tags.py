@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.template import Library, Context, Template, TemplateSyntaxError, Variable, Node
+from django.template import Library
 try:
     from django.apps import apps
     get_model = apps.get_model

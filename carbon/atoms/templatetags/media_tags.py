@@ -1,10 +1,4 @@
 from django.template import Library
-from django.core.urlresolvers import reverse
-try:
-    from django.apps import apps
-    get_model = apps.get_model
-except:
-    from django.db.models.loading import get_model
 
 register = Library()
 
@@ -13,9 +7,11 @@ register = Library()
 def get_variant_url(object, variant_name):
     return object.get_variant_url(variant_name)
 
+
 @register.assignment_tag()
 def get_variant_width(object, variant_name):
     return object.get_variant_width(variant_name)
+
 
 @register.assignment_tag()
 def get_variant_height(object, variant_name):
@@ -27,17 +23,19 @@ def filename(full_path):
     head, tail = os.path.split(full_path)
     return tail
 
+
 @register.assignment_tag()
 def get_variant_links(object):
-  
-  output = [object.get_variant_link('image')]  
-  for variant in object.variants:
-    output.append(object.get_variant_link(variant))
-  return output    
+
+    output = [object.get_variant_link('image')]
+    for variant in object.variants:
+        output.append(object.get_variant_link(variant))
+    return output
+
 
 @register.assignment_tag()
 def get_secure_link(object, duration):
-    return object.get_secure_url(duration)    
+    return object.get_secure_url(duration)
 
 
 @register.simple_tag
@@ -112,4 +110,3 @@ def upload_js():
 {% } %}
 </script>
 """
-    

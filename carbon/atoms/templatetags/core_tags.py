@@ -1,5 +1,4 @@
 from django.template import Library
-from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ImproperlyConfigured
@@ -8,7 +7,7 @@ try:
     get_model = apps.get_model
 except:
     from django.db.models.loading import get_model
-    
+
 from ..models import *
 
 register = Library()
@@ -21,14 +20,12 @@ def get_link_descendants(slug=None, item=None):
     """
     if slug is None and item is None:
         raise ImproperlyConfigured("Either slug or item must be defined")
-        
-
 
     output = []
     app_label = settings.MENU_MODEL.split('.')[0]
     object_name = settings.MENU_MODEL.split('.')[1]
     model = get_model(app_label, object_name)
-    
+
     if not item:
         try:
             item = model.objects.get(slug=slug)
@@ -43,17 +40,16 @@ def get_link_descendants(slug=None, item=None):
     children = [] if item is None else [child for child in item.get_children() if child.is_published()]
 
     descendants = {
-        'item':item,
-        'children':output
+        'item': item,
+        'children': output
     }
     for child in children:
         output.append({
-            'item':child,
-            'children':get_link_descendants(None, child)
+            'item': child,
+            'children': get_link_descendants(None, child)
         })
 
     return descendants
-
 
 
 @register.assignment_tag(takes_context=True)
@@ -67,6 +63,7 @@ def get_edit_url(context, object):
                 pass
         return None
     return None
+
 
 @register.assignment_tag(takes_context=True)
 def get_object_cache_key(context, object, extra_cache_context=None):
@@ -87,16 +84,15 @@ def get_object_cache_key(context, object, extra_cache_context=None):
         return str(object)
 
 
-#TODO -- figure out a way to make this check if user is admin before returning url
+# TODO -- figure out a way to make this check if user is admin before returning url
 @register.filter(is_safe=True)
 def edit_attribute(object):
     if object:
         try:
-            return mark_safe('data-edit-url="%s"'%(object.edit_item_url))
+            return mark_safe('data-edit-url="%s"' % (object.edit_item_url))
         except:
             pass
     return None
-
 
 
 @register.assignment_tag()
@@ -105,13 +101,13 @@ def get_js_package(slug, minified=False):
     try:
         item = model.objects.defer("generated_file_minified", "generated_file_source").get(slug=slug)
 
-
     except:
         item = None
 
     if item:
         return item.get_url(minified)
     return ''
+
 
 @register.assignment_tag()
 def get_js_source(slug, minified=False):
@@ -126,7 +122,7 @@ def get_js_source(slug, minified=False):
             return item.generated_file_minified
         else:
             return item.generated_file_source
-    return ''   
+    return ''
 
 
 @register.assignment_tag()
@@ -139,9 +135,7 @@ def get_css_package(slug, minified=False):
 
     if item:
         return item.get_url(minified)
-    return ''   
-
-
+    return ''
 
 
 @register.assignment_tag()
@@ -152,10 +146,9 @@ def get_css_source(slug, minified=False):
     except:
         item = None
 
-
     if item:
         if minified:
             return item.generated_file_minified
         else:
             return item.generated_file_source
-    return ''   
+    return ''

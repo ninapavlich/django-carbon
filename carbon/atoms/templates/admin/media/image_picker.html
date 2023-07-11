@@ -1,107 +1,76 @@
 {% extends 'admin/base.html' %}
 {% load staticfiles admin_list i18n media_tags helpful_tags cache %}
-
 {% block title %}Image Picker{{ block.super }}{% endblock %}
-
-
 {% block breadcrumbs %}
-    <ul>
-        <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-        <li><a href="{% url 'admin:app_list' app_label='media' %}">{% trans 'Media' %}</a></li>
-        <li><a href="{% url 'admin:media_image_changelist' %}">{% trans 'Image' %}</a></li>
-        <li>{% trans 'Image Picker' %}</li>        
-    </ul>
+<ul>
+    <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+    <li><a href="{% url 'admin:app_list' app_label='media' %}">{% trans 'Media' %}</a></li>
+    <li><a href="{% url 'admin:media_image_changelist' %}">{% trans 'Image' %}</a></li>
+    <li>{% trans 'Image Picker' %}</li>
+</ul>
 {% endblock %}
-
 {% block content %}
-
 <header id="grp-content-title">
-                
-                
     <h1>{% trans "Image" %}</h1>
-
-                
     <ul class="grp-object-tools">
-        {% block add_link %}<li><a href="{% url 'admin:media_image_add' %}?{{ request.GET.urlencode }}" class="addlink">{% trans "Upload a new image" %}</a></li>{% endblock %}        
+        {% block add_link %}<li><a href="{% url 'admin:media_image_add' %}?{{ request.GET.urlencode }}" class="addlink">{% trans "Upload a new image" %}</a></li>{% endblock %}
     </ul>
-
 </header>
 <div class="grp-module">
     <div class="grp-row">
         <div class="l-2cr-fluid {% if cl.has_filters and cl.search_fields %}l-d-12{% else %}{% if cl.has_filters or cl.search_fields %}l-d-6{% endif %}{% endif %}">
             <aside class="c-1">
-                <header style="display:none"><h1>{% trans "Search" %}</h1></header>
+                <header style="display:none">
+                    <h1>{% trans "Search" %}</h1>
+                </header>
                 <div id="search" class="g-d-f">
                     <form id="grp-changelist-search" action="" method="get">
-                        <input type="text" name="q" id="grp-changelist-search" class="grp-search-field" value="{{ request.GET.q }}" palceholder="Search"/>
-                        <button type="submit" value="" class="grp-search-button"></button>   
-                        <input type="hidden" name="CKEditor" value="{{ request.GET.CKEditor }}"/>
-                        <input type="hidden" name="CKEditorFuncNum" value="{{ request.GET.CKEditorFuncNum }}"/>
-                        <input type="hidden" name="langCode" value="{{ request.GET.langCode }}"/>                        
+                        <input type="text" name="q" id="grp-changelist-search" class="grp-search-field" value="{{ request.GET.q }}" palceholder="Search" />
+                        <button type="submit" value="" class="grp-search-button"></button>
+                        <input type="hidden" name="CKEditor" value="{{ request.GET.CKEditor }}" />
+                        <input type="hidden" name="CKEditorFuncNum" value="{{ request.GET.CKEditorFuncNum }}" />
+                        <input type="hidden" name="langCode" value="{{ request.GET.langCode }}" />
                     </form>
-                </div>                    
+                </div>
             </aside>
-
         </div>
     </div>
 </div>
-
 {% block before_items %}
-
 {% endblock %}
-
 <div class="g-d-c" style="margin:auto;">
     <div class="g-d-24">
-
-    {% block items %}
-    {% for object in object_list %}
-
-
-        
-        
+        {% block items %}
+        {% for object in object_list %}
         {% cache 86400 imagepicker object.id object.modified_date %}
-            <figure data-credit="{{ object.credit }}" class="g-d-6">
-                <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
-
-
-
-                {% if object.image %}
-                <div class="preview">
-                    <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}"/><br />
-                </div>
-                
-                <p class="picker-links">  
-                    {% get_variant_links object as variants %}
-                    {% for variant in variants %}
-                    {{variant|safe}}
-                    {% endfor %}
-                </p>
-
-               
-                
-                {% endif %}
-
-                {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
-                <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
-            </figure>
+        <figure data-credit="{{ object.credit }}" class="g-d-6">
+            <span><strong>{{object.title}}</strong> {{object.caption}} {% if object.credit %}- {{object.credit}}{% endif %}</span>
+            {% if object.image %}
+            <div class="preview">
+                <img src="{{ object.thumbnail_url }}" alt="{{ object.get_alt }}" /><br />
+            </div>
+            <p class="picker-links">
+                {% get_variant_links object as variants %}
+                {% for variant in variants %}
+                {{variant|safe}}
+                {% endfor %}
+            </p>
+            {% endif %}
+            {% if object.admin_note %}<p class="admin-note"><em>{{object.admin_note|safe}}</em></p>{% endif %}
+            <a class="admin-link" href="{% url 'admin:media_image_change' object.id %}" target="_blank">Edit in admin ></a>
+        </figure>
         {% endcache %}
-        
-        
-
-
-    {% if forloop.counter|divisibleby:4 %}
+        {% if forloop.counter|divisibleby:4 %}
     </div>
     <div class="g-d-24">
-    {% endif %}
-
-    {% endfor %}
-    {% endblock %}
+        {% endif %}
+        {% endfor %}
+        {% endblock %}
     </div>
 </div>
 <div class="grp-module">
     <div class="grp-row">
         <nav class="grp-pagination">
-            
             <ul>
                 <li class="grp-results">
                     <span>{{page_obj.paginator.count}} {% trans "total" %}</span>
@@ -112,180 +81,185 @@
                 {% if page_obj.has_next %}
                 <li><a href="{% url_add_query page=page_obj.next_page_number %}">{% trans "Next" %}</a></li>
                 {% endif %}
-
-                {% for i in page_obj.paginator.page_range %}    
-
-                    {% if i == page_obj.number %}
-                        <li><span class="this-page">{{i}}</span></li>
-                    {% else %}
-                        <li><a href="{% url_add_query page=i %}">{{i}}</a></li>
-                    {% endif %}
+                {% for i in page_obj.paginator.page_range %}
+                {% if i == page_obj.number %}
+                <li><span class="this-page">{{i}}</span></li>
+                {% else %}
+                <li><a href="{% url_add_query page=i %}">{{i}}</a></li>
+                {% endif %}
                 {% endfor %}
-                
             </ul>
         </nav>
     </div>
 </div>
-
 {% block after_items %}
-
 {% endblock %}
-
 <style>
-    .g-d-6{
-        float: left;
-        margin-right: 20px;
-        width:178px;
-        padding:20px;
-        border: 1px solid #ccc;
-        background: #eee;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        margin-bottom: 20px;
+.g-d-6 {
+    float: left;
+    margin-right: 20px;
+    width: 178px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background: #eee;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 
-        width: 24.25%;
+    width: 24.25%;
+    margin-right: 1%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    list-style-type: none;
+
+}
+
+.g-d-6:nth-child(4) {
+    margin-right: 0px;
+}
+
+.preview {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.preview img {
+    margin: auto;
+    max-width: 100%;
+}
+
+.admin-note {
+    color: #666;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-link {
+    display: block;
+    text-align: right;
+}
+
+.g-d-24,
+.g-d-c,
+.g-all-c {
+    max-width: 940px;
+    width: 100%;
+}
+
+.picker-links a {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.variant-link.loading {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    -moz-opacity: 0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+}
+
+.variant-link.loaded {
+    display: none;
+}
+
+@media (max-width: 800px) {
+    figure.g-d-6 {
+        width: 49.5%;
         margin-right: 1%;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
+    }
+}
 
-        list-style-type: none;
-        
+@media (max-width: 450px) {
+    figure.g-d-6 {
+        width: 100%;
+        margin-right: 0;
     }
-    .g-d-6:nth-child(4) {
-        margin-right:0px;
-    }
-     .preview{
-        margin-top:10px;
-        margin-bottom:10px;
-        text-align: center;
-    }
-     .preview img{
-        margin:auto;
-        max-width: 100%;
-    }
-     .admin-note{
-        color:#666;
-        max-height: 150px;
-        overflow-y: auto;
-        margin-top: 10px;
-        margin-bottom:10px;
-    }
-     .admin-link{
-        display:block;
-        text-align: right;
-    }
-    .g-d-24, .g-d-c, .g-all-c {
-        max-width: 940px;
-        width:100%;
-    }
-    .picker-links a{
-        display:block;
-        margin-bottom:5px;
-    }
-    .variant-link.loading{
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-        filter: alpha(opacity=50);
-        -moz-opacity: 0.5;
-        -khtml-opacity: 0.5;
-        opacity: 0.5;
-    }
-    .variant-link.loaded{
-        display:none;
-    }
-
-    @media (max-width: 800px) {
-         figure.g-d-6{
-            width:49.5%;
-            margin-right:1%;
-        }        
-    }
-    @media (max-width: 450px) {
-         figure.g-d-6{
-            width:100%;
-            margin-right:0;
-        }        
-    }
-
-</style>    
+}
+</style>
 <script>
-    (function($) {
+(function($) {
 
-        function getCKEditor(container){
-            if(container.CKEDITOR){
-                return container.CKEDITOR;
-            }else{
-                if(container.opener){
-                    return getCKEditor(container.opener)
-                }
+    function getCKEditor(container) {
+        if (container.CKEDITOR) {
+            return container.CKEDITOR;
+        } else {
+            if (container.opener) {
+                return getCKEditor(container.opener)
             }
-            return null
         }
-        function initPickerLinks(){
+        return null
+    }
 
-            var editor = getCKEditor(window.opener);
-            console.log("EDITOR: "+editor)
+    function initPickerLinks() {
 
-            $('.picker-links a:not(.inited)').click(function(e){
-                e.preventDefault();
-                var img = e.currentTarget;
-                $(e).addClass("inited");
+        var editor = getCKEditor(window.opener);
+        console.log("EDITOR: " + editor)
 
-                
-                if(editor!=null){
-                    editor.tools.callFunction(funcNum, $(img).attr('data-img'), function(){
-                        // -- Set the Image Alt Tag via Caption
-                        var dialog = this.getDialog();
-                        var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
-                        var caption_text = $(img).data("caption");
-                        var credit_text = $(img).data("credit");
-                        var use_caption = caption_text? credit_text? caption_text+" - "+credit_text : caption_text : credit_text? credit_text : '';
+        $('.picker-links a:not(.inited)').click(function(e) {
+            e.preventDefault();
+            var img = e.currentTarget;
+            $(e).addClass("inited");
 
-                        var alt_element = dialog.getContentElement( 'info', 'txtAlt' );
-                        if(alt_element){
-                            alt_element.setValue(alt_text);
-                        }
 
-                        var caption_element = dialog.getContentElement( 'info', 'caption' );
-                        if(caption_element){
-                            caption_element.setValue(use_caption);
-                        }
-                    });
-                    window.close();
-                }
-                
-            });
+            if (editor != null) {
+                editor.tools.callFunction(funcNum, $(img).attr('data-img'), function() {
+                    // -- Set the Image Alt Tag via Caption
+                    var dialog = this.getDialog();
+                    var alt_text = $(img).parent().find('img').attr('alt') || $(img).data("alt");
+                    var caption_text = $(img).data("caption");
+                    var credit_text = $(img).data("credit");
+                    var use_caption = caption_text ? credit_text ? caption_text + " - " + credit_text : caption_text : credit_text ? credit_text : '';
 
-        }
-        
-        // $('a.variant-link').click(function(e){
-        //     e.preventDefault();
+                    var alt_element = dialog.getContentElement('info', 'txtAlt');
+                    if (alt_element) {
+                        alt_element.setValue(alt_text);
+                    }
 
-        //     var url = e.target;
-        //     var div_target = $(e.target).attr('data-target');
-            
-        //     $(e.target).addClass("loading");
-        //     $.get( url, function(data) {
-        //         $(e.target).removeClass("loading");
-        //         $(e.target).addClass("loaded");
-        //         $(div_target).html( data );
-        //         initPickerLinks();
-        //     });
+                    var caption_element = dialog.getContentElement('info', 'caption');
+                    if (caption_element) {
+                        caption_element.setValue(use_caption);
+                    }
+                });
+                window.close();
+            }
 
-        // });
+        });
 
-        initPickerLinks();
+    }
 
-        // -- Helper Functions
-        function getUrlParam(paramName) {
-            var reParam = new RegExp( '(?:[\?&]|&)' + paramName + '=([^&]+)', 'i' ) ;
-            var match = window.location.search.match(reParam) ;
+    // $('a.variant-link').click(function(e){
+    //     e.preventDefault();
 
-            return ( match && match.length > 1 ) ? match[ 1 ] : null ;
-        }
-        var funcNum = getUrlParam('CKEditorFuncNum');
-    })(grp.jQuery);
-    
+    //     var url = e.target;
+    //     var div_target = $(e.target).attr('data-target');
+
+    //     $(e.target).addClass("loading");
+    //     $.get( url, function(data) {
+    //         $(e.target).removeClass("loading");
+    //         $(e.target).addClass("loaded");
+    //         $(div_target).html( data );
+    //         initPickerLinks();
+    //     });
+
+    // });
+
+    initPickerLinks();
+
+    // -- Helper Functions
+    function getUrlParam(paramName) {
+        var reParam = new RegExp('(?:[\?&]|&)' + paramName + '=([^&]+)', 'i');
+        var match = window.location.search.match(reParam);
+
+        return (match && match.length > 1) ? match[1] : null;
+    }
+    var funcNum = getUrlParam('CKEditorFuncNum');
+})(grp.jQuery);
 </script>
 {% endblock %}

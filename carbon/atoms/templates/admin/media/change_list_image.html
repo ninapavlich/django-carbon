@@ -1,284 +1,299 @@
 {% extends "admin/media/change_list.html" %}
-
 {% load i18n media_admin_tags grp_tags admin_urls admin_static admin_list %}
-
-
 {% block result_list %}
-    {{block.super}}
-	<style>
-    #result_list thead tr{
-        display: table;
-        padding: 0;
-        border: 0;
-    }
-    #result_list tbody{
-        width: 98%;
-        margin: auto;
-        display: block;
-    }
-    #result_list tr{
-        display:block;
-        position: relative;
-        float: left;
-        margin-right: 20px;
-        width:178px;
-        padding:20px;
-        border: 1px solid #ccc;
-        background: #eee;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        margin-bottom: 20px;
+{{block.super}}
+<style>
+#result_list thead tr {
+    display: table;
+    padding: 0;
+    border: 0;
+}
 
-        
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    #result_list thead tr{
-        width:100%;
-    }
-    #result_list tr td{
-        display: block;
-        background:transparent;
-    }
-    #result_list tr td.field-image_width,
-    #result_list tr td.field-image_height,
-    #result_list tr td.field-display_size{
-        width:33%;
-        float:left;
+#result_list tbody {
+    width: 98%;
+    margin: auto;
+    display: block;
+}
 
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    #result_list tr td.field-tag_list{
-        clear:both;
+#result_list tr {
+    display: block;
+    position: relative;
+    float: left;
+    margin-right: 20px;
+    width: 178px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background: #eee;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
 
-    }
-    #result_list tr th.field-title{
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        display: block;
-        width:100%;
-        border-top: 1px solid #e0e0e0;
-    }
-    #result_list tr th.field-title,
-    #result_list tr td.field-preview,
-    #result_list tr td.field-display_size,
-    #result_list tr td.field-tag_list{
-        border-right: 1px solid #e0e0e0;
-    }
-    #result_list tr td.field-tag_list a{
-        display:inline-block;
-    }
-    #result_list tr td.field-tag_list a:after{
-        content:',';
-    }
-    #result_list tr td.field-tag_list a:last-child:after{
-        content:'';
-    }
-    #result_list tr td.action-checkbox{
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        border: 0;
-    }
-    #result_list tr.grp-row-odd td, 
-    #result_list tr.grp-row-odd th,
-    #result_list tr.grp-row-even td, 
-    #result_list tr.grp-row-even th, 
-    #result_list tr.grp-alt td, 
-    #result_list tr.grp-alt th{
-        background:transparent;
-    }
-    #result_list .field-preview{
-        padding:0;
-        margin:0;
-    }
-    #result_list .field-preview img{
-        width:100%;
-        max-width: 100%;
-        margin:auto;
-    }
-    .g-d-24, .g-d-c, .g-all-c {
-        max-width: 1400px;
-        width:100%;
-    }
-    #result_list {
-        width:100%;
-        overflow:hidden
-    }
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
+#result_list thead tr {
+    width: 100%;
+}
+
+#result_list tr td {
+    display: block;
+    background: transparent;
+}
+
+#result_list tr td.field-image_width,
+#result_list tr td.field-image_height,
+#result_list tr td.field-display_size {
+    width: 33%;
+    float: left;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#result_list tr td.field-tag_list {
+    clear: both;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+}
+
+#result_list tr th.field-title {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    border-top: 1px solid #e0e0e0;
+}
+
+#result_list tr th.field-title,
+#result_list tr td.field-preview,
+#result_list tr td.field-display_size,
+#result_list tr td.field-tag_list {
+    border-right: 1px solid #e0e0e0;
+}
+
+#result_list tr td.field-tag_list a {
+    display: inline-block;
+}
+
+#result_list tr td.field-tag_list a:after {
+    content: ',';
+}
+
+#result_list tr td.field-tag_list a:last-child:after {
+    content: '';
+}
+
+#result_list tr td.action-checkbox {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    border: 0;
+}
+
+#result_list tr.grp-row-odd td,
+#result_list tr.grp-row-odd th,
+#result_list tr.grp-row-even td,
+#result_list tr.grp-row-even th,
+#result_list tr.grp-alt td,
+#result_list tr.grp-alt th {
+    background: transparent;
+}
+
+#result_list .field-preview {
+    padding: 0;
+    margin: 0;
+}
+
+#result_list .field-preview img {
+    width: 100%;
+    max-width: 100%;
+    margin: auto;
+}
+
+.g-d-24,
+.g-d-c,
+.g-all-c {
+    max-width: 1400px;
+    width: 100%;
+}
+
+#result_list {
+    width: 100%;
+    overflow: hidden
+}
+
+#result_list tr {
+    float: left;
+    width: 300px
+}
+
+@media(min-width:151px) and (max-width:450px) {
     #result_list tr {
-        float:left;
-        width:300px
-    }
-
-    @media(min-width:151px) and (max-width:450px) {
-    #result_list tr {
-        width:66.6666666667%;
-        margin-right:0;
-        margin-bottom:0
+        width: 66.6666666667%;
+        margin-right: 0;
+        margin-bottom: 0
     }
 
     #result_list tr:nth-child(1n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(1n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:451px) and (max-width:750px) {
+@media(min-width:451px) and (max-width:750px) {
     #result_list tr {
-        width:40%;
-        margin-right:20%;
-        margin-bottom:20%
+        width: 40%;
+        margin-right: 20%;
+        margin-bottom: 20%
     }
 
     #result_list tr:nth-child(2n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(2n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:751px) and (max-width:1050px) {
+@media(min-width:751px) and (max-width:1050px) {
     #result_list tr {
-        width:28.5714285714%;
-        margin-right:7.14285714286%;
-        margin-bottom:7.14285714286%
+        width: 28.5714285714%;
+        margin-right: 7.14285714286%;
+        margin-bottom: 7.14285714286%
     }
 
     #result_list tr:nth-child(3n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(3n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:1051px) and (max-width:1350px) {
+@media(min-width:1051px) and (max-width:1350px) {
     #result_list tr {
-        width:22.2222222222%;
-        margin-right:3.7037037037%;
-        margin-bottom:3.7037037037%
+        width: 22.2222222222%;
+        margin-right: 3.7037037037%;
+        margin-bottom: 3.7037037037%
     }
 
     #result_list tr:nth-child(4n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(4n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:1351px) and (max-width:1650px) {
+@media(min-width:1351px) and (max-width:1650px) {
     #result_list tr {
-        width:18.1818181818%;
-        margin-right:2.27272727273%;
-        margin-bottom:2.27272727273%
+        width: 18.1818181818%;
+        margin-right: 2.27272727273%;
+        margin-bottom: 2.27272727273%
     }
 
     #result_list tr:nth-child(5n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(5n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:1651px) and (max-width:1950px) {
+@media(min-width:1651px) and (max-width:1950px) {
     #result_list tr {
-        width:15.3846153846%;
-        margin-right:1.53846153846%;
-        margin-bottom:1.53846153846%
+        width: 15.3846153846%;
+        margin-right: 1.53846153846%;
+        margin-bottom: 1.53846153846%
     }
 
     #result_list tr:nth-child(6n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(6n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:1951px) and (max-width:2250px) {
+@media(min-width:1951px) and (max-width:2250px) {
     #result_list tr {
-        width:13.3333333333%;
-        margin-right:1.11111111111%;
-        margin-bottom:1.11111111111%
+        width: 13.3333333333%;
+        margin-right: 1.11111111111%;
+        margin-bottom: 1.11111111111%
     }
 
     #result_list tr:nth-child(7n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(7n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:2251px) and (max-width:2550px) {
+@media(min-width:2251px) and (max-width:2550px) {
     #result_list tr {
-        width:11.7647058824%;
-        margin-right:.840336134454%;
-        margin-bottom:.840336134454%
+        width: 11.7647058824%;
+        margin-right: .840336134454%;
+        margin-bottom: .840336134454%
     }
 
     #result_list tr:nth-child(8n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(8n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:2551px) and (max-width:2850px) {
+@media(min-width:2551px) and (max-width:2850px) {
     #result_list tr {
-        width:10.5263157895%;
-        margin-right:.657894736842%;
-        margin-bottom:.657894736842%
+        width: 10.5263157895%;
+        margin-right: .657894736842%;
+        margin-bottom: .657894736842%
     }
 
     #result_list tr:nth-child(9n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(9n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
+}
 
-    @media(min-width:2851px) and (max-width:3150px) {
+@media(min-width:2851px) and (max-width:3150px) {
     #result_list tr {
-        width:9.52380952381%;
-        margin-right:.529100529101%;
-        margin-bottom:.529100529101%
+        width: 9.52380952381%;
+        margin-right: .529100529101%;
+        margin-bottom: .529100529101%
     }
 
     #result_list tr:nth-child(10n+1) {
-        clear:both
+        clear: both
     }
 
     #result_list tr:nth-child(10n+0) {
-        margin-right:0
+        margin-right: 0
     }
-    }
-
-</style> 
+}
+</style>
 {% endblock %}

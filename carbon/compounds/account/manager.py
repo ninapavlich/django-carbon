@@ -4,7 +4,6 @@ from django.utils import timezone
 
 
 class UserQueryset(models.query.QuerySet):
-    
 
     def active(self):
         return self.filter(is_active=True)

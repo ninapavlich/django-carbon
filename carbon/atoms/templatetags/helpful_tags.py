@@ -1,13 +1,10 @@
 import re
-import urllib
 from unidecode import unidecode
-from django import template
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.template import Library
-from django.template.defaultfilters import slugify
-from django.utils.html import strip_tags
+from django.template.defaultfilters import slugify as django_slugify
 
 
 from ..models import *
@@ -15,8 +12,7 @@ from ..models import *
 register = Library()
 
 
-
-#HELPER FUNCTIONS:
+# HELPER FUNCTIONS:
 
 @register.assignment_tag
 def getAttribute(the_object, attribute_name):
@@ -29,6 +25,7 @@ def getAttribute(the_object, attribute_name):
         attr = getattr(the_object, attribute_name, None)
     return attr
 
+
 @register.simple_tag(takes_context=True)
 def url_add_query(context, **kwargs):
     request = context.get('request')
@@ -40,8 +37,8 @@ def url_add_query(context, **kwargs):
     for query, val in get.items():
         path += '%s=%s&' % (query, val)
 
-
     return path[:-1]
+
 
 @register.simple_tag(takes_context=True)
 def url_remove_query(context, name):
@@ -50,23 +47,23 @@ def url_remove_query(context, name):
     get = request.GET.copy()
     if name in get:
         del get[name]
-    
+
     path = '%s?' % request.path
     for query, val in get.items():
         path += '%s=%s&' % (query, val)
 
-    return path[:-1]    
+    return path[:-1]
+
 
 @register.assignment_tag(takes_context=True)
 def get_query_string(context):
     request = context.get('request')
 
     get = request.GET.copy()
-    
+
     path = '?'
     for query, val in get.items():
         path += '%s=%s&' % (query, val)
-
 
     return path[:-1]
 
@@ -75,9 +72,11 @@ def get_query_string(context):
 def tostring(object):
     return str(object)
 
+
 @register.filter
 def slugify(value):
-    return slugify(unidecode(value))
+    return django_slugify(unidecode(value))
+
 
 def insert_ellipse(lst, ellipse=0):
     '''Insert ellipse where it's not sequential
@@ -101,6 +100,7 @@ def insert_ellipse(lst, ellipse=0):
         return [lst[0], lst[0] + 1] + insert_ellipse(lst[1:], ellipse)
     else:
         return [lst[0], ellipse] + insert_ellipse(lst[1:], ellipse)
+
 
 @register.assignment_tag
 def pick_pages(num_pages, current):
@@ -134,11 +134,12 @@ def url_to_edit_object(object):
         object_type = type(object).__name__
         if object_type == 'SearchResult':
             object = object.object
-        
-        url = reverse('admin:%s_%s_change' %(object._meta.app_label,  object._meta.model_name),  args=[object.id] )
+
+        url = reverse('admin:%s_%s_change' % (object._meta.app_label, object._meta.model_name), args=[object.id])
         return url
     except:
         return None
+
 
 @register.assignment_tag()
 def get_model_label(object):
@@ -151,12 +152,10 @@ def get_model_label(object):
             object_type = type(object).__name__
             object_label = object.__unicode__()
 
-        return "%s %s"%(object_type.upper(), object_label)
-        
+        return "%s %s" % (object_type.upper(), object_label)
+
     except:
-        return None        
-
-
+        return None
 
 
 def is_path_encrypted(path):
@@ -165,11 +164,10 @@ def is_path_encrypted(path):
             pattern = re.compile(SSL_PATH)
             match = pattern.match(path)
             if match:
-                #print 'Matched %s to pattern %s'%(path, SSL_PATH)
+                # print 'Matched %s to pattern %s'%(path, SSL_PATH)
                 return True
     except:
         return False
-
 
 
 @register.assignment_tag(takes_context=True)
@@ -178,18 +176,18 @@ def get_canonical_url(context):
     try:
         request = context['request']
     except:
-        #No request
+        # No request
         return None
-        
+
     current_site = Site.objects.get_current()
     path = request.get_full_path()
 
     encrypt_path = is_path_encrypted(path)
 
     if encrypt_path:
-        url  = 'https://%s%s'%(current_site.domain, path)
+        url = 'https://%s%s' % (current_site.domain, path)
     else:
-        url  = 'http://%s%s'%(current_site.domain, path)
+        url = 'http://%s%s' % (current_site.domain, path)
 
     return url
 
@@ -199,22 +197,24 @@ def get_site_url(context):
     try:
         request = context['request']
     except:
-        #No request
+        # No request
         return None
-        
+
     request = context['request']
     full_path = ('http', ('', 's')[request.is_secure()], '://', request.META['HTTP_HOST'])
     domain = ''.join(full_path)
-    
+
     return domain
+
 
 @register.filter
 def data_verbose(boundField):
     if boundField:
         value = boundField.value()
-        field = boundField.field    
-        return hasattr(field, 'choices') and dict(field.choices).get(value,'') or value
+        field = boundField.field
+        return hasattr(field, 'choices') and dict(field.choices).get(value, '') or value
     return None
+
 
 @register.assignment_tag()
 def get_sorted(list, attribute, reverse=False):
@@ -223,4 +223,4 @@ def get_sorted(list, attribute, reverse=False):
 
 @register.simple_tag()
 def get_cache_duration():
-    return settings.CACHE_DURATION    
+    return settings.CACHE_DURATION

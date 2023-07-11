@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#CODE HELP FROM https://code.google.com/p/threepress/source/browse/trunk/bookworm/database-backup.py
+# CODE HELP FROM https://code.google.com/p/threepress/source/browse/trunk/bookworm/database-backup.py
 
 
 import sys
@@ -15,54 +15,59 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 PG_CMD = 'pg_dump'
 ZIP_CMD = 'zip'
 
+
 def _setup(backup_dir):
     if not os.path.exists(backup_dir):
         logging.debug("Created backup directory %s" % backup_dir)
         os.mkdir(backup_dir)
     else:
         logging.debug("Using backup directory %s" % backup_dir)
-    
+
+
 def _backup_name(prefix="database_backup"):
 
     now = datetime.now()
-    now_string ="%s-%s-%s_%s-%s" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), str(now.hour).zfill(2), str(now.minute).zfill(2))
+    now_string = "%s-%s-%s_%s-%s" % (now.year, str(now.month).zfill(2), str(now.day).zfill(2), str(now.hour).zfill(2), str(now.minute).zfill(2))
     file_name = "%s_%s.sql" % (prefix, now_string)
 
     logging.debug("Setting backup name for as %s" % (file_name))
     return file_name
 
+
 def _run_backup(file_name, backup_dir, database_settings="default"):
-    
+
     user = settings.DATABASES[database_settings]['USER']
     name = settings.DATABASES[database_settings]['NAME']
     password = settings.DATABASES[database_settings]['PASSWORD']
     port = settings.DATABASES[database_settings]['PORT'] or 5432
     host = settings.DATABASES[database_settings]['HOST']
-    
-    #export PGPASSWORD=db_password; pg_dump -h 127.0.0.1 -U db_username db_name > path/to/file.sql 
+
+    # export PGPASSWORD=db_password; pg_dump -h 127.0.0.1 -U db_username db_name > path/to/file.sql
     cmd = "export PGPASSWORD=%(password)s; %(pgdump)s -h %(host)s -U %(user)s %(database)s > %(log_dir)s/%(file)s" % {
-        'password' : password,
-        'pgdump' : PG_CMD,
-        'host' : host,
-        'user' : user,
-        'database' : name,
-        'log_dir' : backup_dir,
+        'password': password,
+        'pgdump': PG_CMD,
+        'host': host,
+        'user': user,
+        'database': name,
+        'log_dir': backup_dir,
         'file': file_name}
     logging.debug("Backing up with command %s " % cmd)
     return os.system(cmd)
 
+
 def run_postgresql_command(self, command, outfile):
-        if self.debug:
-            print command
+    if self.debug:
+        print command
 
-        pipe = popen2.Popen4(command)
+    pipe = popen2.Popen4(command)
 
-        if self.password:
-            pipe.tochild.write('%s\n' % self.password)
-            pipe.tochild.close()
+    if self.password:
+        pipe.tochild.write('%s\n' % self.password)
+        pipe.tochild.close()
 
-        if outfile == self.OUTPUT_STDOUT:
-            shutil.copyfileobj(pipe.fromchild, sys.stdout)
+    if outfile == self.OUTPUT_STDOUT:
+        shutil.copyfileobj(pipe.fromchild, sys.stdout)
+
 
 def _zip_backup(file_name, backup_dir):
     backup = "%s/%s" % (backup_dir, file_name)
@@ -71,7 +76,7 @@ def _zip_backup(file_name, backup_dir):
     if os.path.exists(zipfile_name):
         logging.debug("Removing previous zip archive %s" % zipfile_name)
         os.remove(zipfile_name)
-    zip_cmds = {'zip' : ZIP_CMD, 'zipfile' : zipfile_name, 'file' : backup }
+    zip_cmds = {'zip': ZIP_CMD, 'zipfile': zipfile_name, 'file': backup}
 
     # Create the backup
     logging.debug("Making backup as %s " % zipfile_name)
@@ -86,37 +91,38 @@ def _zip_backup(file_name, backup_dir):
     else:
         return None
 
+
 def _upload_backup(bucket_name, file_name, dest_dir):
     base_name = os.path.basename(file_name)
-        
+
     conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(bucket_name)
 
     print 'Uploading %s to Amazon S3 from %s' % (base_name, file_name)
 
-    import sys
     def percent_cb(complete, total):
         sys.stdout.write('.')
         sys.stdout.flush()
 
     from boto.s3.key import Key
     k = Key(bucket)
-    k.key = u"%s%s"%(dest_dir, base_name)
-    print 'KEY %s'%(k.key)
+    k.key = u"%s%s" % (dest_dir, base_name)
+    print 'KEY %s' % (k.key)
     k.set_contents_from_filename(file_name, cb=percent_cb, num_cb=10)
 
-    #Remove tmp file
+    # Remove tmp file
     os.remove(file_name)
+
 
 def backup_database(bucket_name, database_settings="default", dest_dir="database/", prefix="database_backup", tmp_dir="/tmp"):
     _setup(tmp_dir)
     file_name = _backup_name(prefix)
-    
+
     _run_backup(file_name, tmp_dir, database_settings)
     zipped_file = _zip_backup(file_name, tmp_dir)
 
     _upload_backup(bucket_name, zipped_file, dest_dir)
-        
-    
+
+
 if __name__ == '__main__':
-    sys.exit(main(*sys.argv))  
+    sys.exit(main(*sys.argv))

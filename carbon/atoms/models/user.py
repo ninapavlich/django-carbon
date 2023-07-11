@@ -1,10 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from .abstract import *
 from .access import *
@@ -17,7 +15,7 @@ class PersonAtom(models.Model):
 
     help = {
         'first_name': "",
-        'last_name':"",
+        'last_name': "",
     }
 
     first_name = models.CharField(_('First name'), max_length=30, blank=True)
@@ -25,9 +23,9 @@ class PersonAtom(models.Model):
     last_name = models.CharField(_('Last name'), max_length=30, blank=True)
     date_of_birth = models.DateField(_('Date of Birth'), blank=True, null=True)
 
-    
     class Meta:
         abstract = True
+
 
 class StreetAddressAtom(models.Model):
 
@@ -35,43 +33,44 @@ class StreetAddressAtom(models.Model):
     street_2 = models.CharField(_('Street Address 2'), max_length=30, blank=True, null=True)
     city = models.CharField(_('City'), max_length=30, blank=True, null=True)
     state = models.CharField(_('State'), max_length=30, blank=True, null=True)
-    zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True, null=True)   
+    zipcode = models.CharField(_('Zipcode'), max_length=30, blank=True, null=True)
 
-    latitude = models.CharField(_('Latitude'), max_length=30, blank=True, null=True)   
-    longitude = models.CharField(_('Longitude'), max_length=30, blank=True, null=True)    
-    
-    class Meta:
-        abstract = True     
+    latitude = models.CharField(_('Latitude'), max_length=30, blank=True, null=True)
+    longitude = models.CharField(_('Longitude'), max_length=30, blank=True, null=True)
 
-
-class PhoneContactAtom(models.Model):
-    class Meta:
-        abstract = True 
-
-    home_phone = models.CharField(_('Home Phone'), max_length=255, blank=True, null=True) 
-    work_phone = models.CharField(_('Work Phone'), max_length=255, blank=True, null=True) 
-    cell_phone = models.CharField(_('Cell Phone'), max_length=255, blank=True, null=True)
-
-
-
-
-class StreetAddressMolecule(VersionableAtom, StreetAddressAtom):
     class Meta:
         abstract = True
 
+
+class PhoneContactAtom(models.Model):
+
+    class Meta:
+        abstract = True
+
+    home_phone = models.CharField(_('Home Phone'), max_length=255, blank=True, null=True)
+    work_phone = models.CharField(_('Work Phone'), max_length=255, blank=True, null=True)
+    cell_phone = models.CharField(_('Cell Phone'), max_length=255, blank=True, null=True)
+
+
+class StreetAddressMolecule(VersionableAtom, StreetAddressAtom):
+
+    class Meta:
+        abstract = True
+
+
 class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMixin):
     help = {
-        'email':"",
+        'email': "",
     }
 
     email = models.EmailField(_('email address'), unique=True, blank=True)
 
     is_staff = models.BooleanField(_('staff status'), default=False,
-        help_text=_('Designates whether the user can log into this admin '
-                    'site.'))
+                                   help_text=_('Designates whether the user can log into this admin '
+                                               'site.'))
     is_active = models.BooleanField(_('active'), default=True,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'))
+                                    help_text=_('Designates whether this user should be treated as '
+                                                'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     USERNAME_FIELD = 'email'
@@ -106,25 +105,26 @@ class UserMolecule(VersionableAtom, PersonAtom, AbstractBaseUser, PermissionsMix
     class Meta:
         abstract = True
 
+
 class UserProfileMolecule(UserMolecule, HasImageAtom):
 
     help = {
-        'about':"",
+        'about': "",
     }
 
     about = models.TextField(_('about'), help_text=help['about'], null=True, blank=True)
 
-
     class Meta:
         abstract = True
 
-class SocialContactLinkMolecule( VersionableAtom, TitleAtom, OrderedItemAtom, LinkAtom):
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, 
-        blank=True, null=True)
-    
-    icon = models.CharField(max_length=255, null=True, blank=True, choices=ICON_CHOICES, 
-        help_text='Preview icons at http://fontawesome.io/icons/',)  
-    
+class SocialContactLinkMolecule(VersionableAtom, TitleAtom, OrderedItemAtom, LinkAtom):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             blank=True, null=True)
+
+    icon = models.CharField(max_length=255, null=True, blank=True, choices=ICON_CHOICES,
+                            help_text='Preview icons at http://fontawesome.io/icons/',)
+
     class Meta:
         abstract = True

@@ -1,14 +1,10 @@
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
 import django.dispatch
 from django.http import QueryDict
 
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormMixin, ProcessFormView
-from django.template import loader, Context, Template
-from django.template.response import SimpleTemplateResponse
 
 from carbon.atoms.views.abstract import *
 from carbon.atoms.views.content import *
@@ -43,14 +39,13 @@ class FormSignalOperator(FormMixin, ProcessFormView):
 
         return self.render_to_response(self.get_context_data(form=form))
 
-
     def form_valid(self, form):
         self.form_entry_object = form.save()
         created = self.get_is_create_form()
 
         form_schema = self.get_form_schema()
         if form_schema:
-            messages.success(self.request, form_schema.form_create_message or self.default_success_message)        
+            messages.success(self.request, form_schema.form_create_message or self.default_success_message)
             form_schema.handle_successful_submission(form, self.form_entry_object, created)
 
             form_entry_class = type(self.form_entry_object)
@@ -62,14 +57,12 @@ class FormSignalOperator(FormMixin, ProcessFormView):
         return super(FormSignalOperator, self).form_valid(form)
 
 
-
 class FormSubmittedView(AddressibleView, PublishableView, DetailView):
-    
+
     def get_template_names(self):
 
         return [self.object.submit_template.slug]
 
-    
 
 class CreateFormEntryMixin(FormSignalOperator):
     content_type = None
@@ -93,12 +86,11 @@ class CreateFormEntryMixin(FormSignalOperator):
         self.form_schema = self.get_form_schema()
         if self.form_schema:
             self.form = form = self.get_form()
-        
-        return super(CreateFormEntryMixin, self).post(request, *args, **kwargs)
-    
 
-    def get_form_kwargs(self):      
-        #ADD REFERNCE TO FORM OBJECT
+        return super(CreateFormEntryMixin, self).post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        # ADD REFERNCE TO FORM OBJECT
         kwargs = super(CreateFormEntryMixin, self).get_form_kwargs()
         kwargs['form_schema'] = self.form_schema
         kwargs['request'] = self.request
@@ -106,7 +98,6 @@ class CreateFormEntryMixin(FormSignalOperator):
 
     def get_success_url(self):
         return self.form_schema.get_success_url(self.form_entry_object)
-
 
     def get_context_data(self, **kwargs):
         context = super(CreateFormEntryMixin, self).get_context_data(**kwargs)
@@ -127,8 +118,8 @@ class CreateFormEntryView(AddressibleView, PublishableView, FormSignalOperator):
     default_success_message = "Your form was created."
 
     def get_form_kwargs(self):
-        
-        #ADD REFERNCE TO FORM OBJECT
+
+        # ADD REFERNCE TO FORM OBJECT
         kwargs = super(CreateFormEntryView, self).get_form_kwargs()
         kwargs['form_schema'] = self.object
         kwargs['request'] = self.request
@@ -143,7 +134,6 @@ class CreateFormEntryView(AddressibleView, PublishableView, FormSignalOperator):
     def get_is_create_form(self):
         return True
 
-
     def get_context_data(self, **kwargs):
         context = super(CreateFormEntryView, self).get_context_data(**kwargs)
         context['form_entry_object'] = self.form_entry_object
@@ -157,25 +147,24 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
     default_success_message = "Your form was updated."
 
     def get_form_kwargs(self):
-        
+
         kwargs = super(UpdateFormEntryView, self).get_form_kwargs()
 
-        #ADD REFERNCE TO FORM OBJECT AND FIELD DATA
+        # ADD REFERNCE TO FORM OBJECT AND FIELD DATA
         kwargs['form_schema'] = self.object
         kwargs['request'] = self.request
         kwargs['instance'] = self.form_entry_object
-        
 
         if self.request.method in ('POST', 'PUT'):
-            
+
             kwargs.update({
                 'data': self.request.POST,
                 'files': self.request.FILES,
             })
-            
+
         else:
-            
-            data = {'form_schema':self.object.pk}
+
+            data = {'form_schema': self.object.pk}
             fields = self.form_entry_object.get_entries()
             for field in fields:
                 key = self.form_class.form_field_prefix+field.form_field.slug
@@ -184,8 +173,6 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
             qdict = QueryDict('', mutable=True)
             qdict.update(data)
             kwargs['data'] = qdict
-
-        
 
         return kwargs
 
@@ -208,9 +195,8 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
             obj = queryset.filter(pk=pk)[0]
         except:
             raise Http404(_("No %(verbose_name)s found matching the query") %
-                    {'verbose_name': queryset.model._meta.verbose_name})
+                          {'verbose_name': queryset.model._meta.verbose_name})
         return obj
-
 
     def get_success_url(self):
         return self.object.get_success_url(self.form_entry_object)
@@ -220,7 +206,6 @@ class UpdateFormEntryView(PublishableView, AddressibleView, FormSignalOperator):
 
     def get_is_create_form(self):
         return False
-
 
     def get_context_data(self, **kwargs):
         context = super(UpdateFormEntryView, self).get_context_data(**kwargs)

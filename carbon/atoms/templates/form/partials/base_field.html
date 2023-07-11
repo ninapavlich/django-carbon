@@ -1,5 +1,4 @@
 {% load i18n %}
-
 <div class="{% spaceless %}form-field form-field-type-{{model_field.type}} form-field-name-{{ field.name }}
 {% if model_field.is_required %}required{% endif %} 
 
@@ -10,72 +9,42 @@
 
 
 {% endspaceless %}">
-    
     {% block field-inner %}
-
     {% block labels %}
     <label for="{{ field.auto_id }}">{{model_field.title|safe}}</label>
-    
     {% if model_field.secondary_label %}
     <span class="secondary-label">{{model_field.secondary_label|safe}}</span>
-    {% endif %}   
-
+    {% endif %}
     {% endblock %}
-
-
     {% block input %}
-    <input 
-        type="{{model_field.input_type}}"
-        name="{{ field.name }}" 
-        id="{{ field.auto_id }}" 
-        class="field-type-{{model_field.type}}"
-
-        {% block field_attributes %}{{block.super}}{% endblock %}
-
-
-        {% block value %}
-        {% if not hide_post_value %}
-        {% if override_value and not request.POST %}
-        value="{{ override_value }}"
-        {% elif model_field.default and not request.POST %}
-        value="{{ override_value }}"
-        {% else %}
-        value="{{ field.value|default_if_none:'' }}"
-        {% endif %}
-        {% endif %}
-        {% endblock %}
-        
-        {% if model_field.placeholder_text %} 
-        placeholder="{{model_field.placeholder_text|striptags|safe}}" 
-        data-placeholder="{{model_field.placeholder_text|striptags|safe}}" 
-        {% endif %}
-
-        {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} 
-        {% if model_field.pattern %}pattern="{{model_field.pattern}}" {% endif %}
-
-        {% if model_field.inset_text_right %}data-inset-suffix="{{model_field.inset_text_right}}" {% endif %}
-        {% if model_field.inset_text_left %}data-inset-prefix="{{model_field.inset_text_left}}" {% endif %}
-    />
+    <input type="{{model_field.input_type}}" name="{{ field.name }}" id="{{ field.auto_id }}" class="field-type-{{model_field.type}}" {% block field_attributes %}{{block.super}}{% endblock %} {% block value %} {% if not hide_post_value %} {% if override_value and not request.POST %} value="{{ override_value }}" {% elif model_field.default and not request.POST %} value="{{ override_value }}" {% else %} value="{{ field.value|default_if_none:'' }}" {% endif %} {% endif %} {% endblock %} {% if model_field.placeholder_text %} placeholder="{{model_field.placeholder_text|striptags|safe}}" data-placeholder="{{model_field.placeholder_text|striptags|safe}}" {% endif %} {% if model_field.max_length %}maxlength="{{model_field.max_length}}" {% endif %} {% if model_field.pattern %}pattern="{{model_field.pattern}}" {% endif %} {% if model_field.inset_text_right %}data-inset-suffix="{{model_field.inset_text_right}}" {% endif %} {% if model_field.inset_text_left %}data-inset-prefix="{{model_field.inset_text_left}}" {% endif %} />
     {% endblock %}
-
-    
-    {% if model_field.icon_right %}<div class="icon suffix"><div class="center-outer"><div class="center-middle"><div class="center-inner"><span class="fa fa-{{model_field.icon_right}}"></span></div></div></div></div>{% endif %}
-    {% if model_field.icon_left %}<div class="icon prefix"><div class="center-outer"><div class="center-middle"><div class="center-inner"><span class="fa fa-{{model_field.icon_left}}"></span></div></div></div></div>{% endif %}
-
-
+    {% if model_field.icon_right %}<div class="icon suffix">
+        <div class="center-outer">
+            <div class="center-middle">
+                <div class="center-inner"><span class="fa fa-{{model_field.icon_right}}"></span></div>
+            </div>
+        </div>
+    </div>{% endif %}
+    {% if model_field.icon_left %}<div class="icon prefix">
+        <div class="center-outer">
+            <div class="center-middle">
+                <div class="center-inner"><span class="fa fa-{{model_field.icon_left}}"></span></div>
+            </div>
+        </div>
+    </div>{% endif %}
     {% block messages %}
     {% if field.messages %}
     <span class="message">{{field.messages.safe}}</span>
-    {% endif %}  
-
-    {% if field.errors %}
-    <span class="error-message">{% if model_field.error_message %}<ul class="errorlist"><li>{{model_field.error_message|safe}}</li></ul>{% else %}{{field.errors|safe }}{% endif %}</span>
     {% endif %}
- 
+    {% if field.errors %}
+    <span class="error-message">{% if model_field.error_message %}<ul class="errorlist">
+            <li>{{model_field.error_message|safe}}</li>
+        </ul>{% else %}{{field.errors|safe }}{% endif %}</span>
+    {% endif %}
     {% if model_field.help_text %}
     <span class="help-text">{{model_field.help_text|safe}}</span>
-    {% endif %}    
+    {% endif %}
     {% endblock %}
-
     {% endblock %}
 </div>

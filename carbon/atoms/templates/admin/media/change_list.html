@@ -1,16 +1,11 @@
 {% extends "admin/change_list.html" %}
-
 {% load i18n media_admin_tags grp_tags admin_urls admin_static admin_list %}
-
 {% block object-tools-items %}
-	
-	{% for link in extra_urls %}
-	<li><a href="{{link.url}}">{{link.title}}</a></li>
-	{% endfor %}
-
-	{% if not is_popup %}
-        <li><a href="{{recoverlist_url}}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a></li>
-    {% endif %}
-
-    {{block.super}}
+{% for link in extra_urls %}
+<li><a href="{{link.url}}">{{link.title}}</a></li>
+{% endfor %}
+{% if not is_popup %}
+<li><a href="{{recoverlist_url}}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a></li>
+{% endif %}
+{{block.super}}
 {% endblock %}

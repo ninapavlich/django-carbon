@@ -1,150 +1,132 @@
 {% extends "admin/media/change_list_image.html" %}
-
 {% load i18n grp_tags admin_urls admin_static admin_list media_admin_tags core_tags helpful_tags %}
-
-
-
 {% block result_list %}
-
-
-
-    {% if folders|length > 0 or current_folder %}
-    <div class="grp-module folder-display">
-        
-
-        <h2 class="clearfix">
-            <div>
-                
-                {% if current_folder %}
-                {% if current_folder.parent %}
-                <div><a href="{% url_add_query folder=current_folder.parent.pk %}">&larr; Go back to {{current_folder.parent.title}}</a></div>
-                {% else %}
-                {% get_changelist_url cl.model_admin as top_url %}
-                {% get_query_string as query_string %}
-                <div><a href="{% url_remove_query 'folder' %}">&larr; All folders</a></div>
-                {% endif %}
-            </div>
-            <div class="pull-left">
-                
-                <div>Showing items in {{current_folder.title_path}} {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
-                {% else %}
-                    {% if ignore_folders %}
-                    <div>Showing items across all folders {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
-                    {% else %}
-                    <div>Showing items at the top level, that aren't in a folder {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
-                    {% endif %}
-                {% endif %}
-            </div>
-
-
-            <div class="pull-right">
+{% if folders|length > 0 or current_folder %}
+<div class="grp-module folder-display">
+    <h2 class="clearfix">
+        <div>
             {% if current_folder %}
-                
-                {% get_edit_url current_folder as edit_folder_url %}
-                <a href="{{edit_folder_url}}" class="grp-add-link grp-state-focus">Edit this folder</a>
-            {% endif %}
-            </div>
-
-        </h2>
-
-        {% if not ignore_folders %}
-        
-        <ul class="subfolders clearfix">
-
-              
-        {% if folders|length > 0 %}
-        
-            {% for folder in folders %}
-            <li><a href="{% url_add_query folder=folder.pk %}" class="folder"><span>{{folder.title}}</span></a></li>
-            {% endfor %}
-        
-        {% endif %}
+            {% if current_folder.parent %}
+            <div><a href="{% url_add_query folder=current_folder.parent.pk %}">&larr; Go back to {{current_folder.parent.title}}</a></div>
+            {% else %}
+            {% get_changelist_url cl.model_admin as top_url %}
             {% get_query_string as query_string %}
-            <li ><a href="{{add_folder_url}}{{query_string}}"  class="folder add"><span>+ Add New Folder</span></a></li>
-        </ul>
+            <div><a href="{% url_remove_query 'folder' %}">&larr; All folders</a></div>
+            {% endif %}
+        </div>
+        <div class="pull-left">
+            <div>Showing items in {{current_folder.title_path}} {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
+            {% else %}
+            {% if ignore_folders %}
+            <div>Showing items across all folders {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
+            {% else %}
+            <div>Showing items at the top level, that aren't in a folder {% if request.GET.q %} + filtering search results for "{{request.GET.q}}" {% endif %}</div>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div class="pull-right">
+            {% if current_folder %}
+            {% get_edit_url current_folder as edit_folder_url %}
+            <a href="{{edit_folder_url}}" class="grp-add-link grp-state-focus">Edit this folder</a>
+            {% endif %}
+        </div>
+    </h2>
+    {% if not ignore_folders %}
+    <ul class="subfolders clearfix">
+        {% if folders|length > 0 %}
+        {% for folder in folders %}
+        <li><a href="{% url_add_query folder=folder.pk %}" class="folder"><span>{{folder.title}}</span></a></li>
+        {% endfor %}
         {% endif %}
-
-    </div>
+        {% get_query_string as query_string %}
+        <li><a href="{{add_folder_url}}{{query_string}}" class="folder add"><span>+ Add New Folder</span></a></li>
+    </ul>
     {% endif %}
+</div>
+{% endif %}
+{{block.super}}
+<style>
+.clearfix:before,
+.clearfix:after {
+    content: "";
+    display: table;
+}
 
-    {{block.super}}
-    
-    <style>
-    .clearfix:before,
-    .clearfix:after {
-      content: "";
-      display: table;
-    }
+.clearfix:after {
+    clear: both;
+}
 
-    .clearfix:after {
-      clear: both;
-    }
+.clearfix {
+    zoom: 1;
+    /* ie 6/7 */
+}
 
-    .clearfix {
-      zoom: 1; /* ie 6/7 */
-    }
-    .pull-right{
-        float:right;
-    }
-    .pull-left{
-        float:left;
-    }
-    .subfolders{
-        background: #eee url("https://ninalp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
-    }
-    .subfolders li{
-        float:left;
-        margin:1em;
-    }
-    .folder {
-        display: inline-block;
-        margin: 0 auto;
-        margin-top: 10px;
-        position: relative;
-        border-radius: 3px;
-        padding: 1em;
-        font-weight: bold;
-        min-width: 53px;
-        
-        border: 1px solid #ccc;
-        background-image: linear-gradient(#e7e8e7,#e0e0e0);
-    }
-    .folder span{
-        display: block;
-        position: relative;
-        top: 45%;
-        text-align: center;
-    }
+.pull-right {
+    float: right;
+}
 
-    .folder:before {
-        content: '';
-        width: 50px;
-        height: 10px;
+.pull-left {
+    float: left;
+}
 
-        border-radius: 6px 6px 0 0;
-        
-        position: absolute;
-        top: -10px;
-        left: 0px;
-        margin-left:12px;
+.subfolders {
+    background: #eee url("https://ninalp-media.s3.amazonaws.com/static/grappelli/images/backgrounds/changelist-results.png") repeat scroll !important;
+}
 
-        border: 1px solid #ccc;
-        border-bottom:0;
-        background-image: linear-gradient(#eeeeee,#e7e8e7);
-    }
+.subfolders li {
+    float: left;
+    margin: 1em;
+}
+
+.folder {
+    display: inline-block;
+    margin: 0 auto;
+    margin-top: 10px;
+    position: relative;
+    border-radius: 3px;
+    padding: 1em;
+    font-weight: bold;
+    min-width: 53px;
+
+    border: 1px solid #ccc;
+    background-image: linear-gradient(#e7e8e7, #e0e0e0);
+}
+
+.folder span {
+    display: block;
+    position: relative;
+    top: 45%;
+    text-align: center;
+}
+
+.folder:before {
+    content: '';
+    width: 50px;
+    height: 10px;
+
+    border-radius: 6px 6px 0 0;
+
+    position: absolute;
+    top: -10px;
+    left: 0px;
+    margin-left: 12px;
+
+    border: 1px solid #ccc;
+    border-bottom: 0;
+    background-image: linear-gradient(#eeeeee, #e7e8e7);
+}
 
 
-    .folder:hover{
-        color:#fff;
-        border-color:#2b8aab;
-        background-image: linear-gradient(#39a2c5,#309bbf);
-    }
+.folder:hover {
+    color: #fff;
+    border-color: #2b8aab;
+    background-image: linear-gradient(#39a2c5, #309bbf);
+}
 
-    .folder:hover:before {
-        color:#fff;
-        border-color:#2b8aab;
-        background-image: linear-gradient(#4fb2d3,#39a2c5);
-    }
-    </style>
-
+.folder:hover:before {
+    color: #fff;
+    border-color: #2b8aab;
+    background-image: linear-gradient(#4fb2d3, #39a2c5);
+}
+</style>
 {% endblock %}

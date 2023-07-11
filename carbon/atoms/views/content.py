@@ -1,5 +1,3 @@
-from django.conf import settings
-
 from django.http import Http404
 from django.utils.translation import ugettext as _
 from django.views.generic.detail import SingleObjectMixin
@@ -13,29 +11,27 @@ class PublishableView(SingleObjectMixin):
         if not self.object:
             return False
 
-        if self.object.is_published() == False:
+        if self.object.is_published() is False:
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
-            if is_super_user==False:
+            if is_super_user is False:
                 return False
         else:
             return True
 
-
     def get(self, request, *args, **kwargs):
-        if self.is_published() == False:
+        if self.is_published() is False:
             raise Http404(_("No published %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.model._meta.verbose_name})
+                          {'verbose_name': self.model._meta.verbose_name})
 
         return super(PublishableView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
 
-        if self.is_published() == False:
+        if self.is_published() is False:
             raise Http404(_("No published %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.model._meta.verbose_name})
+                          {'verbose_name': self.model._meta.verbose_name})
 
         return super(PublishableView, self).post(request, *args, **kwargs)
-
 
 
 class ModerationView(SingleObjectMixin):
@@ -45,25 +41,24 @@ class ModerationView(SingleObjectMixin):
             self.object = self.get_object()
         if not self.object:
             return False
-        if self.object.is_moderated() == False:
+        if self.object.is_moderated() is False:
             is_super_user = hasattr(self.request, 'user') and self.request.user and self.request.user.is_authenticated() and self.request.user.is_superuser
-            if is_super_user==False:
+            if is_super_user is False:
                 return False
         else:
             return True
 
-
     def get(self, request, *args, **kwargs):
-        if self.is_moderated() == False:
+        if self.is_moderated() is False:
             raise Http404(_("No moderated %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.model._meta.verbose_name})
+                          {'verbose_name': self.model._meta.verbose_name})
 
         return super(ModerationView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
 
-        if self.is_moderated() == False:
+        if self.is_moderated() is False:
             raise Http404(_("No moderated %(verbose_name)s found matching the query") %
-                        {'verbose_name': self.model._meta.verbose_name})
+                          {'verbose_name': self.model._meta.verbose_name})
 
         return super(ModerationView, self).post(request, *args, **kwargs)
